@@ -1,5 +1,6 @@
 #include "dbfs.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -43,10 +44,71 @@ void free_statement(sqlite3_stmt *s)
 }
 
 static
+void print_escaped(const char *text)
+{
+    printf("%s", text);
+}
+
+static
+void print_blob(const uint8_t *blob, size_t size)
+{
+    fwrite(blob, 1, size, stdout);
+}
+
+static
 void debug_result(sqlite3_stmt *query)
 {
-    (void)query;
+    int type, i, count;
+    if (!getenv("DBFS_DEBUG"))
+    {
+        return;
+    }
+
+    count = sqlite3_column_count(query);
+    if (count == 0)
+    {
+        printf("no results\n\n");
+        return;
+    }
+    for (i = 0; i < count; ++i)
+    {
+        printf("name: %s\n", sqlite3_column_name(query, i));
+        type = sqlite3_column_type(query, i);
+        switch (type)
+        {
+        case SQLITE_INTEGER:
+            printf("int: %d\n", sqlite3_column_int(query, i));
+            break;
+        case SQLITE_FLOAT:
+            printf("float: %f\n", sqlite3_column_double(query, i));
+            break;
+        case SQLITE_TEXT:
+            {
+                const unsigned char *text = sqlite3_column_text(query, i);
+                printf("text: ");
+                print_escaped((const char *)text);
+                printf("\n");
+            }
+            break;
+        case SQLITE_BLOB:
+            {
+                const void *blob = sqlite3_column_text(query, i);
+                size_t size = sqlite3_column_bytes(query, i);
+                printf("blob: ");
+                print_blob((const uint8_t *)blob, size);
+                printf("\n");
+            }
+            break;
+        case SQLITE_NULL:
+            printf("null: NULL\n");
+            break;
+        default:
+            dbfs_fatal();
+        }
+        printf("\n");
+    }
 }
+
 static
 void *memdup(const void *mem, size_t sz)
 {
@@ -65,6 +127,7 @@ void run_query_init(sqlite3_stmt *query)
         if (status == SQLITE_ROW)
         {
             debug_result(query);
+            dbfs_fatal();
             continue;
         }
         sqlite3_reset(query);
@@ -78,6 +141,7 @@ void run_query_init(sqlite3_stmt *query)
 static
 DBFS_Error run_query_get(sqlite3_stmt *query, const char *name, uint8_t **out_body, size_t *out_size)
 {
+    // bindings are 1-based but result columns are 0-based. Wtf?
     int count = 0;
     sqlite3_bind_text(query, 1, name, strlen(name), SQLITE_TRANSIENT);
     while (true)
@@ -90,8 +154,8 @@ DBFS_Error run_query_get(sqlite3_stmt *query, const char *name, uint8_t **out_bo
             debug_result(query);
             if (count)
                 dbfs_fatal();
-            blob = sqlite3_column_blob(query, 1);
-            size = sqlite3_column_bytes(query, 1);
+            blob = sqlite3_column_blob(query, 0);
+            size = sqlite3_column_bytes(query, 0);
             *out_body = memdup(blob, size);
             *out_size = size;
             count++;
@@ -174,7 +238,7 @@ DBFS_Error dbfs_get(DBFS *dbfs, const char *path, DBFS_Blob *out)
     return err;
 }
 
-void dbfs_free(DBFS_Blob blob)
+void dbfs_free_blob(DBFS_Blob blob)
 {
     // cast away const
     free((uint8_t *)blob.data);

@@ -2,15 +2,82 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+
+static
+DBFS_Blob slurp(FILE *in)
+{
+    uint8_t *buf = NULL;
+    size_t size = 0, cap = 0;
+
+    cap = 4096;
+    buf = malloc(cap);
+    while (true)
+    {
+        size_t got;
+        if (size == cap)
+        {
+            cap *= 2;
+            buf = realloc(buf, cap);
+        }
+        got = fread(buf + size, 1, cap - size, in);
+        if (!got)
+            break;
+        size += got;
+    }
+    buf = realloc(buf, size);
+    return (DBFS_Blob){buf, size};
+}
+
+static
+int do_get(DBFS *dbfs, const char *fname, FILE *out)
+{
+    DBFS_Blob blob;
+    if (!fname)
+    {
+        puts("missing argument");
+        return 1;
+    }
+    if (DBFS_OKAY != dbfs_get(dbfs, fname, &blob))
+    {
+        puts("not okay");
+        return 2;
+    }
+    fwrite(blob.data, 1, blob.size, out);
+    dbfs_free_blob(blob);
+    return 0;
+}
+
+static
+int do_put(DBFS *dbfs, const char *fname, FILE *in)
+{
+    DBFS_Blob blob;
+    if (!fname)
+    {
+        puts("missing argument");
+        return 1;
+    }
+
+    blob = slurp(in);
+    if (DBFS_OKAY != dbfs_put(dbfs, fname, blob))
+    {
+        puts("not okay");
+        free((uint8_t *)blob.data);
+        return 2;
+    }
+    return 0;
+}
 
 int main(int argc, char **argv)
 {
+    int rv = 0;
     const char *db_name;
     DBFS *dbfs_handle;
 
-    if (argc < 2 || argc > 2 || argv[1][0] == '-')
+    if (argc < 2 || argv[1][0] == '-')
     {
-        printf("Usage: %s {get|put}\n", argv[0]);
+        printf("Usage: %s {get|put} filename\n", argv[0]);
         return 0;
     }
 
@@ -27,9 +94,20 @@ int main(int argc, char **argv)
         puts("problem opening database");
     }
 
-    printf("Would %s in %s\n", argv[1], db_name);
-    // insert main logic here
+    if (strcmp(argv[1], "get") == 0)
+    {
+        rv = do_get(dbfs_handle, argv[2], stdout);
+    }
+    else if (strcmp(argv[1], "put") == 0)
+    {
+        rv = do_put(dbfs_handle, argv[2], stdin);
+    }
+    else
+    {
+        printf("unknown command '%s'\n", argv[1]);
+        rv = 1;
+    }
 
     dbfs_close(dbfs_handle);
-    return 0;
+    return rv;
 }
