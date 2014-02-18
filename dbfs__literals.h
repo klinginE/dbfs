@@ -13,12 +13,21 @@ const char *sql_fs1_init = QUOTE(
 );
 
 const char *sql_fs1_get = QUOTE(
-    SELECT contents
-    FROM filesystem_v1
+    SELECT contents FROM filesystem_v1
     WHERE name == ?;
 );
 
 const char *sql_fs1_put = QUOTE(
     INSERT INTO filesystem_v1
     VALUES (?, ?);
+);
+
+const char *sql_fs1_del = QUOTE(
+    DELETE FROM filesystem_v1
+    WHERE name == ?;
+);
+
+const char *sql_fs1_lsf = QUOTE(
+    SELECT name FROM filesystem_v1
+    WHERE name LIKE (? || '%');
 );

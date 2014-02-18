@@ -39,7 +39,7 @@ int do_get(DBFS *dbfs, const char *fname, FILE *out)
         puts("missing argument");
         return 1;
     }
-    if (DBFS_OKAY != dbfs_get(dbfs, fname, &blob))
+    if (DBFS_OKAY != dbfs_get(dbfs, (DBFS_FileName){fname}, &blob))
     {
         puts("not okay");
         return 2;
@@ -60,12 +60,51 @@ int do_put(DBFS *dbfs, const char *fname, FILE *in)
     }
 
     blob = slurp(in);
-    if (DBFS_OKAY != dbfs_put(dbfs, fname, blob))
+    if (DBFS_OKAY != dbfs_put(dbfs, (DBFS_FileName){fname}, blob))
     {
         puts("not okay");
         free((uint8_t *)blob.data);
         return 2;
     }
+    return 0;
+}
+
+static
+int do_del(DBFS *dbfs, const char *fname)
+{
+    if (!fname)
+    {
+        puts("missing argument");
+        return 1;
+    }
+
+    if (DBFS_OKAY != dbfs_del(dbfs, (DBFS_FileName){fname}))
+    {
+        puts("not okay");
+        return 2;
+    }
+    return 0;
+}
+
+static
+int do_lsf(DBFS *dbfs, const char *fname, FILE *out)
+{
+    DBFS_FileList flist;
+    size_t i;
+    if (!fname)
+    {
+        puts("missing argument");
+        return 1;
+    }
+    if (DBFS_OKAY != dbfs_lsf(dbfs, (DBFS_DirName){fname}, &flist))
+    {
+        puts("not okay");
+        return 2;
+    }
+    fprintf(out, "%zu files:\n", flist.count);
+    for (i = 0; i < flist.count; ++i)
+        fprintf(out, "  [%zu]: %s\n", i, flist.files[i].name);
+    dbfs_free_file_list(flist);
     return 0;
 }
 
@@ -101,6 +140,14 @@ int main(int argc, char **argv)
     else if (strcmp(argv[1], "put") == 0)
     {
         rv = do_put(dbfs_handle, argv[2], stdin);
+    }
+    else if (strcmp(argv[1], "del") == 0)
+    {
+        rv = do_del(dbfs_handle, argv[2]);
+    }
+    else if (strcmp(argv[1], "lsf") == 0)
+    {
+        rv = do_lsf(dbfs_handle, argv[2], stdout);
     }
     else
     {
