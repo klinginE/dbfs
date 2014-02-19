@@ -108,6 +108,28 @@ int do_lsf(DBFS *dbfs, const char *fname, FILE *out)
     return 0;
 }
 
+static
+int do_lsd(DBFS *dbfs, const char *fname, FILE *out)
+{
+    DBFS_DirList dlist;
+    size_t i;
+    if (!fname)
+    {
+        puts("missing argument");
+        return 1;
+    }
+    if (DBFS_OKAY != dbfs_lsd(dbfs, (DBFS_DirName){fname}, &dlist))
+    {
+        puts("not okay");
+        return 2;
+    }
+    fprintf(out, "%zu directories:\n", dlist.count);
+    for (i = 0; i < dlist.count; ++i)
+        fprintf(out, "  [%zu]: %s\n", i, dlist.dirs[i].name);
+    dbfs_free_dir_list(dlist);
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     int rv = 0;
@@ -148,6 +170,10 @@ int main(int argc, char **argv)
     else if (strcmp(argv[1], "lsf") == 0)
     {
         rv = do_lsf(dbfs_handle, argv[2], stdout);
+    }
+    else if (strcmp(argv[1], "lsd") == 0)
+    {
+        rv = do_lsd(dbfs_handle, argv[2], stdout);
     }
     else
     {

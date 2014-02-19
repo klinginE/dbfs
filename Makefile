@@ -3,7 +3,7 @@ LDLIBS = -lsqlite3
 
 dbfs-demo: dbfs-demo.o dbfs.o
 dbfs-demo.o: dbfs-demo.c dbfs.h
-dbfs.o: dbfs.c dbfs.h
+dbfs.o: dbfs.c dbfs.h dbfs__literals.h
 
 clean:
 	rm -f dbfs-demo *.o

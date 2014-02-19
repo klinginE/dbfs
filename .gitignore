@@ -1,2 +1,3 @@
 *.o
 /dbfs-demo
+/test.db

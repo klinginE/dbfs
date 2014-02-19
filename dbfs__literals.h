@@ -27,7 +27,13 @@ const char *sql_fs1_del = QUOTE(
     WHERE name == ?;
 );
 
+// grumble, more 1-based indexing
 const char *sql_fs1_lsf = QUOTE(
-    SELECT name FROM filesystem_v1
-    WHERE name LIKE (? || '%');
+    SELECT substr(name, length(?1) + 1) FROM filesystem_v1
+    WHERE instr(name, ?1) == 1 and instr(substr(name, length(?1) + 1), '/') == 0;
+);
+
+const char *sql_fs1_lsd = QUOTE(
+    SELECT DISTINCT substr(name, length(?1) + 1, instr(substr(name, length(?1) + 1), '/')) FROM filesystem_v1
+    WHERE instr(name, ?1) == 1 and instr(substr(name, length(?1) + 1), '/') != 0;
 );

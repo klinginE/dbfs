@@ -11,6 +11,7 @@ typedef enum DBFS_Error DBFS_Error;
 typedef struct DBFS_Blob DBFS_Blob;
 typedef struct DBFS_FileList DBFS_FileList;
 typedef struct DBFS_FileName DBFS_FileName;
+typedef struct DBFS_DirList DBFS_DirList;
 typedef struct DBFS_DirName DBFS_DirName;
 
 
@@ -39,6 +40,12 @@ struct DBFS_FileName
     const char *name;
 };
 
+struct DBFS_DirList
+{
+    const DBFS_DirName *dirs;
+    size_t count;
+};
+
 struct DBFS_DirName
 {
     const char *name;
@@ -56,5 +63,8 @@ DBFS_Error dbfs_del(DBFS *db, DBFS_FileName path);
 
 DBFS_Error dbfs_lsf(DBFS *db, DBFS_DirName dir, DBFS_FileList *files);
 void dbfs_free_file_list(DBFS_FileList fl);
+
+DBFS_Error dbfs_lsd(DBFS *db, DBFS_DirName dir, DBFS_DirList *dirs);
+void dbfs_free_dir_list(DBFS_DirList dl);
 
 #endif //DBFS_H
