@@ -70,6 +70,26 @@ int do_put(DBFS *dbfs, const char *fname, FILE *in)
 }
 
 static
+int do_ovr(DBFS *dbfs, const char *fname, FILE *in)
+{
+    DBFS_Blob blob;
+    if (!fname)
+    {
+        puts("missing argument");
+        return 1;
+    }
+
+    blob = slurp(in);
+    if (DBFS_OKAY != dbfs_ovr(dbfs, (DBFS_FileName){fname}, blob))
+    {
+        puts("not okay");
+        free((uint8_t *)blob.data);
+        return 2;
+    }
+    return 0;
+}
+
+static
 int do_del(DBFS *dbfs, const char *fname)
 {
     if (!fname)
@@ -162,6 +182,10 @@ int main(int argc, char **argv)
     else if (strcmp(argv[1], "put") == 0)
     {
         rv = do_put(dbfs_handle, argv[2], stdin);
+    }
+    else if (strcmp(argv[1], "ovr") == 0)
+    {
+        rv = do_ovr(dbfs_handle, argv[2], stdin);
     }
     else if (strcmp(argv[1], "del") == 0)
     {

@@ -59,6 +59,7 @@ DBFS_Error dbfs_get(DBFS *db, DBFS_FileName path, DBFS_Blob *out);
 void dbfs_free_blob(DBFS_Blob blob);
 
 DBFS_Error dbfs_put(DBFS *db, DBFS_FileName path, DBFS_Blob blob);
+DBFS_Error dbfs_ovr(DBFS *db, DBFS_FileName path, DBFS_Blob blob);
 DBFS_Error dbfs_del(DBFS *db, DBFS_FileName path);
 
 DBFS_Error dbfs_lsf(DBFS *db, DBFS_DirName dir, DBFS_FileList *files);

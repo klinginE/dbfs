@@ -13,6 +13,7 @@ struct DBFS
     sqlite3 *db;
     sqlite3_stmt *get;
     sqlite3_stmt *put;
+    sqlite3_stmt *ovr;
     sqlite3_stmt *del;
     sqlite3_stmt *lsf;
     sqlite3_stmt *lsd;
@@ -203,6 +204,29 @@ DBFS_Error run_query_put(sqlite3_stmt *query, const char *name, const uint8_t *b
 }
 
 static
+DBFS_Error run_query_ovr(sqlite3_stmt *query, const char *name, const uint8_t *body, size_t size)
+{
+    sqlite3_bind_text(query, 2, name, strlen(name), SQLITE_TRANSIENT);
+    sqlite3_bind_blob(query, 1, body, size, SQLITE_TRANSIENT);
+    while (true)
+    {
+        int status = sqlite3_step(query);
+        if (status == SQLITE_ROW)
+        {
+            debug_result(query);
+            abort();
+            continue;
+        }
+        sqlite3_reset(query);
+        if (status == SQLITE_DONE)
+            break;
+        dbfs_fatal();
+    }
+    sqlite3_clear_bindings(query);
+    return DBFS_OKAY;
+}
+
+static
 DBFS_Error run_query_del(sqlite3_stmt *query, const char *name)
 {
     sqlite3_bind_text(query, 1, name, strlen(name), SQLITE_TRANSIENT);
@@ -320,6 +344,7 @@ DBFS *dbfs_open(const char *name)
     rv->db = db;
     rv->get = compile_statement(db, sql_fs1_get);
     rv->put = compile_statement(db, sql_fs1_put);
+    rv->ovr = compile_statement(db, sql_fs1_ovr);
     rv->del = compile_statement(db, sql_fs1_del);
     rv->lsf = compile_statement(db, sql_fs1_lsf);
     rv->lsd = compile_statement(db, sql_fs1_lsd);
@@ -330,6 +355,7 @@ void dbfs_close(DBFS *dbfs)
 {
     free_statement(dbfs->get);
     free_statement(dbfs->put);
+    free_statement(dbfs->ovr);
     free_statement(dbfs->del);
     free_statement(dbfs->lsf);
     free_statement(dbfs->lsd);
@@ -373,6 +399,15 @@ DBFS_Error dbfs_put(DBFS *dbfs, DBFS_FileName path, DBFS_Blob blob)
         return DBFS_NO_SLASH;
     DBFS_Error err;
     err = run_query_put(dbfs->put, path.name, blob.data, blob.size);
+    return err;
+}
+
+DBFS_Error dbfs_ovr(DBFS *dbfs, DBFS_FileName path, DBFS_Blob blob)
+{
+    if (!check_file(path))
+        return DBFS_NO_SLASH;
+    DBFS_Error err;
+    err = run_query_ovr(dbfs->ovr, path.name, blob.data, blob.size);
     return err;
 }
 

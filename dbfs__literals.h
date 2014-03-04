@@ -7,7 +7,7 @@
 const char *sql_fs1_init = QUOTE(
     CREATE TABLE IF NOT EXISTS filesystem_v1
     (
-        name TEXT,
+        name TEXT PRIMARY KEY,
         contents BLOB
     )
 );
@@ -20,6 +20,12 @@ const char *sql_fs1_get = QUOTE(
 const char *sql_fs1_put = QUOTE(
     INSERT INTO filesystem_v1
     VALUES (?, ?);
+);
+
+const char *sql_fs1_ovr = QUOTE(
+    UPDATE filesystem_v1
+    SET contents = ?
+    WHERE name = ?;
 );
 
 const char *sql_fs1_del = QUOTE(

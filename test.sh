@@ -4,6 +4,8 @@ export DBFS=test.db
 rm -f "$DBFS"
 echo 'put foo'
 echo '(contents of foo)' | ./dbfs-demo put /foo
+echo 'ovr foo'
+echo '(ovr contents of foo)' | ./dbfs-demo ovr /foo
 echo 'put bar'
 echo '(contents of bar)' | ./dbfs-demo put /sub/bar
 echo 'put baz'
