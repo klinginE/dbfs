@@ -6,13 +6,17 @@
 //  Copyright (c) 2014 Eric Klinginsmith. All rights reserved.
 
 #import "MobileDriveAppDelegate.h"
+#import "IPadTableViewController.h"
 
 @implementation MobileDriveAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Override point for customization after application launch.
+    IPadTableViewController *iPadTableViewController = [[IPadTableViewController alloc] initWithDir:@"/"];
+    iPadTableViewController.title = @"Root Directory";
+    self.window.rootViewController = iPadTableViewController;
+    
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     return YES;
