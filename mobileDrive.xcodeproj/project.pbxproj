@@ -22,7 +22,6 @@
 		DE0FDF8618C963CB00843686 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DE0FDF8418C963CB00843686 /* InfoPlist.strings */; };
 		DE0FDF8818C963CB00843686 /* mobileDriveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DE0FDF8718C963CB00843686 /* mobileDriveTests.m */; };
 		DE9833C718C96BA0003CEA5B /* dbfs in Resources */ = {isa = PBXBuildFile; fileRef = DE9833C618C96BA0003CEA5B /* dbfs */; };
-		DE9833C918C96BBC003CEA5B /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = DE9833C818C96BBC003CEA5B /* Makefile */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -256,7 +255,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DE9833C918C96BBC003CEA5B /* Makefile in Sources */,
 				8AD2189618CA6F8B00BC2EAC /* IPadTableViewController.m in Sources */,
 				DE0FDF6F18C963CB00843686 /* main.m in Sources */,
 				DE0FDF7318C963CB00843686 /* MobileDriveAppDelegate.m in Sources */,

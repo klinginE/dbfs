@@ -13,5 +13,6 @@
 @property (weak, atomic) NSString *currentDir;
 
 -(id)initWithDir:(NSString *)cd;
+-(void)buttonPressed:(id)sendr;
 
 @end

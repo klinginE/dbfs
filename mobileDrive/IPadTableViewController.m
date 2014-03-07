@@ -13,11 +13,14 @@
 @end
 
 @implementation IPadTableViewController {
+
     NSDictionary *_filesDictionary;
     NSArray *_fileKeys;
+
 }
 
 -(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
     
@@ -25,26 +28,29 @@
     return self;
 }
 
-- (id)initWithStyle:(UITableViewStyle)style
-{
+-(id)initWithStyle:(UITableViewStyle)style {
+
     self = [super initWithStyle:style];
     if (self) {
         // Custom initialization
     }
     return self;
+
 }
 
 -(id)initWithDir:(NSString *)cd {
 
     self = [super init];
-    if (self) {
+    if (self)
         _currentDir = cd;
-    }
+
     return self;
 
 }
 
 -(void)loadView {
+
+    /*CGRect rect = CGRectMake(self.view.superview.frame.origin.x, self.view.superview.frame.origin.y + 20, self.view.superview.frame.size.width, self.view.superview.frame.size.height);*/
     UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
     tableView.dataSource = self;
     tableView.delegate = self;
@@ -52,21 +58,40 @@
 
 }
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
+-(void)buttonPressed:(UIBarButtonItem *)sender {
     
+    NSLog(@"buttonPressed: %d", sender.tag);
+    
+}
+
+- (void)viewDidLoad {
+
+    [super viewDidLoad];
+
     if(_filesDictionary == nil) {
+
         NSString *path = [[NSBundle mainBundle] pathForResource:@"files" ofType:@"plist"];
         _filesDictionary = [[NSDictionary alloc] initWithContentsOfFile:path];
         _fileKeys = [[_filesDictionary allKeys] sortedArrayUsingSelector:@selector(compare:)];
+
     }
+
+    UIBarButtonItem *tool = [[UIBarButtonItem alloc] initWithTitle:@"This is a Button"
+                                                             style:UIBarButtonItemStylePlain
+                                                            target:self
+                                                            action:@selector(buttonPressed:)];
+    tool.tag = 1;
+    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:tool, nil];
+    
+    self.toolbarItems = toolBarItems;
+    [self.navigationController setToolbarHidden:NO animated:YES];
 
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+
 }
 
 - (void)didReceiveMemoryWarning
@@ -105,7 +130,7 @@
     
     NSString *key = [_fileKeys objectAtIndex:indexPath.row];
     NSDictionary *dict = [_filesDictionary objectForKey:key];
-    
+    NSLog(@"tabView didSelectRowAtIndex");
     //push new dictionary with initWithDir: key
 
 }

@@ -10,16 +10,24 @@
 
 @implementation MobileDriveAppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
+-(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+
     IPadTableViewController *iPadTableViewController = [[IPadTableViewController alloc] initWithDir:@"/"];
-    iPadTableViewController.title = @"Root Directory";
-    self.window.rootViewController = iPadTableViewController;
-    
+    UINavigationController *iPadNavController = [[UINavigationController alloc] initWithRootViewController:iPadTableViewController];
+    iPadTableViewController.title = @"/ Directory";
+    iPadNavController.title = @"NavController";
+
+    //[iPadNavController setToolbarHidden:NO];
+
+    self.window.rootViewController = iPadNavController;
+
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
+
     return YES;
+
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application

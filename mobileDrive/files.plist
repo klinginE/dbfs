@@ -16,7 +16,7 @@
 	<dict>
 		<key>path</key>
 		<string>/DirectoryB/</string>
-		<key>One File</key>
+		<key>OneFile</key>
 		<dict>
 			<key>path</key>
 			<string>/DirectoryB/One File</string>
