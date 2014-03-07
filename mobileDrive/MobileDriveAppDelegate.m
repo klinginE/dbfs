@@ -14,8 +14,8 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    IPadTableViewController *iPadTableViewController = [[IPadTableViewController alloc] init];
-    iPadTableViewController.title = @"Current Directory";
+    IPadTableViewController *iPadTableViewController = [[IPadTableViewController alloc] initWithDir:@"/"];
+    iPadTableViewController.title = @"Root Directory";
     self.window.rootViewController = iPadTableViewController;
     
     self.window.backgroundColor = [UIColor whiteColor];

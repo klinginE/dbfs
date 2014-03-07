@@ -3,22 +3,44 @@
 <plist version="1.0">
 <dict>
 	<key>File1</key>
-	<string></string>
+	<dict>
+		<key>path</key>
+		<string>/File1</string>
+	</dict>
 	<key>File2</key>
-	<string></string>
+	<dict>
+		<key>path</key>
+		<string>/File2</string>
+	</dict>
 	<key>DirectoryB</key>
 	<dict>
+		<key>path</key>
+		<string>/DirectoryB/</string>
 		<key>One File</key>
-		<string></string>
+		<dict>
+			<key>path</key>
+			<string>/DirectoryB/One File</string>
+		</dict>
 		<key>Another File</key>
-		<string></string>
+		<dict>
+			<key>path</key>
+			<string>/DirectoryB/AnotherFile</string>
+		</dict>
 	</dict>
 	<key>DirectoryA</key>
 	<dict>
+		<key>path</key>
+		<string>/DirectoryA/</string>
 		<key>FileA</key>
-		<string></string>
+		<dict>
+			<key>path</key>
+			<string>/DirectoryA/FileA</string>
+		</dict>
 		<key>FileB</key>
-		<string></string>
+		<dict>
+			<key>path</key>
+			<string>/DirectoryA/FileB</string>
+		</dict>
 	</dict>
 </dict>
 </plist>

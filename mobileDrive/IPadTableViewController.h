@@ -10,4 +10,8 @@
 
 @interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate>
 
+@property (weak, atomic) NSString *currentDir;
+
+-(id)initWithDir:(NSString *)cd;
+
 @end
