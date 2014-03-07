@@ -19,6 +19,8 @@
 		DE0FDF7E18C963CB00843686 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6618C963CB00843686 /* UIKit.framework */; };
 		DE0FDF8618C963CB00843686 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DE0FDF8418C963CB00843686 /* InfoPlist.strings */; };
 		DE0FDF8818C963CB00843686 /* mobileDriveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DE0FDF8718C963CB00843686 /* mobileDriveTests.m */; };
+		DE9833C718C96BA0003CEA5B /* dbfs in Resources */ = {isa = PBXBuildFile; fileRef = DE9833C618C96BA0003CEA5B /* dbfs */; };
+		DE9833C918C96BBC003CEA5B /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = DE9833C818C96BBC003CEA5B /* Makefile */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +50,8 @@
 		DE0FDF8318C963CB00843686 /* mobileDriveTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "mobileDriveTests-Info.plist"; sourceTree = "<group>"; };
 		DE0FDF8518C963CB00843686 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DE0FDF8718C963CB00843686 /* mobileDriveTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = mobileDriveTests.m; sourceTree = "<group>"; };
+		DE9833C618C96BA0003CEA5B /* dbfs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dbfs; sourceTree = "<group>"; };
+		DE9833C818C96BBC003CEA5B /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,9 +111,11 @@
 		DE0FDF6818C963CB00843686 /* mobileDrive */ = {
 			isa = PBXGroup;
 			children = (
+				DE9833C618C96BA0003CEA5B /* dbfs */,
 				DE0FDF7118C963CB00843686 /* MobileDriveAppDelegate.h */,
 				DE0FDF7218C963CB00843686 /* MobileDriveAppDelegate.m */,
 				DE0FDF7418C963CB00843686 /* Images.xcassets */,
+				DE9833C818C96BBC003CEA5B /* Makefile */,
 				DE0FDF6918C963CB00843686 /* Supporting Files */,
 			);
 			path = mobileDrive;
@@ -221,6 +227,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DE0FDF6D18C963CB00843686 /* InfoPlist.strings in Resources */,
+				DE9833C718C96BA0003CEA5B /* dbfs in Resources */,
 				DE0FDF7518C963CB00843686 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -240,6 +247,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE9833C918C96BBC003CEA5B /* Makefile in Sources */,
 				DE0FDF6F18C963CB00843686 /* main.m in Sources */,
 				DE0FDF7318C963CB00843686 /* MobileDriveAppDelegate.m in Sources */,
 			);
@@ -444,6 +452,7 @@
 				DE0FDF8D18C963CB00843686 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		DE0FDF8E18C963CB00843686 /* Build configuration list for PBXNativeTarget "mobileDriveTests" */ = {
 			isa = XCConfigurationList;
@@ -452,6 +461,7 @@
 				DE0FDF9018C963CB00843686 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
