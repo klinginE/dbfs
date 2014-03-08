@@ -10,6 +10,8 @@
 
 @interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate>
 
+typedef enum {HELP_TAG, ADD_DIR_TAG} buttonTag;
+
 @property (weak, atomic) NSString *currentDir;
 
 -(id)initWithDir:(NSString *)cd;
