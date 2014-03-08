@@ -7,22 +7,42 @@
 
 #import "MobileDriveAppDelegate.h"
 #import "IPadTableViewController.h"
+#import <string.h>
 
 @implementation MobileDriveAppDelegate
 
+-(void)switchChanged:(UISwitch *)sender {
+
+    self.isConnected = [sender isOn];
+    NSLog(@"switchChanged %hhd", self.isConnected);
+    //FIXME add code to turn off server here
+
+}
+
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    // intit global app properties
+    self.isConnected = YES;
 
-    IPadTableViewController *iPadTableViewController = [[IPadTableViewController alloc] initWithDir:@"/"];
+    // set up state for root table view controller
+    state rootState;
+    rootState.currentPath = strdup("");
+    rootState.currentDir = strdup("/");
+
+    // init root table view controler
+    IPadTableViewController *iPadTableViewController = [[IPadTableViewController alloc] initWithState:rootState
+                                                                                               target:self
+                                                                                         switchAction:@selector(switchChanged:)
+                                                                                            forEvents:UIControlEventValueChanged];
+
+    // init nav controller
     UINavigationController *iPadNavController = [[UINavigationController alloc] initWithRootViewController:iPadTableViewController];
-    iPadTableViewController.title = @"/ Directory";
+    iPadTableViewController.title = @"/";
     iPadNavController.title = @"NavController";
 
-    //[iPadNavController setToolbarHidden:NO];
-
+    // set up window
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = iPadNavController;
-
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
 

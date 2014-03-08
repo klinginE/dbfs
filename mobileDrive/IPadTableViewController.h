@@ -7,14 +7,20 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MobileDriveAppDelegate.h"
 
 @interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate>
 
 typedef enum {HELP_TAG, ADD_DIR_TAG} buttonTag;
 
-@property (weak, atomic) NSString *currentDir;
+typedef struct {
 
--(id)initWithDir:(NSString *)cd;
+   char *currentDir;
+   char *currentPath;
+
+}state;
+
+-(id)initWithState:(state)currentState target:(MobileDriveAppDelegate *)respond switchAction:(SEL)action forEvents:(UIControlEvents)events;
 -(void)buttonPressed:(id)sendr;
 
 @end

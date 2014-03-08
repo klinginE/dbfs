@@ -7,6 +7,7 @@
 //
 
 #import "IPadTableViewController.h"
+#import <string.h>
 
 @interface IPadTableViewController ()
 
@@ -14,37 +15,67 @@
 
 @implementation IPadTableViewController {
 
+    MobileDriveAppDelegate *_iPadResponder;
+    SEL _switchAction;
+    UIControlEvents _switchEvents;
+    state _iPadState;
+    UISwitch *_conectSwitch;
     NSDictionary *_filesDictionary;
     NSArray *_fileKeys;
 
 }
 
--(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+//-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+//
+//    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+//    if (self) {
+//    
+//    }
+//    return self;
+//}
+//
+//-(id)initWithStyle:(UITableViewStyle)style {
+//
+//    self = [super initWithStyle:style];
+//    if (self) {
+//        // Custom initialization
+//    }
+//    return self;
+//
+//}
 
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-    
-    }
-    return self;
-}
-
--(id)initWithStyle:(UITableViewStyle)style {
-
-    self = [super initWithStyle:style];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
-
-}
-
--(id)initWithDir:(NSString *)cd {
+-(id)initWithState:(state)currentState target:(MobileDriveAppDelegate *)respond switchAction:(SEL)action forEvents:(UIControlEvents)events {
 
     self = [super init];
-    if (self)
-        _currentDir = cd;
+    if (self) {
+
+        _iPadState.currentDir = currentState.currentDir;
+        _iPadState.currentPath = currentState.currentPath;
+        _iPadResponder = respond;
+        _switchAction = action;
+        _switchEvents = events;
+        _conectSwitch = [[UISwitch alloc] init];
+        [_conectSwitch addTarget:_iPadResponder
+                          action:_switchAction
+                forControlEvents:events];
+        if (respond.isConnected)
+            _conectSwitch.on = YES;
+        else
+            _conectSwitch.on = NO;
+
+    }
 
     return self;
+
+}
+
+-(void)dealloc {
+
+    NSLog(@"dealloc");
+    if (_iPadState.currentDir != NULL)
+        free(_iPadState.currentDir);
+    if (_iPadState.currentPath != NULL)
+        free(_iPadState.currentPath);
 
 }
 
@@ -100,11 +131,13 @@
                                                                     target:self
                                                                     action:@selector(buttonPressed:)];
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
-                                                                          target:self
+                                                                          target:nil
                                                                           action:nil];
+    UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:_conectSwitch];
+
     addDirButton.tag = ADD_DIR_TAG;
     addDirButton.tintColor = buttonColor;
-    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:flex, addDirButton, nil];
+    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:addDirButton, flex, cSwitch, nil];
     self.toolbarItems = toolBarItems;
 
     // set tool bar settings
@@ -113,7 +146,7 @@
 
     // set navbar settings
     self.navigationController.navigationBar.barTintColor = navBarColor;
-    self.navigationItem.backBarButtonItem.title = @"⤴️";
+    self.navigationController.navigationBar.tintColor = buttonColor;
     [self.navigationController setToolbarHidden:NO animated:YES];
 
     // Uncomment the following line to preserve selection between presentations.
@@ -121,6 +154,13 @@
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+
+    _conectSwitch.on = _iPadResponder.isConnected;
+    [super viewWillAppear:animated];
 
 }
 
@@ -156,11 +196,10 @@
     NSString *key = [_fileKeys objectAtIndex:indexPath.row];
     NSDictionary *dict = [_filesDictionary objectForKey:key];
     cell.textLabel.text = key;
+    cell.detailTextLabel.text = [dict objectForKey:@"path"];
 
     if ([[dict objectForKey:@"isDir"] boolValue])
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-
-    cell.detailTextLabel.text = [dict objectForKey:@"path"];
 
     return cell;
 
@@ -168,14 +207,51 @@
 
 #pragma mark - Table View Delegate
 
+-(char *)nsStringToCString:(NSString *)s {
+
+    int len = [s length];
+    char *c = (char *)malloc(len + 1);
+    int i = 0;
+    for (; i < len; i++) {
+
+        c[i] = [s characterAtIndex:i];
+
+    }
+    c[i] = '\0';
+
+    return c;
+
+}
+
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
     NSString *key = [_fileKeys objectAtIndex:indexPath.row];
     NSDictionary *dict = [_filesDictionary objectForKey:key];
-    NSLog(@"tabView didSelectRowAtIndex");
-    //push new dictionary with initWithDir: key
+    
+    if ([[dict objectForKey:@"isDir"] boolValue]) {
+
+        NSString *subPath = [NSString stringWithFormat:@"%s/%@", _iPadState.currentPath, key];
+        state newState;
+
+        newState.currentDir = [self nsStringToCString:key];
+        newState.currentPath = [self nsStringToCString:subPath];
+
+        NSLog(@"%s", newState.currentPath);
+
+        IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithState:newState
+                                                                                                  target:_iPadResponder
+                                                                                            switchAction:_switchAction
+                                                                                               forEvents:_switchEvents];
+        UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:key
+                                                                       style:UIBarButtonItemStyleBordered
+                                                                      target:nil
+                                                                      action:nil];
+        subTableViewController.title = key;
+        [subTableViewController.navigationItem setBackBarButtonItem:backButton];
+        [self.navigationController pushViewController:subTableViewController animated:YES];
+
+    }
 
 }
 

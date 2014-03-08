@@ -11,5 +11,6 @@
 @interface MobileDriveAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+@property (atomic) BOOL isConnected;
 
 @end
