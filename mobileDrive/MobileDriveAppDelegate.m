@@ -15,7 +15,7 @@
 
     self.isConnected = [sender isOn];
     NSLog(@"switchChanged %hhd", self.isConnected);
-    //FIXME add code to turn off server here
+    //FIXME add code to turn on/off server here
 
 }
 
@@ -31,13 +31,14 @@
 
     // init root table view controler
     IPadTableViewController *iPadTableViewController = [[IPadTableViewController alloc] initWithState:rootState
+                                                                                                model:nil
                                                                                                target:self
                                                                                          switchAction:@selector(switchChanged:)
                                                                                             forEvents:UIControlEventValueChanged];
+    iPadTableViewController.title = @"/";
 
     // init nav controller
     UINavigationController *iPadNavController = [[UINavigationController alloc] initWithRootViewController:iPadTableViewController];
-    iPadTableViewController.title = @"/";
     iPadNavController.title = @"NavController";
 
     // set up window

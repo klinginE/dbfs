@@ -24,11 +24,15 @@
 		<string>/DirectoryB/</string>
 		<key>OneFile</key>
 		<dict>
+			<key>isDir</key>
+			<false/>
 			<key>path</key>
 			<string>/DirectoryB/One File</string>
 		</dict>
 		<key>Another File</key>
 		<dict>
+			<key>isDir</key>
+			<false/>
 			<key>path</key>
 			<string>/DirectoryB/AnotherFile</string>
 		</dict>
@@ -41,11 +45,15 @@
 		<string>/DirectoryA/</string>
 		<key>FileA</key>
 		<dict>
+			<key>isDir</key>
+			<false/>
 			<key>path</key>
 			<string>/DirectoryA/FileA</string>
 		</dict>
 		<key>FileB</key>
 		<dict>
+			<key>isDir</key>
+			<false/>
 			<key>path</key>
 			<string>/DirectoryA/FileB</string>
 		</dict>
