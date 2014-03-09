@@ -36,10 +36,22 @@
                                                                                          switchAction:@selector(switchChanged:)
                                                                                             forEvents:UIControlEventValueChanged];
     iPadTableViewController.title = @"/";
+    UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:@"/"
+                                                                   style:UIBarButtonItemStyleBordered
+                                                                  target:nil
+                                                                  action:nil];
+    [backButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
+                                        NSFontAttributeName,
+                                        nil]
+                              forState:UIControlStateNormal];
+    [iPadTableViewController.navigationItem setBackBarButtonItem:backButton];
 
     // init nav controller
     UINavigationController *iPadNavController = [[UINavigationController alloc] initWithRootViewController:iPadTableViewController];
     iPadNavController.title = @"NavController";
+    [iPadNavController.navigationBar setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
+                                                            NSFontAttributeName,
+                                                            nil]];
 
     // set up window
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];

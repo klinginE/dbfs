@@ -9,6 +9,10 @@
 #import <UIKit/UIKit.h>
 #import "MobileDriveAppDelegate.h"
 
+#define LARGE_FONT_SIZE 30.0
+#define SMALL_FONT_SIZE 20.0
+#define CELL_HEIGHT (LARGE_FONT_SIZE + SMALL_FONT_SIZE + 10.0);
+
 @interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate>
 
 typedef enum {HELP_TAG, ADD_DIR_TAG} buttonTag;

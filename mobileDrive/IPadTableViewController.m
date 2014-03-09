@@ -133,6 +133,10 @@
                                                                     action:@selector(buttonPressed:)];
     helpButton.tag = HELP_TAG;
     helpButton.tintColor = buttonColor;
+    [helpButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
+                                                                                  NSFontAttributeName,
+                                                                                  nil]
+                              forState:UIControlStateNormal];
     self.navigationItem.rightBarButtonItem = helpButton;
 
     // Add a add dir button to the bottom left
@@ -142,6 +146,10 @@
                                                                     action:@selector(buttonPressed:)];
     addDirButton.tag = ADD_DIR_TAG;
     addDirButton.tintColor = buttonColor;
+    [addDirButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
+                                                                                    NSFontAttributeName,
+                                                                                    nil]
+                                forState:UIControlStateNormal];
 
     // flexiable space holder
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
@@ -186,7 +194,7 @@
 
 }
 
-- (void)didReceiveMemoryWarning {
+-(void)didReceiveMemoryWarning {
 
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
@@ -195,13 +203,19 @@
 
 #pragma mark - Table view data source
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 
     return [_fileKeys count];
 
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+
+    return CELL_HEIGHT;
+
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
     // fetch cell
     static NSString *cellID = @"filesCell";
@@ -214,10 +228,17 @@
     NSDictionary *dict = [_filesDictionary objectForKey:key];
 
     // set up cell text and other atributes
-    cell.textLabel.text = key;
     cell.detailTextLabel.text = [dict objectForKey:@"path"];
-    if ([[dict objectForKey:@"isDir"] boolValue])
+    if ([[dict objectForKey:@"isDir"] boolValue]) {
+
+        cell.textLabel.text = [NSString stringWithFormat:@"📂 %@", key];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+
+    }
+    else
+        cell.textLabel.text = [NSString stringWithFormat:@"📄 %@", key];
+    cell.textLabel.font = [UIFont boldSystemFontOfSize:LARGE_FONT_SIZE];
+    cell.detailTextLabel.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
 
     return cell;
 
@@ -273,6 +294,10 @@
                                                                        style:UIBarButtonItemStyleBordered
                                                                       target:nil
                                                                       action:nil];
+        [backButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
+                                                                                      NSFontAttributeName,
+                                                                                      nil]
+                                  forState:UIControlStateNormal];
         [subTableViewController.navigationItem setBackBarButtonItem:backButton];
 
         // push new controller onto nav stack
