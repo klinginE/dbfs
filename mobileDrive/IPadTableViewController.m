@@ -241,7 +241,6 @@
         else
             height = self.view.frame.size.height;
 
-        //[_helpView sizeToFit];
         NSLog(@"changing frames.");
 
         _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height + self.navigationController.navigationBar.frame.size.height + self.navigationController.toolbar.frame.size.height);
@@ -259,7 +258,8 @@
 
         case HELP_TAG:
         {
-            NSString *helpMessage = @"To change directories:\n\t1) Tap once on any directory\n\nTo go back:\n\t1) Tap once on the \"<\"\n\nTo add a directory:\n\t1) Tap once on the add directory button\n\t2) Enter in a name\n\t3) Tap \"OK\"\n\nTo see a file's/directoie's meta data:\n\t1) Tap and hold any file/directory\n\nTo rename a file/directory:\n\t1) Tap and hold the file/directory\n\t2) Tap the rename button\n\t3) Enter a new name\n\t4) Tap \"OK\"\n\nTo move a file/directory:\n\t1) Tap and hold the file/directory\n\t2) Tap the move button\n\t3) Enter a new path\n\t4) Tap \"OK\"\n\nTo delete a file/directory:\n\t1) Tap and hold the file/directory\n\t2) Tap the delete button\n\t3) Tap \"OK\"";
+            NSString *helpMessagePath = [[NSBundle mainBundle] pathForResource:@"file" ofType:@"txt"];
+            NSString *helpMessage = [NSString stringWithContentsOfFile:helpMessagePath encoding:NSUTF8StringEncoding error:NULL];
 
             CGFloat height = 0;
             if (self.view.frame.size.height > self.view.frame.size.width)
