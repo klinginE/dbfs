@@ -240,19 +240,11 @@
 
         else
             height = self.view.frame.size.height;
-        
-        _helpView.frame = CGRectMake(LARGE_FONT_SIZE,
-                                     0.0,
-                                     self.view.frame.size.width,
-                                     height);
-        [_helpView sizeToFit];
+
+        //[_helpView sizeToFit];
         NSLog(@"changing frames.");
 
-        _helpScroll.frame = CGRectMake(0.0,
-                                       self.navigationController.navigationBar.frame.size.height,
-                                       self.view.frame.size.width,
-                                       self.view.frame.size.height - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height);
-        _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height);
+        _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height + self.navigationController.navigationBar.frame.size.height + self.navigationController.toolbar.frame.size.height);
         [_helpScroll setNeedsDisplay];
 
     }
@@ -287,16 +279,16 @@
             _helpView.tag = HELP_VIEW_TAG;
             [_helpView sizeToFit];
 
-            _helpScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0,
-                                                                         self.navigationController.navigationBar.frame.size.height,
+            _helpScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x,
+                                                                         self.view.frame.origin.y + self.navigationController.navigationBar.frame.size.height,
                                                                          self.view.frame.size.width,
-                                                                         self.view.frame.size.height - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height)];
+                                                                         height - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height)];
             [_helpScroll addSubview:_helpView];
             [_helpScroll setScrollEnabled:YES];
             [_helpScroll setBounces:NO];
             _helpScroll.tag = HELP_SCROLL_VIEW_TAG;
 
-            _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, _helpView.frame.size.height);
+            _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height + self.navigationController.navigationBar.frame.size.height + self.navigationController.toolbar.frame.size.height);
 
             UIViewController *helpController = [[UIViewController alloc] init];
             helpController.title = @"Help Page.";
