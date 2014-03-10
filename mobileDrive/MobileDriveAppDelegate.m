@@ -36,14 +36,11 @@
                                                                                          switchAction:@selector(switchChanged:)
                                                                                             forEvents:UIControlEventValueChanged];
     iPadTableViewController.title = @"/";
-    UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:@"/"
-                                                                   style:UIBarButtonItemStyleBordered
-                                                                  target:nil
-                                                                  action:nil];
-    [backButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
-                                        NSFontAttributeName,
-                                        nil]
-                              forState:UIControlStateNormal];
+    UIBarButtonItem *backButton = [iPadTableViewController makeButtonWithTitle:@"/"
+                                                                           Tag:HELP_TAG
+                                                                         Color:nil
+                                                                        Target:nil
+                                                                        Action:nil];
     [iPadTableViewController.navigationItem setBackBarButtonItem:backButton];
 
     // init nav controller

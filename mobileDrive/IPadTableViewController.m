@@ -24,6 +24,8 @@
     UISwitch *_conectSwitch;
     NSDictionary *_filesDictionary;
     NSArray *_fileKeys;
+    UIScrollView *_helpScroll;
+    UILabel *_helpView;
 
 }
 
@@ -47,7 +49,11 @@
 //
 //}
 
--(id)initWithState:(state)currentState model:(id)fsModel target:(MobileDriveAppDelegate *)respond switchAction:(SEL)action forEvents:(UIControlEvents)events {
+-(id)initWithState:(state)currentState
+             model:(id)fsModel
+            target:(MobileDriveAppDelegate *)respond
+      switchAction:(SEL)action
+         forEvents:(UIControlEvents)events {
 
     self = [super init];
     if (self) {
@@ -89,6 +95,34 @@
 
 }
 
+-(UIBarButtonItem *)makeButtonWithTitle:(NSString *)title
+                                    Tag:(NSInteger)tag
+                                  Color:(UIColor *)color
+                                 Target:(id)target
+                                 Action:(SEL)action {
+    
+    UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:title
+                                                                   style:UIBarButtonItemStyleBordered
+                                                                  target:target
+                                                                  action:action];
+    [backButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
+                                                                                  NSFontAttributeName,
+                                                                                  nil]
+                              forState:UIControlStateNormal];
+    backButton.tag = tag;
+    backButton.tintColor = color;
+
+    return backButton;
+
+}
+
+-(CGSize)sizeOfString:(NSString *)string withFont:(UIFont *)font {
+
+    NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
+    return [[[NSAttributedString alloc] initWithString:string attributes:attributes] size];
+
+}
+
 -(void)loadView {
 
     UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
@@ -101,6 +135,12 @@
 - (void)viewDidLoad {
 
     [super viewDidLoad];
+
+    [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+    [[NSNotificationCenter defaultCenter]
+     addObserver:self selector:@selector(orientationChanged:)
+     name:UIDeviceOrientationDidChangeNotification
+     object:[UIDevice currentDevice]];
 
     // Set up directory Contents
     if(_filesDictionary == nil) {
@@ -127,40 +167,41 @@
                                            alpha:1.0f];
 
     // Add a help button to the top right
-    UIBarButtonItem *helpButton = [[UIBarButtonItem alloc] initWithTitle:@"Need Help?"
-                                                                     style:UIBarButtonItemStyleBordered
-                                                                    target:self
-                                                                    action:@selector(buttonPressed:)];
-    helpButton.tag = HELP_TAG;
-    helpButton.tintColor = buttonColor;
-    [helpButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
-                                                                                  NSFontAttributeName,
-                                                                                  nil]
-                              forState:UIControlStateNormal];
+    UIBarButtonItem *helpButton = [self makeButtonWithTitle:@"Need help?"
+                                                        Tag:HELP_TAG
+                                                      Color:buttonColor
+                                                     Target:self
+                                                     Action:@selector(buttonPressed:)];
     self.navigationItem.rightBarButtonItem = helpButton;
 
     // Add a add dir button to the bottom left
-    UIBarButtonItem *addDirButton = [[UIBarButtonItem alloc] initWithTitle:@"Add Directory"
-                                                                     style:UIBarButtonItemStyleBordered
-                                                                    target:self
-                                                                    action:@selector(buttonPressed:)];
-    addDirButton.tag = ADD_DIR_TAG;
-    addDirButton.tintColor = buttonColor;
-    [addDirButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
-                                                                                    NSFontAttributeName,
-                                                                                    nil]
-                                forState:UIControlStateNormal];
+    UIBarButtonItem *addDirButton = [self makeButtonWithTitle:@"Add Directory"
+                                                          Tag:ADD_DIR_TAG
+                                                        Color:buttonColor
+                                                       Target:self
+                                                       Action:@selector(buttonPressed:)];
 
     // flexiable space holder
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
                                                                           target:nil
                                                                           action:nil];
 
+    // make lable for switch
+    NSString *switchString = @"Turn on/off server:";
+    UILabel *switchLable = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, [self sizeOfString:switchString
+                                                                                      withFont:[UIFont systemFontOfSize:LARGE_FONT_SIZE]].width, CELL_HEIGHT)];
+    switchLable.text = switchString;
+    switchLable.backgroundColor = [UIColor clearColor];
+    switchLable.textColor = [UIColor blackColor];
+    switchLable.font = [UIFont systemFontOfSize:LARGE_FONT_SIZE];
+    [switchLable setTextAlignment:NSTextAlignmentCenter];
+    UIBarButtonItem *switchButtonItem = [[UIBarButtonItem alloc] initWithCustomView:switchLable];
+
     // add switch to the bottom right
     UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:_conectSwitch];
 
-    // putt objects in toolbar
-    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:addDirButton, flex, cSwitch, nil];
+    // put objects in toolbar
+    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:addDirButton, flex, switchButtonItem, cSwitch, nil];
     self.toolbarItems = toolBarItems;
 
     // set tool bar settings
@@ -187,10 +228,86 @@
 
 }
 
+- (void) orientationChanged:(NSNotification *)note {
+
+    NSLog(@"Rotated!");
+    CGFloat height = 0.0;
+
+    if (_helpScroll && _helpView) {
+
+        if (self.view.frame.size.width > self.view.frame.size.height)
+            height = self.view.frame.size.width;
+
+        else
+            height = self.view.frame.size.height;
+        
+        _helpView.frame = CGRectMake(LARGE_FONT_SIZE,
+                                     0.0,
+                                     self.view.frame.size.width,
+                                     height);
+        [_helpView sizeToFit];
+        NSLog(@"changing frames.");
+
+        _helpScroll.frame = CGRectMake(0.0,
+                                       self.navigationController.navigationBar.frame.size.height,
+                                       self.view.frame.size.width,
+                                       self.view.frame.size.height - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height);
+        _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height);
+        [_helpScroll setNeedsDisplay];
+
+    }
+
+}
+
 -(void)buttonPressed:(UIBarButtonItem *)sender {
 
     NSLog(@"buttonPressed: %d", sender.tag);
     //FIXME add code to handel a button press here
+    switch (sender.tag) {
+
+        case HELP_TAG:
+        {
+            NSString *helpMessage = @"To change directories:\n\t1) Tap once on any directory\n\nTo go back:\n\t1) Tap once on the \"<\"\n\nTo add a directory:\n\t1) Tap once on the add directory button\n\t2) Enter in a name\n\t3) Tap \"OK\"\n\nTo see a file's/directoie's meta data:\n\t1) Tap and hold any file/directory\n\nTo rename a file/directory:\n\t1) Tap and hold the file/directory\n\t2) Tap the rename button\n\t3) Enter a new name\n\t4) Tap \"OK\"\n\nTo move a file/directory:\n\t1) Tap and hold the file/directory\n\t2) Tap the move button\n\t3) Enter a new path\n\t4) Tap \"OK\"\n\nTo delete a file/directory:\n\t1) Tap and hold the file/directory\n\t2) Tap the delete button\n\t3) Tap \"OK\"";
+
+            CGFloat height = 0;
+            if (self.view.frame.size.height > self.view.frame.size.width)
+                height = self.view.frame.size.height;
+            else
+                height = self.view.frame.size.width;
+
+            _helpView = [[UILabel alloc] initWithFrame:CGRectMake(LARGE_FONT_SIZE,
+                                                                  0.0,
+                                                                  self.view.frame.size.width,
+                                                                  height)];
+            _helpView.text = helpMessage;
+            _helpView.backgroundColor = [UIColor clearColor];
+            _helpView.textColor = [UIColor blackColor];
+            _helpView.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
+            _helpView.numberOfLines = 0;
+            _helpView.tag = HELP_VIEW_TAG;
+            [_helpView sizeToFit];
+
+            _helpScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0,
+                                                                         self.navigationController.navigationBar.frame.size.height,
+                                                                         self.view.frame.size.width,
+                                                                         self.view.frame.size.height - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height)];
+            [_helpScroll addSubview:_helpView];
+            [_helpScroll setScrollEnabled:YES];
+            [_helpScroll setBounces:NO];
+            _helpScroll.tag = HELP_SCROLL_VIEW_TAG;
+
+            _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, _helpView.frame.size.height);
+
+            UIViewController *helpController = [[UIViewController alloc] init];
+            helpController.title = @"Help Page.";
+            [helpController.view addSubview:_helpScroll];
+            [self.navigationController pushViewController:helpController animated:YES];
+        }
+            break;
+        default:
+            break;
+
+    }
 
 }
 
@@ -290,15 +407,11 @@
         subTableViewController.title = key;
 
         // Set up back button
-        UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:key
-                                                                       style:UIBarButtonItemStyleBordered
-                                                                      target:nil
-                                                                      action:nil];
-        [backButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
-                                                                                      NSFontAttributeName,
-                                                                                      nil]
-                                  forState:UIControlStateNormal];
-        [subTableViewController.navigationItem setBackBarButtonItem:backButton];
+        [subTableViewController.navigationItem setBackBarButtonItem:[self makeButtonWithTitle:key
+                                                                                          Tag:BACK_TAG
+                                                                                        Color:nil
+                                                                                       Target:nil
+                                                                                       Action:nil]];
 
         // push new controller onto nav stack
         [self.navigationController pushViewController:subTableViewController animated:YES];
