@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8AD2189618CA6F8B00BC2EAC /* IPadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */; };
 		8AD2189A18CA71FF00BC2EAC /* files.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2189918CA71FF00BC2EAC /* files.plist */; };
+		8AF0CD7E18CE547000210087 /* DBInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AF0CD7D18CE547000210087 /* DBInterface.m */; };
 		DE0FDF6318C963CB00843686 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6218C963CB00843686 /* Foundation.framework */; };
 		DE0FDF6518C963CB00843686 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6418C963CB00843686 /* CoreGraphics.framework */; };
 		DE0FDF6718C963CB00843686 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6618C963CB00843686 /* UIKit.framework */; };
@@ -38,6 +39,8 @@
 		8AD2189418CA6F8B00BC2EAC /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
 		8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
 		8AD2189918CA71FF00BC2EAC /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
+		8AF0CD7C18CE547000210087 /* DBInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DBInterface.h; path = ../DBInterface.h; sourceTree = "<group>"; };
+		8AF0CD7D18CE547000210087 /* DBInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DBInterface.m; path = ../DBInterface.m; sourceTree = "<group>"; };
 		DE0FDF5F18C963CB00843686 /* mobileDrive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mobileDrive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE0FDF6218C963CB00843686 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		DE0FDF6418C963CB00843686 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -115,6 +118,8 @@
 		DE0FDF6818C963CB00843686 /* mobileDrive */ = {
 			isa = PBXGroup;
 			children = (
+				8AF0CD7C18CE547000210087 /* DBInterface.h */,
+				8AF0CD7D18CE547000210087 /* DBInterface.m */,
 				8AD2189918CA71FF00BC2EAC /* files.plist */,
 				DE9833C618C96BA0003CEA5B /* dbfs */,
 				DE0FDF7118C963CB00843686 /* MobileDriveAppDelegate.h */,
@@ -258,6 +263,7 @@
 				8AD2189618CA6F8B00BC2EAC /* IPadTableViewController.m in Sources */,
 				DE0FDF6F18C963CB00843686 /* main.m in Sources */,
 				DE0FDF7318C963CB00843686 /* MobileDriveAppDelegate.m in Sources */,
+				8AF0CD7E18CE547000210087 /* DBInterface.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
