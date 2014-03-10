@@ -258,7 +258,7 @@
 
         case HELP_TAG:
         {
-            NSString *helpMessagePath = [[NSBundle mainBundle] pathForResource:@"file" ofType:@"txt"];
+            NSString *helpMessagePath = [[NSBundle mainBundle] pathForResource:@"helpPage" ofType:@"txt"];
             NSString *helpMessage = [NSString stringWithContentsOfFile:helpMessagePath encoding:NSUTF8StringEncoding error:NULL];
 
             CGFloat height = 0;

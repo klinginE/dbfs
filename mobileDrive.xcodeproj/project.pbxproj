@@ -21,7 +21,7 @@
 		DE0FDF7E18C963CB00843686 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6618C963CB00843686 /* UIKit.framework */; };
 		DE0FDF8618C963CB00843686 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DE0FDF8418C963CB00843686 /* InfoPlist.strings */; };
 		DE0FDF8818C963CB00843686 /* mobileDriveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DE0FDF8718C963CB00843686 /* mobileDriveTests.m */; };
-		DE96FBC018CE5AA9008553D8 /* file.txt in Resources */ = {isa = PBXBuildFile; fileRef = DE96FBBF18CE5AA9008553D8 /* file.txt */; };
+		DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */ = {isa = PBXBuildFile; fileRef = DE96FBC118CE618B008553D8 /* helpPage.txt */; };
 		DE9833C718C96BA0003CEA5B /* dbfs in Resources */ = {isa = PBXBuildFile; fileRef = DE9833C618C96BA0003CEA5B /* dbfs */; };
 /* End PBXBuildFile section */
 
@@ -55,7 +55,7 @@
 		DE0FDF8318C963CB00843686 /* mobileDriveTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "mobileDriveTests-Info.plist"; sourceTree = "<group>"; };
 		DE0FDF8518C963CB00843686 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DE0FDF8718C963CB00843686 /* mobileDriveTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = mobileDriveTests.m; sourceTree = "<group>"; };
-		DE96FBBF18CE5AA9008553D8 /* file.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = file.txt; sourceTree = "<group>"; };
+		DE96FBC118CE618B008553D8 /* helpPage.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = helpPage.txt; sourceTree = "<group>"; };
 		DE9833C618C96BA0003CEA5B /* dbfs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dbfs; sourceTree = "<group>"; };
 		DE9833C818C96BBC003CEA5B /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -117,7 +117,6 @@
 		DE0FDF6818C963CB00843686 /* mobileDrive */ = {
 			isa = PBXGroup;
 			children = (
-				8AD2189918CA71FF00BC2EAC /* files.plist */,
 				DE9833C618C96BA0003CEA5B /* dbfs */,
 				DE0FDF7118C963CB00843686 /* MobileDriveAppDelegate.h */,
 				DE0FDF7218C963CB00843686 /* MobileDriveAppDelegate.m */,
@@ -125,7 +124,8 @@
 				8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */,
 				DE0FDF7418C963CB00843686 /* Images.xcassets */,
 				DE9833C818C96BBC003CEA5B /* Makefile */,
-				DE96FBBF18CE5AA9008553D8 /* file.txt */,
+				DE96FBC118CE618B008553D8 /* helpPage.txt */,
+				8AD2189918CA71FF00BC2EAC /* files.plist */,
 				DE0FDF6918C963CB00843686 /* Supporting Files */,
 			);
 			path = mobileDrive;
@@ -236,11 +236,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */,
 				8AD2189A18CA71FF00BC2EAC /* files.plist in Resources */,
 				DE0FDF6D18C963CB00843686 /* InfoPlist.strings in Resources */,
 				DE9833C718C96BA0003CEA5B /* dbfs in Resources */,
 				DE0FDF7518C963CB00843686 /* Images.xcassets in Resources */,
-				DE96FBC018CE5AA9008553D8 /* file.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
