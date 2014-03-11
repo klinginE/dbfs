@@ -12,6 +12,7 @@
 @interface IPadTableViewController ()
 
 @property(weak, atomic) id model;//FIXME chage type from id to pointer to iPad file system model
+@property(strong, atomic)NSMutableArray *alerts;
 
 @end
 
@@ -77,6 +78,64 @@
             _conectSwitch.on = YES;
         else
             _conectSwitch.on = NO;
+
+        self.alerts = [[NSMutableArray alloc] init];
+        for (int i = ADD_TAG; i < (NUM_ALERTS + ADD_TAG); i++) {
+
+            UIAlertView *alert = [[UIAlertView alloc] init];
+            switch (i) {
+
+                case ADD_TAG:
+                    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+                    [alert setDelegate:self];
+                    [alert setTitle:@"Add a Directory"];
+                    [alert setMessage:@"Give it a name:"];
+                    [alert addButtonWithTitle:@"Cancel"];
+                    [alert addButtonWithTitle:@"OK"];
+                    alert.tag = ADD_TAG;
+                    break;
+                case DELETE_TAG:
+                    [alert setDelegate:self];
+                    [alert setTitle:@"Deleting a File/Directory"];
+                    [alert setMessage:@"Are You Sure?"];
+                    [alert addButtonWithTitle:@"Cancel"];
+                    [alert addButtonWithTitle:@"OK"];
+                    alert.tag = DELETE_TAG;
+                    break;
+                case MOVE_TAG:
+                    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+                    [alert setDelegate:self];
+                    [alert setTitle:@"Moving a File/Directory"];
+                    [alert setMessage:@"Give it a new path:"];
+                    [alert addButtonWithTitle:@"Cancel"];
+                    [alert addButtonWithTitle:@"OK"];
+                    alert.tag = MOVE_TAG;
+                    break;
+                case RENAME_TAG:
+                    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+                    [alert setDelegate:self];
+                    [alert setTitle:@"Renaming a File/Directory"];
+                    [alert setMessage:@"Give it a new name:"];
+                    [alert addButtonWithTitle:@"Cancel"];
+                    [alert addButtonWithTitle:@"OK"];
+                    alert.tag = RENAME_TAG;
+                    break;
+                case CONFIRM_TAG:
+                    [alert setDelegate:self];
+                    [alert setTitle:@"This action is permanent!"];
+                    [alert setMessage:@"Are you sure you want to perform this action?"];
+                    [alert addButtonWithTitle:@"Cancel"];
+                    [alert addButtonWithTitle:@"OK"];
+                    alert.tag = CONFIRM_TAG;
+                    break;
+                default:
+                    break;
+
+            }
+
+            [self.alerts addObject:alert];
+
+        }
 
     }
 
@@ -240,69 +299,140 @@
 
         else
             height = self.view.frame.size.height;
-        
-        _helpView.frame = CGRectMake(LARGE_FONT_SIZE,
-                                     0.0,
-                                     self.view.frame.size.width,
-                                     height);
-        [_helpView sizeToFit];
+
         NSLog(@"changing frames.");
 
-        _helpScroll.frame = CGRectMake(0.0,
-                                       self.navigationController.navigationBar.frame.size.height,
-                                       self.view.frame.size.width,
-                                       self.view.frame.size.height - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height);
-        _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height);
+        _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height + self.navigationController.navigationBar.frame.size.height + self.navigationController.toolbar.frame.size.height);
         [_helpScroll setNeedsDisplay];
 
     }
 
 }
 
+-(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
+
+    if (buttonIndex != 0) {
+
+        static NSString *text = @"";
+        static allertTag previousTag = NONE;
+
+        switch (alertView.tag) {
+
+            case ADD_TAG:
+                previousTag = ADD_TAG;
+                text = [alertView textFieldAtIndex:0].text;
+                [[self objectInArray:self.alerts WithTag:CONFIRM_TAG] show];
+                break;
+            case DELETE_TAG:
+                //FIXME add code here to delete
+                break;
+            case MOVE_TAG:
+                previousTag = MOVE_TAG;
+                text = [alertView textFieldAtIndex:0].text;
+                [[self objectInArray:self.alerts WithTag:CONFIRM_TAG] show];
+                break;
+            case RENAME_TAG:
+                previousTag = RENAME_TAG;
+                text = [alertView textFieldAtIndex:0].text;
+                [[self objectInArray:self.alerts WithTag:CONFIRM_TAG] show];
+                break;
+            case CONFIRM_TAG:
+                NSLog(@"Entered= %@", text);
+                switch (previousTag) {
+
+                    case ADD_TAG:
+                        //FIXME add code here to add a directory
+                        break;
+                    case MOVE_TAG:
+                        //FIXME add code here to move a file/directory
+                        break;
+                    case RENAME_TAG:
+                        //FIXME add code here to rename a file/directory
+                        break;
+                    default:
+                        break;
+
+                }
+                previousTag = CONFIRM_TAG;
+                break;
+            default:
+                previousTag = NONE;
+                break;
+
+        }
+
+    }
+    if (alertView.alertViewStyle == UIAlertViewStylePlainTextInput)
+        [alertView textFieldAtIndex:0].text = @"";
+
+}
+
+-(UIAlertView *)objectInArray:(NSArray *)a WithTag:(NSInteger)tag {
+
+    for (UIAlertView *object in a)
+        if(object.tag == tag)
+            return object;
+
+    return nil;
+
+}
+
+-(void)disPlayHelpPage {
+    
+    NSString *helpMessagePath = [[NSBundle mainBundle] pathForResource:@"helpPage" ofType:@"txt"];
+    NSString *helpMessage = [NSString stringWithContentsOfFile:helpMessagePath encoding:NSUTF8StringEncoding error:NULL];
+    
+    CGFloat height = 0;
+    if (self.view.frame.size.height > self.view.frame.size.width)
+        height = self.view.frame.size.height;
+    else
+        height = self.view.frame.size.width;
+    
+    _helpView = [[UILabel alloc] initWithFrame:CGRectMake(LARGE_FONT_SIZE,
+                                                          0.0,
+                                                          self.view.frame.size.width,
+                                                          height)];
+    _helpView.text = helpMessage;
+    _helpView.backgroundColor = [UIColor clearColor];
+    _helpView.textColor = [UIColor blackColor];
+    _helpView.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
+    _helpView.numberOfLines = 0;
+    [_helpView sizeToFit];
+    
+    _helpScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x,
+                                                                 self.view.frame.origin.y + self.navigationController.navigationBar.frame.size.height,
+                                                                 self.view.frame.size.width,
+                                                                 height - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height)];
+    [_helpScroll addSubview:_helpView];
+    [_helpScroll setScrollEnabled:YES];
+    [_helpScroll setBounces:NO];
+    
+    _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height + self.navigationController.navigationBar.frame.size.height + self.navigationController.toolbar.frame.size.height);
+    
+    UIViewController *helpController = [[UIViewController alloc] init];
+    helpController.title = @"Help Page.";
+    [helpController.view addSubview:_helpScroll];
+    [self.navigationController pushViewController:helpController animated:YES];
+    
+}
+
+-(void)displayAddDirPage {
+
+    UIAlertView *addDirAlert = [self objectInArray:self.alerts WithTag:ADD_TAG];
+    [addDirAlert show];
+
+}
+
 -(void)buttonPressed:(UIBarButtonItem *)sender {
 
-    NSLog(@"buttonPressed: %d", sender.tag);
-    //FIXME add code to handel a button press here
+    //NSLog(@"buttonPressed: %d", sender.tag);
     switch (sender.tag) {
 
         case HELP_TAG:
-        {
-            NSString *helpMessage = @"To change directories:\n\t1) Tap once on any directory\n\nTo go back:\n\t1) Tap once on the \"<\"\n\nTo add a directory:\n\t1) Tap once on the add directory button\n\t2) Enter in a name\n\t3) Tap \"OK\"\n\nTo see a file's/directoie's meta data:\n\t1) Tap and hold any file/directory\n\nTo rename a file/directory:\n\t1) Tap and hold the file/directory\n\t2) Tap the rename button\n\t3) Enter a new name\n\t4) Tap \"OK\"\n\nTo move a file/directory:\n\t1) Tap and hold the file/directory\n\t2) Tap the move button\n\t3) Enter a new path\n\t4) Tap \"OK\"\n\nTo delete a file/directory:\n\t1) Tap and hold the file/directory\n\t2) Tap the delete button\n\t3) Tap \"OK\"";
-
-            CGFloat height = 0;
-            if (self.view.frame.size.height > self.view.frame.size.width)
-                height = self.view.frame.size.height;
-            else
-                height = self.view.frame.size.width;
-
-            _helpView = [[UILabel alloc] initWithFrame:CGRectMake(LARGE_FONT_SIZE,
-                                                                  0.0,
-                                                                  self.view.frame.size.width,
-                                                                  height)];
-            _helpView.text = helpMessage;
-            _helpView.backgroundColor = [UIColor clearColor];
-            _helpView.textColor = [UIColor blackColor];
-            _helpView.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
-            _helpView.numberOfLines = 0;
-            _helpView.tag = HELP_VIEW_TAG;
-            [_helpView sizeToFit];
-
-            _helpScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(0.0,
-                                                                         self.navigationController.navigationBar.frame.size.height,
-                                                                         self.view.frame.size.width,
-                                                                         self.view.frame.size.height - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height)];
-            [_helpScroll addSubview:_helpView];
-            [_helpScroll setScrollEnabled:YES];
-            [_helpScroll setBounces:NO];
-            _helpScroll.tag = HELP_SCROLL_VIEW_TAG;
-
-            _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, _helpView.frame.size.height);
-
-            UIViewController *helpController = [[UIViewController alloc] init];
-            helpController.title = @"Help Page.";
-            [helpController.view addSubview:_helpScroll];
-            [self.navigationController pushViewController:helpController animated:YES];
-        }
+            [self disPlayHelpPage];
+            break;
+        case ADD_DIR_TAG:
+            [self displayAddDirPage];
             break;
         default:
             break;
@@ -337,8 +467,14 @@
     // fetch cell
     static NSString *cellID = @"filesCell";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellID];
-    if(cell == nil)
+    if(cell == nil) {
+
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:cellID];
+        UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
+        longPress.minimumPressDuration = 0.5;
+        [cell addGestureRecognizer:longPress];
+
+    }
 
     // fecthc key and dict info
     NSString *key = [_fileKeys objectAtIndex:indexPath.row];
@@ -376,6 +512,40 @@
     c[i] = '\0';
 
     return c;
+
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+
+    switch (buttonIndex) {
+
+        case 0:
+            [[self objectInArray:self.alerts WithTag:MOVE_TAG] show];
+            break;
+        case 1:
+            [[self objectInArray:self.alerts WithTag:RENAME_TAG] show];
+            break;
+        case 2:
+            [[self objectInArray:self.alerts WithTag:DELETE_TAG] show];
+            break;
+        default:
+            break;
+
+    }
+
+}
+
+-(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
+
+    UIActionSheet *detailSheet = [[UIActionSheet alloc] initWithTitle:@"File/Directory Details"
+                                                             delegate:self
+                                                    cancelButtonTitle:@"Cancel"
+                                               destructiveButtonTitle:nil
+                                                    otherButtonTitles:@"Move",
+                                                                      @"Rename",
+                                                                      @"Delete",
+                                                                      nil];
+    [detailSheet showInView:self.view];
 
 }
 
@@ -419,13 +589,24 @@
     }
 
     // else dict object is a file then...
-    else {
-
-        //FIXME add code to handel the case when user clicks on a file.
-
-    }
+    else
+        [self displayDetailedViwForItem:dict WithKey:key];
 
 }
+
+-(void)handleLongPress:(UILongPressGestureRecognizer*)sender {
+
+    CGPoint location = [sender locationInView:self.view];
+    NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:location];
+    NSString *key = [_fileKeys objectAtIndex:indexPath.row];
+    NSDictionary *dict = [_filesDictionary objectForKey:key];
+
+    if (sender.state == UIGestureRecognizerStateBegan)
+        [self displayDetailedViwForItem:dict WithKey:key];
+
+}
+
+//-(void)tableView:(UITableView *)tableView did {
 
 /*
 // Override to support conditional editing of the table view.
