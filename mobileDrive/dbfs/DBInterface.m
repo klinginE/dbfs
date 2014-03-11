@@ -7,7 +7,6 @@
 //
 
 #import "DBInterface.h"
-#import "IPadTableViewController.h"
 
 @implementation DBInterface
 
@@ -106,7 +105,7 @@
     return 0;
 }
 
--(int)deleteFile:(NSString *)fname fromDB:(DBFS *)dbfs {
+-(int)deleteFile:(NSString *)fname fromDatabase:(DBFS *)dbfs {
     
     if (!fname) {
         NSLog(@"Error: No name");

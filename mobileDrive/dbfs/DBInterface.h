@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "mobileDrive/dbfs/dbfs.h"
+#import "dbfs.h"
 
 @interface DBInterface : NSObject
 
@@ -16,7 +16,7 @@
 -(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out;
 -(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in;
 -(int)overwriteFile:(NSString *)fname inDatabase:(DBFS *)dbfs from:(FILE *)in;
--(int)deleteFile:(NSString *)fname fromDB:(DBFS *)dbfs;
+-(int)deleteFile:(NSString *)fname fromDatabase:(DBFS *)dbfs;
 -(DBFS_FileList *)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs;
 -(DBFS_DirList *)getDirectoryListIn:(NSString *)dirName inDatabase:(DBFS *)dbfs;
 
