@@ -501,9 +501,9 @@
 
 -(char *)nsStringToCString:(NSString *)s {
 
-    int len = [s length];
+    NSInteger len = [s length];
     char *c = (char *)malloc(len + 1);
-    int i = 0;
+    NSInteger i = 0;
     for (; i < len; i++) {
 
         c[i] = [s characterAtIndex:i];
