@@ -362,7 +362,7 @@
         }
 
     }
-    if ([alertView textFieldAtIndex:0])
+    if (alertView.alertViewStyle == UIAlertViewStylePlainTextInput)
         [alertView textFieldAtIndex:0].text = @"";
 
 }
@@ -517,18 +517,34 @@
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 
-    
+    switch (buttonIndex) {
+
+        case 0:
+            [[self objectInArray:self.alerts WithTag:MOVE_TAG] show];
+            break;
+        case 1:
+            [[self objectInArray:self.alerts WithTag:RENAME_TAG] show];
+            break;
+        case 2:
+            [[self objectInArray:self.alerts WithTag:DELETE_TAG] show];
+            break;
+        default:
+            break;
+
+    }
 
 }
 
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
-    UIActionSheet *detailSheet = [[UIActionSheet alloc] initWithFrame:self.view.frame];
-    detailSheet.delegate = self;
-    [detailSheet setTitle:@"File/Directory Details"];
-    [detailSheet addButtonWithTitle:@"Move"];
-    [detailSheet addButtonWithTitle:@"Rename"];
-    [detailSheet addButtonWithTitle:@"Delete"];
+    UIActionSheet *detailSheet = [[UIActionSheet alloc] initWithTitle:@"File/Directory Details"
+                                                             delegate:self
+                                                    cancelButtonTitle:@"Cancel"
+                                               destructiveButtonTitle:nil
+                                                    otherButtonTitles:@"Move",
+                                                                      @"Rename",
+                                                                      @"Delete",
+                                                                      nil];
     [detailSheet showInView:self.view];
 
 }
@@ -585,12 +601,8 @@
     NSString *key = [_fileKeys objectAtIndex:indexPath.row];
     NSDictionary *dict = [_filesDictionary objectForKey:key];
 
-    if (sender.state == UIGestureRecognizerStateBegan) {
-
-        NSLog(@"%@", dict);
+    if (sender.state == UIGestureRecognizerStateBegan)
         [self displayDetailedViwForItem:dict WithKey:key];
-
-    }
 
 }
 
