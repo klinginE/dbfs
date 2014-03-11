@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8A014E8018CF8FF600C83490 /* MobileDriveModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */; };
 		8AD2189618CA6F8B00BC2EAC /* IPadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */; };
 		8AD2189A18CA71FF00BC2EAC /* files.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2189918CA71FF00BC2EAC /* files.plist */; };
 		DE0FDF6318C963CB00843686 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6218C963CB00843686 /* Foundation.framework */; };
@@ -37,6 +38,8 @@
 
 /* Begin PBXFileReference section */
 		8A014E7618CF825600C83490 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		8A014E7E18CF8FF600C83490 /* MobileDriveModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileDriveModel.h; sourceTree = "<group>"; };
+		8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileDriveModel.m; sourceTree = "<group>"; };
 		8AD2189418CA6F8B00BC2EAC /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
 		8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
 		8AD2189918CA71FF00BC2EAC /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
@@ -125,6 +128,8 @@
 				DE0FDF7218C963CB00843686 /* MobileDriveAppDelegate.m */,
 				8AD2189418CA6F8B00BC2EAC /* IPadTableViewController.h */,
 				8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */,
+				8A014E7E18CF8FF600C83490 /* MobileDriveModel.h */,
+				8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */,
 				DE0FDF7418C963CB00843686 /* Images.xcassets */,
 				DE9833C818C96BBC003CEA5B /* Makefile */,
 				DE96FBC118CE618B008553D8 /* helpPage.txt */,
@@ -262,6 +267,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8A014E8018CF8FF600C83490 /* MobileDriveModel.m in Sources */,
 				8AD2189618CA6F8B00BC2EAC /* IPadTableViewController.m in Sources */,
 				DE0FDF6F18C963CB00843686 /* main.m in Sources */,
 				DE0FDF7318C963CB00843686 /* MobileDriveAppDelegate.m in Sources */,
