@@ -36,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8A014E7618CF825600C83490 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		8AD2189418CA6F8B00BC2EAC /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
 		8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
 		8AD2189918CA71FF00BC2EAC /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
@@ -106,6 +107,7 @@
 		DE0FDF6118C963CB00843686 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8A014E7618CF825600C83490 /* QuartzCore.framework */,
 				DE0FDF6218C963CB00843686 /* Foundation.framework */,
 				DE0FDF6418C963CB00843686 /* CoreGraphics.framework */,
 				DE0FDF6618C963CB00843686 /* UIKit.framework */,
@@ -117,6 +119,7 @@
 		DE0FDF6818C963CB00843686 /* mobileDrive */ = {
 			isa = PBXGroup;
 			children = (
+				8AD2189918CA71FF00BC2EAC /* files.plist */,
 				DE9833C618C96BA0003CEA5B /* dbfs */,
 				DE0FDF7118C963CB00843686 /* MobileDriveAppDelegate.h */,
 				DE0FDF7218C963CB00843686 /* MobileDriveAppDelegate.m */,

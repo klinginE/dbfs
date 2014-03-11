@@ -35,5 +35,6 @@ typedef struct {
                                   Color:(UIColor *)color
                                  Target:(id)target
                                  Action:(SEL)action;
+-(char *)nsStringToCString:(NSString *)s;
 
 @end
