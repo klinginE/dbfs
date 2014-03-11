@@ -515,14 +515,21 @@
 
 }
 
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+
+    
+
+}
+
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
-    UIView *detailView = [[UIView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x + (self.view.frame.size.width - self.view.frame.size.width * 0.75f) / 2.0f,
-                                                                  self.view.frame.origin.y + (self.view.frame.size.height - self.view.frame.size.height * 0.75f) / 4.0f,
-                                                                  self.view.frame.size.width * 0.75f,
-                                                                  self.view.frame.size.height * 0.75f)];
-    [detailView setBackgroundColor:[UIColor yellowColor]];
-    //[self.view addSubview:detailView];
+    UIActionSheet *detailSheet = [[UIActionSheet alloc] initWithFrame:self.view.frame];
+    detailSheet.delegate = self;
+    [detailSheet setTitle:@"File/Directory Details"];
+    [detailSheet addButtonWithTitle:@"Move"];
+    [detailSheet addButtonWithTitle:@"Rename"];
+    [detailSheet addButtonWithTitle:@"Delete"];
+    [detailSheet showInView:self.view];
 
 }
 
