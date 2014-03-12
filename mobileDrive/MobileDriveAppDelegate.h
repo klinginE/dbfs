@@ -7,10 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ServerViewController.h"
 
 @interface MobileDriveAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 @property (atomic) BOOL isConnected;
+@property (strong, nonatomic) ServerViewController *serverController;
 
 @end

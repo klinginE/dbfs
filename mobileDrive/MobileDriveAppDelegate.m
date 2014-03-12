@@ -8,6 +8,9 @@
 #import "MobileDriveAppDelegate.h"
 #import "IPadTableViewController.h"
 #import <string.h>
+#import "ServerViewController.h"
+
+
 
 @implementation MobileDriveAppDelegate
 
@@ -15,7 +18,14 @@
 
     self.isConnected = [sender isOn];
     NSLog(@"switchChanged %hhd", self.isConnected);
+    if(self.isConnected){
+        [self.serverController turnOnServer];
+        NSLog( [self.serverController getIPAddress] );
+    }else{
+        [self.serverController turnOffServer];
+    }
     //FIXME add code to turn on/off server here
+    
 
 }
 
@@ -55,6 +65,8 @@
     self.window.rootViewController = iPadNavController;
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
+    
+    self.serverController = [[ServerViewController alloc] init];
 
     return YES;
 

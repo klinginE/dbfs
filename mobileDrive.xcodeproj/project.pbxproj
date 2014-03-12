@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		8AD2189618CA6F8B00BC2EAC /* IPadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */; };
 		8AD2189A18CA71FF00BC2EAC /* files.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2189918CA71FF00BC2EAC /* files.plist */; };
+		9564623818D0DAC400AA845A /* GCDWebServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623018D0DAC400AA845A /* GCDWebServer.m */; };
+		9564623918D0DAC400AA845A /* GCDWebServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623218D0DAC400AA845A /* GCDWebServerConnection.m */; };
+		9564623A18D0DAC400AA845A /* GCDWebServerRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623518D0DAC400AA845A /* GCDWebServerRequest.m */; };
+		9564623B18D0DAC400AA845A /* GCDWebServerResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623718D0DAC400AA845A /* GCDWebServerResponse.m */; };
+		9564623E18D0DEBC00AA845A /* ServerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623D18D0DEBC00AA845A /* ServerViewController.m */; };
 		DE0FDF6318C963CB00843686 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6218C963CB00843686 /* Foundation.framework */; };
 		DE0FDF6518C963CB00843686 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6418C963CB00843686 /* CoreGraphics.framework */; };
 		DE0FDF6718C963CB00843686 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6618C963CB00843686 /* UIKit.framework */; };
@@ -40,6 +45,17 @@
 		8AD2189418CA6F8B00BC2EAC /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
 		8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
 		8AD2189918CA71FF00BC2EAC /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
+		9564622F18D0DAC400AA845A /* GCDWebServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServer.h; sourceTree = "<group>"; };
+		9564623018D0DAC400AA845A /* GCDWebServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServer.m; sourceTree = "<group>"; };
+		9564623118D0DAC400AA845A /* GCDWebServerConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerConnection.h; sourceTree = "<group>"; };
+		9564623218D0DAC400AA845A /* GCDWebServerConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerConnection.m; sourceTree = "<group>"; };
+		9564623318D0DAC400AA845A /* GCDWebServerPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerPrivate.h; sourceTree = "<group>"; };
+		9564623418D0DAC400AA845A /* GCDWebServerRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerRequest.h; sourceTree = "<group>"; };
+		9564623518D0DAC400AA845A /* GCDWebServerRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerRequest.m; sourceTree = "<group>"; };
+		9564623618D0DAC400AA845A /* GCDWebServerResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerResponse.h; sourceTree = "<group>"; };
+		9564623718D0DAC400AA845A /* GCDWebServerResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerResponse.m; sourceTree = "<group>"; };
+		9564623C18D0DEBC00AA845A /* ServerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ServerViewController.h; path = mobileDrive/ServerViewController.h; sourceTree = SOURCE_ROOT; };
+		9564623D18D0DEBC00AA845A /* ServerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ServerViewController.m; path = mobileDrive/ServerViewController.m; sourceTree = SOURCE_ROOT; };
 		DE0FDF5F18C963CB00843686 /* mobileDrive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mobileDrive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE0FDF6218C963CB00843686 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		DE0FDF6418C963CB00843686 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -85,6 +101,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9564622E18D0DAC400AA845A /* CGDWebServer */ = {
+			isa = PBXGroup;
+			children = (
+				9564622F18D0DAC400AA845A /* GCDWebServer.h */,
+				9564623018D0DAC400AA845A /* GCDWebServer.m */,
+				9564623118D0DAC400AA845A /* GCDWebServerConnection.h */,
+				9564623218D0DAC400AA845A /* GCDWebServerConnection.m */,
+				9564623318D0DAC400AA845A /* GCDWebServerPrivate.h */,
+				9564623418D0DAC400AA845A /* GCDWebServerRequest.h */,
+				9564623518D0DAC400AA845A /* GCDWebServerRequest.m */,
+				9564623618D0DAC400AA845A /* GCDWebServerResponse.h */,
+				9564623718D0DAC400AA845A /* GCDWebServerResponse.m */,
+			);
+			path = CGDWebServer;
+			sourceTree = "<group>";
+		};
 		DE0FDF5618C963CA00843686 = {
 			isa = PBXGroup;
 			children = (
@@ -121,10 +153,13 @@
 			children = (
 				8AD2189918CA71FF00BC2EAC /* files.plist */,
 				DE9833C618C96BA0003CEA5B /* dbfs */,
+				9564623C18D0DEBC00AA845A /* ServerViewController.h */,
+				9564623D18D0DEBC00AA845A /* ServerViewController.m */,
 				DE0FDF7118C963CB00843686 /* MobileDriveAppDelegate.h */,
 				DE0FDF7218C963CB00843686 /* MobileDriveAppDelegate.m */,
 				8AD2189418CA6F8B00BC2EAC /* IPadTableViewController.h */,
 				8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */,
+				9564622E18D0DAC400AA845A /* CGDWebServer */,
 				DE0FDF7418C963CB00843686 /* Images.xcassets */,
 				DE9833C818C96BBC003CEA5B /* Makefile */,
 				DE96FBC118CE618B008553D8 /* helpPage.txt */,
@@ -262,9 +297,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9564623818D0DAC400AA845A /* GCDWebServer.m in Sources */,
 				8AD2189618CA6F8B00BC2EAC /* IPadTableViewController.m in Sources */,
+				9564623918D0DAC400AA845A /* GCDWebServerConnection.m in Sources */,
 				DE0FDF6F18C963CB00843686 /* main.m in Sources */,
+				9564623B18D0DAC400AA845A /* GCDWebServerResponse.m in Sources */,
+				9564623A18D0DAC400AA845A /* GCDWebServerRequest.m in Sources */,
 				DE0FDF7318C963CB00843686 /* MobileDriveAppDelegate.m in Sources */,
+				9564623E18D0DEBC00AA845A /* ServerViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
