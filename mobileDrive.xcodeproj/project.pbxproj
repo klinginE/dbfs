@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8A014E8018CF8FF600C83490 /* MobileDriveModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */; };
-		8AD2189618CA6F8B00BC2EAC /* IPadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */; };
+
 		9564623818D0DAC400AA845A /* GCDWebServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623018D0DAC400AA845A /* GCDWebServer.m */; };
 		9564623918D0DAC400AA845A /* GCDWebServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623218D0DAC400AA845A /* GCDWebServerConnection.m */; };
 		9564623A18D0DAC400AA845A /* GCDWebServerRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623518D0DAC400AA845A /* GCDWebServerRequest.m */; };
@@ -29,6 +29,7 @@
 		DE0FDF8818C963CB00843686 /* mobileDriveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DE0FDF8718C963CB00843686 /* mobileDriveTests.m */; };
 		DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */ = {isa = PBXBuildFile; fileRef = DE96FBC118CE618B008553D8 /* helpPage.txt */; };
 		DE9833C718C96BA0003CEA5B /* dbfs in Resources */ = {isa = PBXBuildFile; fileRef = DE9833C618C96BA0003CEA5B /* dbfs */; };
+		DED6C4C118D2643900F50F97 /* IPadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DED6C4C018D2643900F50F97 /* IPadTableViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,7 @@
 		8A014E7618CF825600C83490 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		8A014E7E18CF8FF600C83490 /* MobileDriveModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileDriveModel.h; sourceTree = "<group>"; };
 		8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileDriveModel.m; sourceTree = "<group>"; };
+
 		8AD2189418CA6F8B00BC2EAC /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
 		8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
 		9564622F18D0DAC400AA845A /* GCDWebServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServer.h; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 		9564623718D0DAC400AA845A /* GCDWebServerResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerResponse.m; sourceTree = "<group>"; };
 		9564623C18D0DEBC00AA845A /* ServerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ServerViewController.h; path = mobileDrive/ServerViewController.h; sourceTree = SOURCE_ROOT; };
 		9564623D18D0DEBC00AA845A /* ServerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ServerViewController.m; path = mobileDrive/ServerViewController.m; sourceTree = SOURCE_ROOT; };
+
 		8AFF3ECB18D24CB300FB8A21 /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
 		DE0FDF5F18C963CB00843686 /* mobileDrive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mobileDrive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE0FDF6218C963CB00843686 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -78,6 +81,9 @@
 		DE96FBC118CE618B008553D8 /* helpPage.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = helpPage.txt; sourceTree = "<group>"; };
 		DE9833C618C96BA0003CEA5B /* dbfs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dbfs; sourceTree = "<group>"; };
 		DE9833C818C96BBC003CEA5B /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		DED6C4BD18D2608300F50F97 /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
+		DED6C4BF18D2643900F50F97 /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
+		DED6C4C018D2643900F50F97 /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -160,12 +166,17 @@
 				9564623D18D0DEBC00AA845A /* ServerViewController.m */,
 				DE0FDF7118C963CB00843686 /* MobileDriveAppDelegate.h */,
 				DE0FDF7218C963CB00843686 /* MobileDriveAppDelegate.m */,
-				8AD2189418CA6F8B00BC2EAC /* IPadTableViewController.h */,
-				8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */,
+
+
 				9564622E18D0DAC400AA845A /* CGDWebServer */,
+
+				DED6C4BF18D2643900F50F97 /* IPadTableViewController.h */,
+				DED6C4C018D2643900F50F97 /* IPadTableViewController.m */,
+
 				8A014E7E18CF8FF600C83490 /* MobileDriveModel.h */,
 				8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */,
 				DE0FDF7418C963CB00843686 /* Images.xcassets */,
+				DED6C4BD18D2608300F50F97 /* files.plist */,
 				DE9833C818C96BBC003CEA5B /* Makefile */,
 				DE96FBC118CE618B008553D8 /* helpPage.txt */,
 				DE0FDF6918C963CB00843686 /* Supporting Files */,
@@ -303,8 +314,12 @@
 			files = (
 				9564623818D0DAC400AA845A /* GCDWebServer.m in Sources */,
 				8A014E8018CF8FF600C83490 /* MobileDriveModel.m in Sources */,
-				8AD2189618CA6F8B00BC2EAC /* IPadTableViewController.m in Sources */,
+
+
 				9564623918D0DAC400AA845A /* GCDWebServerConnection.m in Sources */,
+
+				DED6C4C118D2643900F50F97 /* IPadTableViewController.m in Sources */,
+
 				DE0FDF6F18C963CB00843686 /* main.m in Sources */,
 				9564623B18D0DAC400AA845A /* GCDWebServerResponse.m in Sources */,
 				9564623A18D0DAC400AA845A /* GCDWebServerRequest.m in Sources */,
