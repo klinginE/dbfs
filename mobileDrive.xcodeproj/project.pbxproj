@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		8AD2189618CA6F8B00BC2EAC /* IPadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */; };
-		8AD2189A18CA71FF00BC2EAC /* files.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2189918CA71FF00BC2EAC /* files.plist */; };
 		DE0FDF6318C963CB00843686 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6218C963CB00843686 /* Foundation.framework */; };
 		DE0FDF6518C963CB00843686 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6418C963CB00843686 /* CoreGraphics.framework */; };
 		DE0FDF6718C963CB00843686 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6618C963CB00843686 /* UIKit.framework */; };
@@ -23,6 +22,7 @@
 		DE0FDF8818C963CB00843686 /* mobileDriveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DE0FDF8718C963CB00843686 /* mobileDriveTests.m */; };
 		DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */ = {isa = PBXBuildFile; fileRef = DE96FBC118CE618B008553D8 /* helpPage.txt */; };
 		DE9833C718C96BA0003CEA5B /* dbfs in Resources */ = {isa = PBXBuildFile; fileRef = DE9833C618C96BA0003CEA5B /* dbfs */; };
+		DED6C4BE18D2608300F50F97 /* files.plist in Resources */ = {isa = PBXBuildFile; fileRef = DED6C4BD18D2608300F50F97 /* files.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,7 +39,6 @@
 		8A014E7618CF825600C83490 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		8AD2189418CA6F8B00BC2EAC /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
 		8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
-		8AD2189918CA71FF00BC2EAC /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
 		DE0FDF5F18C963CB00843686 /* mobileDrive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mobileDrive.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DE0FDF6218C963CB00843686 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		DE0FDF6418C963CB00843686 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -59,6 +58,7 @@
 		DE96FBC118CE618B008553D8 /* helpPage.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = helpPage.txt; sourceTree = "<group>"; };
 		DE9833C618C96BA0003CEA5B /* dbfs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dbfs; sourceTree = "<group>"; };
 		DE9833C818C96BBC003CEA5B /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		DED6C4BD18D2608300F50F97 /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,16 +119,15 @@
 		DE0FDF6818C963CB00843686 /* mobileDrive */ = {
 			isa = PBXGroup;
 			children = (
-				8AD2189918CA71FF00BC2EAC /* files.plist */,
 				DE9833C618C96BA0003CEA5B /* dbfs */,
 				DE0FDF7118C963CB00843686 /* MobileDriveAppDelegate.h */,
 				DE0FDF7218C963CB00843686 /* MobileDriveAppDelegate.m */,
 				8AD2189418CA6F8B00BC2EAC /* IPadTableViewController.h */,
 				8AD2189518CA6F8B00BC2EAC /* IPadTableViewController.m */,
 				DE0FDF7418C963CB00843686 /* Images.xcassets */,
+				DED6C4BD18D2608300F50F97 /* files.plist */,
 				DE9833C818C96BBC003CEA5B /* Makefile */,
 				DE96FBC118CE618B008553D8 /* helpPage.txt */,
-				8AD2189918CA71FF00BC2EAC /* files.plist */,
 				DE0FDF6918C963CB00843686 /* Supporting Files */,
 			);
 			path = mobileDrive;
@@ -240,7 +239,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */,
-				8AD2189A18CA71FF00BC2EAC /* files.plist in Resources */,
+				DED6C4BE18D2608300F50F97 /* files.plist in Resources */,
 				DE0FDF6D18C963CB00843686 /* InfoPlist.strings in Resources */,
 				DE9833C718C96BA0003CEA5B /* dbfs in Resources */,
 				DE0FDF7518C963CB00843686 /* Images.xcassets in Resources */,

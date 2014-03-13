@@ -14,7 +14,7 @@
 -(void)switchChanged:(UISwitch *)sender {
 
     self.isConnected = [sender isOn];
-    NSLog(@"switchChanged %hhd", self.isConnected);
+    NSLog(@"switchChanged %d", self.isConnected);
     //FIXME add code to turn on/off server here
 
 }
