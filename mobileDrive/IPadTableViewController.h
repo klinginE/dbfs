@@ -28,7 +28,7 @@ typedef struct {
 }state;
 
 //FIXME change the type of fsModel from id to class name of the iPad file system model class.
--(id)initWithState:(state)currentState model:(id)fsModel target:(MobileDriveAppDelegate *)respond switchAction:(SEL)action forEvents:(UIControlEvents)events;
+-(id)initWithState:(state)currentState target:(MobileDriveAppDelegate *)respond switchAction:(SEL)action forEvents:(UIControlEvents)events;
 -(void)buttonPressed:(id)sendr;
 -(UIBarButtonItem *)makeButtonWithTitle:(NSString *)title
                                     Tag:(NSInteger)tag

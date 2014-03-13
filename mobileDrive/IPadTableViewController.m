@@ -11,24 +11,20 @@
 
 @interface IPadTableViewController ()
 
-@property(weak, atomic) id model;//FIXME chage type from id to pointer to iPad file system model
-@property(strong, atomic)NSMutableArray *alerts;
+@property (strong, atomic)NSMutableArray *alerts;
+@property (weak, nonatomic)MobileDriveAppDelegate *iPadResponder;
+@property (assign) SEL switchAction;
+@property (assign) state iPadState;
+@property (strong, atomic) UISwitch *conectSwitch;
+@property (assign) UIControlEvents switchEvents;
+@property (strong, nonatomic) NSDictionary *filesDictionary;
+@property (strong, nonatomic) NSArray *fileKeys;
+@property (strong, nonatomic) UIScrollView *helpScroll;
+@property (strong, nonatomic) UILabel *helpView;
 
 @end
 
-@implementation IPadTableViewController {
-
-    __weak MobileDriveAppDelegate *_iPadResponder;
-    SEL _switchAction;
-    UIControlEvents _switchEvents;
-    state _iPadState;
-    UISwitch *_conectSwitch;
-    NSDictionary *_filesDictionary;
-    NSArray *_fileKeys;
-    UIScrollView *_helpScroll;
-    UILabel *_helpView;
-
-}
+@implementation IPadTableViewController
 
 // We may need these inits for later but for right now they are useles
 //-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
@@ -51,7 +47,6 @@
 //}
 
 -(id)initWithState:(state)currentState
-             model:(id)fsModel
             target:(MobileDriveAppDelegate *)respond
       switchAction:(SEL)action
          forEvents:(UIControlEvents)events {
@@ -62,9 +57,6 @@
         // init state
         _iPadState.currentDir = currentState.currentDir;
         _iPadState.currentPath = currentState.currentPath;
-
-        // init model
-        _model = fsModel;
 
         // set up connection switch
         _iPadResponder = respond;
@@ -570,7 +562,6 @@
 
         // Make subTableviewcontroller to push onto nav stack
         IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithState:newState
-                                                                                                   model:self.model
                                                                                                   target:_iPadResponder
                                                                                             switchAction:_switchAction
                                                                                                forEvents:_switchEvents];

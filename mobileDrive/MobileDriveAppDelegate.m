@@ -40,7 +40,6 @@
 
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithState:rootState
-                                                                            model:nil
                                                                            target:self
                                                                      switchAction:@selector(switchChanged:)
                                                                         forEvents:UIControlEventValueChanged];
