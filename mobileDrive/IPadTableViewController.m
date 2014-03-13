@@ -200,6 +200,7 @@
         NSString *path = [[NSBundle mainBundle] pathForResource:@"files" ofType:@"plist"];
         _filesDictionary = [[NSDictionary alloc] initWithContentsOfFile:path];
         _fileKeys = [[_filesDictionary allKeys] sortedArrayUsingSelector:@selector(compare:)];
+        //[self.iPadResponder.model getDirectoryListIn:self.iPadState.currentPath];
 
     }
 
