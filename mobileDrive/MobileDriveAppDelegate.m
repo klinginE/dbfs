@@ -6,7 +6,6 @@
 //  Copyright (c) 2014 Eric Klinginsmith. All rights reserved.
 
 #import "MobileDriveAppDelegate.h"
-#import "IPadTableViewController.h"
 #import <string.h>
 
 @implementation MobileDriveAppDelegate
@@ -29,22 +28,25 @@
     rootState.currentPath = strdup("");
     rootState.currentDir = strdup("/");
 
+//  intit the model
+    self.model = [[MobileDriveModel alloc] init];
+
     // init root table view controler
-    IPadTableViewController *iPadTableViewController = [[IPadTableViewController alloc] initWithState:rootState
-                                                                                                model:nil
-                                                                                               target:self
-                                                                                         switchAction:@selector(switchChanged:)
-                                                                                            forEvents:UIControlEventValueChanged];
-    iPadTableViewController.title = @"/";
-    UIBarButtonItem *backButton = [iPadTableViewController makeButtonWithTitle:@"/"
+    self.iPadTableViewController = [[IPadTableViewController alloc] initWithState:rootState
+                                                                            model:nil
+                                                                           target:self
+                                                                     switchAction:@selector(switchChanged:)
+                                                                        forEvents:UIControlEventValueChanged];
+    self.iPadTableViewController.title = @"/";
+    UIBarButtonItem *backButton = [self.iPadTableViewController makeButtonWithTitle:@"/"
                                                                            Tag:HELP_TAG
                                                                          Color:nil
                                                                         Target:nil
                                                                         Action:nil];
-    [iPadTableViewController.navigationItem setBackBarButtonItem:backButton];
+    [self.iPadTableViewController.navigationItem setBackBarButtonItem:backButton];
 
     // init nav controller
-    UINavigationController *iPadNavController = [[UINavigationController alloc] initWithRootViewController:iPadTableViewController];
+    UINavigationController *iPadNavController = [[UINavigationController alloc] initWithRootViewController:self.iPadTableViewController];
     iPadNavController.title = @"NavController";
     [iPadNavController.navigationBar setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
                                                             NSFontAttributeName,

@@ -7,10 +7,19 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "IPadTableViewController.h"
+#import "MobileDriveModel.h"
+
+#define PUBLIC_EXT @".pub"
+#define PRIVATE_EXT @".pri"
 
 @interface MobileDriveAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 @property (atomic) BOOL isConnected;
+@property (strong, atomic) MobileDriveModel *model;
+@property (strong, nonatomic) IPadTableViewController *iPadTableViewController;
+
+-(void)switchChanged:(UISwitch *)sender;
 
 @end
