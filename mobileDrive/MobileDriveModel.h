@@ -20,6 +20,10 @@
 // Upload contents of file to absolute path "fname" through file stream "in"
 -(void)putFile:(NSString *)fname from:(FILE *)in withSize:(int)size;
 
+// Renames the original file "oldName" the new file "newName"
+// Both names are absolute paths
+-(void)renameFile:(NSString *)oldName to:(NSString *)newName;
+
 -(void)overwriteFile:(NSString *)fname from:(FILE *)in;
 
 // Remove file with absolute path "fname" from database
