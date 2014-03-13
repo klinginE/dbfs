@@ -6,7 +6,14 @@
 //  Copyright (c) 2014 Eric Klinginsmith. All rights reserved.
 
 #import "MobileDriveAppDelegate.h"
+#import "IPadTableViewController.h"
 #import <string.h>
+
+@interface MobileDriveAppDelegate()
+
+@property (strong, nonatomic) IPadTableViewController *iPadTableViewController;
+
+@end
 
 @implementation MobileDriveAppDelegate
 
