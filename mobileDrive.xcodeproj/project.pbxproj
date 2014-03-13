@@ -81,7 +81,6 @@
 		DE96FBC118CE618B008553D8 /* helpPage.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = helpPage.txt; sourceTree = "<group>"; };
 		DE9833C618C96BA0003CEA5B /* dbfs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dbfs; sourceTree = "<group>"; };
 		DE9833C818C96BBC003CEA5B /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
-		DED6C4BD18D2608300F50F97 /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
 		DED6C4BF18D2643900F50F97 /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
 		DED6C4C018D2643900F50F97 /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -176,7 +175,6 @@
 				8A014E7E18CF8FF600C83490 /* MobileDriveModel.h */,
 				8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */,
 				DE0FDF7418C963CB00843686 /* Images.xcassets */,
-				DED6C4BD18D2608300F50F97 /* files.plist */,
 				DE9833C818C96BBC003CEA5B /* Makefile */,
 				DE96FBC118CE618B008553D8 /* helpPage.txt */,
 				DE0FDF6918C963CB00843686 /* Supporting Files */,
