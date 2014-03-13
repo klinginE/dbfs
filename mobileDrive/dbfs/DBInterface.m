@@ -49,7 +49,7 @@
     return (DBFS_Blob){buf, size};
 }
 
--(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out {
+-(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out withSize:(int *)size {
     
     DBFS_Blob blob;
     if(!fname) {
@@ -62,6 +62,7 @@
         dbfs_free_blob(blob);
         return 2;
     }
+    *size = blog.size;
     fwrite(blob.data, 1, blob.size, out);
     dbfs_free_blob(blob);
     free(name);
@@ -69,7 +70,7 @@
     return 0;
 }
 
--(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in {
+-(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in withSize:(int)size {
     DBFS_Blob blob;
     if (!fname) {
         NSLog(@"fname missing");
