@@ -12,9 +12,9 @@
 @interface IPadTableViewController ()
 
 @property (strong, atomic)NSMutableArray *alerts;
-@property (weak, nonatomic)MobileDriveAppDelegate *iPadResponder;
+@property (weak, nonatomic)MobileDriveAppDelegate *appDelegate;
 @property (assign) SEL switchAction;
-@property (assign) state iPadState;
+@property (assign) State iPadState;
 @property (strong, atomic) UISwitch *conectSwitch;
 @property (assign) UIControlEvents switchEvents;
 @property (strong, nonatomic) NSDictionary *filesDictionary;
@@ -26,27 +26,7 @@
 
 @implementation IPadTableViewController
 
-// We may need these inits for later but for right now they are useles
-//-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-//
-//    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-//    if (self) {
-//    
-//    }
-//    return self;
-//}
-//
-//-(id)initWithStyle:(UITableViewStyle)style {
-//
-//    self = [super initWithStyle:style];
-//    if (self) {
-//        // Custom initialization
-//    }
-//    return self;
-//
-//}
-
--(id)initWithState:(state)currentState
+-(id)initWithPath:(NSString *)currentPath
             target:(MobileDriveAppDelegate *)respond
       switchAction:(SEL)action
          forEvents:(UIControlEvents)events {
@@ -55,15 +35,14 @@
     if (self) {
 
         // init state
-        _iPadState.currentDir = currentState.currentDir;
-        _iPadState.currentPath = currentState.currentPath;
+        [self initState:&_iPadState WithPath:currentPath];
 
         // set up connection switch
-        _iPadResponder = respond;
+        _appDelegate = respond;
         _switchAction = action;
         _switchEvents = events;
         _conectSwitch = [[UISwitch alloc] init];
-        [_conectSwitch addTarget:_iPadResponder
+        [_conectSwitch addTarget:_appDelegate
                           action:_switchAction
                 forControlEvents:events];
         if (respond.isConnected)
@@ -71,7 +50,7 @@
         else
             _conectSwitch.on = NO;
 
-        self.alerts = [[NSMutableArray alloc] init];
+        _alerts = [[NSMutableArray alloc] init];
         for (int i = ADD_TAG; i < (NUM_ALERTS + ADD_TAG); i++) {
 
             UIAlertView *alert = [[UIAlertView alloc] init];
@@ -125,13 +104,44 @@
 
             }
 
-            [self.alerts addObject:alert];
+            [_alerts addObject:alert];
 
         }
 
     }
 
     return self;
+
+}
+
+-(void)initState:(State *)state WithPath:(NSString *)path {
+
+    state->currentPath = [self nsStringToCString:path];
+    NSUInteger len = [path length];
+    NSUInteger index = len - 1;
+
+    if (index == 0) {
+
+        state->currentDir = state->currentPath;
+        state->currentPath = [self nsStringToCString:@""];
+        state->depth = 0;
+
+    }
+
+    else {
+
+        for (; [path characterAtIndex:index] != '/'; index--);
+        state->currentDir = [self nsStringToCString:[path substringFromIndex:index + 1]];
+
+        state->depth = 0;
+        for (int i = 0; i < len; i++)
+            if ([path characterAtIndex:i] == '/')
+                state->depth++;
+
+    }
+    NSLog(@"dir= %s", state->currentDir);
+    NSLog(@"path= %s", state->currentPath);
+    NSLog(@"depth= %d", state->depth);
 
 }
 
@@ -200,7 +210,7 @@
         NSString *path = [[NSBundle mainBundle] pathForResource:@"files" ofType:@"plist"];
         _filesDictionary = [[NSDictionary alloc] initWithContentsOfFile:path];
         _fileKeys = [[_filesDictionary allKeys] sortedArrayUsingSelector:@selector(compare:)];
-        //[self.iPadResponder.model getDirectoryListIn:self.iPadState.currentPath];
+        //[self.appDelegate.model getDirectoryListIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
 
     }
 
@@ -275,7 +285,7 @@
 
 -(void)viewWillAppear:(BOOL)animated {
 
-    _conectSwitch.on = _iPadResponder.isConnected;
+    _conectSwitch.on = self.appDelegate.isConnected;
     [super viewWillAppear:animated];
 
 }
@@ -497,11 +507,8 @@
     NSInteger len = [s length];
     char *c = (char *)malloc(len + 1);
     NSInteger i = 0;
-    for (; i < len; i++) {
-
+    for (; i < len; i++)
         c[i] = [s characterAtIndex:i];
-
-    }
     c[i] = '\0';
 
     return c;
@@ -555,16 +562,11 @@
 
         // set up state for subTableViewController
         NSString *subPath = [NSString stringWithFormat:@"%s/%@", _iPadState.currentPath, key];
-        state newState;
-        newState.currentDir = [self nsStringToCString:key];
-        newState.currentPath = [self nsStringToCString:subPath];
-
-        NSLog(@"%s", newState.currentPath);
 
         // Make subTableviewcontroller to push onto nav stack
-        IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithState:newState
-                                                                                                  target:_iPadResponder
-                                                                                            switchAction:_switchAction
+        IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithPath:subPath
+                                                                                                  target:self.appDelegate
+                                                                                            switchAction:self.switchAction
                                                                                                forEvents:_switchEvents];
         subTableViewController.title = key;
 

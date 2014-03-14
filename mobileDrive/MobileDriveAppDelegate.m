@@ -30,16 +30,11 @@
     // intit global app properties
     self.isConnected = YES;
 
-    // set up state for root table view controller
-    state rootState;
-    rootState.currentPath = strdup("");
-    rootState.currentDir = strdup("/");
-
 //  intit the model
     self.model = [[MobileDriveModel alloc] init];
 
     // init root table view controler
-    self.iPadTableViewController = [[IPadTableViewController alloc] initWithState:rootState
+    self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
                                                                            target:self
                                                                      switchAction:@selector(switchChanged:)
                                                                         forEvents:UIControlEventValueChanged];

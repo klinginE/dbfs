@@ -22,19 +22,21 @@ typedef enum {ADD_TAG=512, DELETE_TAG, MOVE_TAG, RENAME_TAG, CONFIRM_TAG, NONE} 
 
 typedef struct {
 
-   char *currentDir;
-   char *currentPath;
+    char *currentDir;
+    char *currentPath;
+    int depth;
 
-}state;
+}State;
 
-//FIXME change the type of fsModel from id to class name of the iPad file system model class.
--(id)initWithState:(state)currentState target:(MobileDriveAppDelegate *)respond switchAction:(SEL)action forEvents:(UIControlEvents)events;
+-(id)initWithPath:(NSString *)currentPath target:(MobileDriveAppDelegate *)respond switchAction:(SEL)action forEvents:(UIControlEvents)events;
 -(void)buttonPressed:(id)sendr;
 -(UIBarButtonItem *)makeButtonWithTitle:(NSString *)title
                                     Tag:(NSInteger)tag
                                   Color:(UIColor *)color
                                  Target:(id)target
                                  Action:(SEL)action;
--(char *)nsStringToCString:(NSString *)s;
+-(char *)nsStringToCString:(NSString *)str;
+-(void)initState:(State *)state WithPath:(NSString *)path;
+-(void)freeState:(State)state;
 
 @end
