@@ -16,7 +16,7 @@
 		<key>path</key>
 		<string>/File2</string>
 	</dict>
-	<key>DirectoryB</key>
+	<key>DirectoryB/</key>
 	<dict>
 		<key>isDir</key>
 		<true/>
@@ -37,7 +37,7 @@
 			<string>/DirectoryB/AnotherFile</string>
 		</dict>
 	</dict>
-	<key>DirectoryA</key>
+	<key>DirectoryA/</key>
 	<dict>
 		<key>isDir</key>
 		<true/>

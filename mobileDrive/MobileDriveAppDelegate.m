@@ -41,8 +41,7 @@
     self.iPadTableViewController.title = @"/";
     UIBarButtonItem *backButton = [self.iPadTableViewController makeButtonWithTitle:@"/"
                                                                            Tag:HELP_TAG
-                                                                         Color:nil
-                                                                        Target:nil
+                                                                             Target:nil
                                                                         Action:nil];
     [self.iPadTableViewController.navigationItem setBackBarButtonItem:backButton];
 

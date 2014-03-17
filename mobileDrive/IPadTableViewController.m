@@ -8,6 +8,7 @@
 
 #import "IPadTableViewController.h"
 #import <string.h>
+#import <assert.h>
 
 @interface IPadTableViewController ()
 
@@ -27,15 +28,20 @@
 @implementation IPadTableViewController
 
 -(id)initWithPath:(NSString *)currentPath
-            target:(MobileDriveAppDelegate *)respond
-      switchAction:(SEL)action
-         forEvents:(UIControlEvents)events {
+           target:(MobileDriveAppDelegate *)respond
+     switchAction:(SEL)action
+        forEvents:(UIControlEvents)events {
 
     self = [super init];
     if (self) {
 
         // init state
         [self initState:&_iPadState WithPath:currentPath];
+
+        _buttonColor = [UIColor colorWithRed:(0.0/255.0)
+                                       green:(0.0/255.0)
+                                        blue:(255.0/255.0)
+                                       alpha:1.0f];
 
         // set up connection switch
         _appDelegate = respond;
@@ -50,63 +56,9 @@
         else
             _conectSwitch.on = NO;
 
+        //Set up alerts
         _alerts = [[NSMutableArray alloc] init];
-        for (int i = ADD_TAG; i < (NUM_ALERTS + ADD_TAG); i++) {
-
-            UIAlertView *alert = [[UIAlertView alloc] init];
-            switch (i) {
-
-                case ADD_TAG:
-                    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
-                    [alert setDelegate:self];
-                    [alert setTitle:@"Add a Directory"];
-                    [alert setMessage:@"Give it a name:"];
-                    [alert addButtonWithTitle:@"Cancel"];
-                    [alert addButtonWithTitle:@"OK"];
-                    alert.tag = ADD_TAG;
-                    break;
-                case DELETE_TAG:
-                    [alert setDelegate:self];
-                    [alert setTitle:@"Deleting a File/Directory"];
-                    [alert setMessage:@"Are You Sure?"];
-                    [alert addButtonWithTitle:@"Cancel"];
-                    [alert addButtonWithTitle:@"OK"];
-                    alert.tag = DELETE_TAG;
-                    break;
-                case MOVE_TAG:
-                    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
-                    [alert setDelegate:self];
-                    [alert setTitle:@"Moving a File/Directory"];
-                    [alert setMessage:@"Give it a new path:"];
-                    [alert addButtonWithTitle:@"Cancel"];
-                    [alert addButtonWithTitle:@"OK"];
-                    alert.tag = MOVE_TAG;
-                    break;
-                case RENAME_TAG:
-                    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
-                    [alert setDelegate:self];
-                    [alert setTitle:@"Renaming a File/Directory"];
-                    [alert setMessage:@"Give it a new name:"];
-                    [alert addButtonWithTitle:@"Cancel"];
-                    [alert addButtonWithTitle:@"OK"];
-                    alert.tag = RENAME_TAG;
-                    break;
-                case CONFIRM_TAG:
-                    [alert setDelegate:self];
-                    [alert setTitle:@"This action is permanent!"];
-                    [alert setMessage:@"Are you sure you want to perform this action?"];
-                    [alert addButtonWithTitle:@"Cancel"];
-                    [alert addButtonWithTitle:@"OK"];
-                    alert.tag = CONFIRM_TAG;
-                    break;
-                default:
-                    break;
-
-            }
-
-            [_alerts addObject:alert];
-
-        }
+        [self initAlerts:_alerts];
 
     }
 
@@ -118,62 +70,120 @@
 
     state->currentPath = [self nsStringToCString:path];
     NSUInteger len = [path length];
+    assert(len > 0);
+    assert([path characterAtIndex:0] == '/');
     NSUInteger index = len - 1;
 
-    if (index == 0) {
+    if (index)
+        for (; [path characterAtIndex:index - 1] != '/'; index--);
+    state->currentDir = [self nsStringToCString:[path substringFromIndex:index]];
 
-        state->currentDir = state->currentPath;
-        state->currentPath = [self nsStringToCString:@""];
-        state->depth = 0;
+    state->depth = 0;
+    for (int i = 0; i < (len - 1); i++)
+        if ([path characterAtIndex:i] == '/')
+            state->depth++;
 
-    }
-
-    else {
-
-        for (; [path characterAtIndex:index] != '/'; index--);
-        state->currentDir = [self nsStringToCString:[path substringFromIndex:index + 1]];
-
-        state->depth = 0;
-        for (int i = 0; i < len; i++)
-            if ([path characterAtIndex:i] == '/')
-                state->depth++;
-
-    }
     NSLog(@"dir= %s", state->currentDir);
     NSLog(@"path= %s", state->currentPath);
     NSLog(@"depth= %d", state->depth);
 
 }
 
+-(void)initAlerts:(NSMutableArray *)alerts {
+
+    for (int i = ADD_TAG; i < (NUM_ALERTS + ADD_TAG); i++) {
+
+        UIAlertView *alert = [[UIAlertView alloc] init];
+        switch (i) {
+                
+            case ADD_TAG:
+                alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+                [alert setDelegate:self];
+                [alert setTitle:@"Add a Directory"];
+                [alert setMessage:@"Give it a name:"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = ADD_TAG;
+                break;
+            case DELETE_TAG:
+                [alert setDelegate:self];
+                [alert setTitle:@"Deleting a File/Directory"];
+                [alert setMessage:@"Are You Sure?"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = DELETE_TAG;
+                break;
+            case MOVE_TAG:
+                alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+                [alert setDelegate:self];
+                [alert setTitle:@"Moving a File/Directory"];
+                [alert setMessage:@"Give it a new path:"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = MOVE_TAG;
+                break;
+            case RENAME_TAG:
+                alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+                [alert setDelegate:self];
+                [alert setTitle:@"Renaming a File/Directory"];
+                [alert setMessage:@"Give it a new name:"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = RENAME_TAG;
+                break;
+            case CONFIRM_TAG:
+                [alert setDelegate:self];
+                [alert setTitle:@"This action is permanent!"];
+                [alert setMessage:@"Are you sure you want to perform this action?"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = CONFIRM_TAG;
+                break;
+            default:
+                break;
+
+        }
+
+        [alerts addObject:alert];
+
+    }
+
+}
+
 -(void)dealloc {
 
     //NSLog(@"dealloc");
+    [self freeState:self.iPadState];
+
+}
+
+-(void)freeState:(State)state {
+
     //This assumes that the strings were created on the heap
-    if (_iPadState.currentDir != NULL)
-        free(_iPadState.currentDir);
-    if (_iPadState.currentPath != NULL)
-        free(_iPadState.currentPath);
+    if (state.currentDir != NULL)
+        free(state.currentDir);
+    if (state.currentPath != NULL)
+        free(state.currentPath);
 
 }
 
 -(UIBarButtonItem *)makeButtonWithTitle:(NSString *)title
                                     Tag:(NSInteger)tag
-                                  Color:(UIColor *)color
                                  Target:(id)target
                                  Action:(SEL)action {
-    
-    UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:title
+
+    UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:title
                                                                    style:UIBarButtonItemStyleBordered
                                                                   target:target
                                                                   action:action];
-    [backButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
-                                                                                  NSFontAttributeName,
-                                                                                  nil]
-                              forState:UIControlStateNormal];
-    backButton.tag = tag;
-    backButton.tintColor = color;
+    [button setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize: LARGE_FONT_SIZE],
+                                                                              NSFontAttributeName,
+                                                                              nil]
+                          forState:UIControlStateNormal];
+    button.tag = tag;
+    button.tintColor = self.buttonColor;
 
-    return backButton;
+    return button;
 
 }
 
@@ -186,9 +196,17 @@
 
 -(void)loadView {
 
-    UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
+    UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];//[[UITableView alloc] initWithFrame:CGRectMake(0, self.navigationController.navigationBar.frame.size.height, self.navigationController.navigationBar.frame.size.width, 1000) style:UITableViewStylePlain];
     tableView.dataSource = self;
     tableView.delegate = self;
+
+    UIView *pathView = [[UIView alloc] initWithFrame:CGRectMake(0, self.navigationController.navigationBar.frame.size.height, self.navigationController.navigationBar.frame.size.width, 60)];
+    [pathView setBackgroundColor:[UIColor yellowColor]];
+    UIView *mainView = [[UIView alloc] initWithFrame:CGRectZero];
+    [mainView addSubview:tableView];
+    [mainView addSubview:tableView];
+    
+    //self.view = mainView;
     self.view = tableView;
 
 }
@@ -198,10 +216,10 @@
     [super viewDidLoad];
 
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-    [[NSNotificationCenter defaultCenter]
-     addObserver:self selector:@selector(orientationChanged:)
-     name:UIDeviceOrientationDidChangeNotification
-     object:[UIDevice currentDevice]];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(orientationChanged:)
+                                                 name:UIDeviceOrientationDidChangeNotification
+                                               object:[UIDevice currentDevice]];
 
     // Set up directory Contents
     if(_filesDictionary == nil) {
@@ -215,10 +233,6 @@
     }
 
     // Get colors
-    UIColor *buttonColor = [UIColor colorWithRed:(220.0/255.0)
-                                           green:(20.0/255.0)
-                                            blue:(60.0/255.0)
-                                           alpha:1.0f];
     UIColor *toolBarColor = [UIColor colorWithRed:0.65f
                                             green:0.65f
                                              blue:0.65f
@@ -231,7 +245,6 @@
     // Add a help button to the top right
     UIBarButtonItem *helpButton = [self makeButtonWithTitle:@"Need help?"
                                                         Tag:HELP_TAG
-                                                      Color:buttonColor
                                                      Target:self
                                                      Action:@selector(buttonPressed:)];
     self.navigationItem.rightBarButtonItem = helpButton;
@@ -239,7 +252,6 @@
     // Add a add dir button to the bottom left
     UIBarButtonItem *addDirButton = [self makeButtonWithTitle:@"Add Directory"
                                                           Tag:ADD_DIR_TAG
-                                                        Color:buttonColor
                                                        Target:self
                                                        Action:@selector(buttonPressed:)];
 
@@ -250,8 +262,11 @@
 
     // make lable for switch
     NSString *switchString = @"Turn on/off server:";
-    UILabel *switchLable = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, [self sizeOfString:switchString
-                                                                                      withFont:[UIFont systemFontOfSize:LARGE_FONT_SIZE]].width, CELL_HEIGHT)];
+    UILabel *switchLable = [[UILabel alloc] initWithFrame:CGRectMake(0,
+                                                                     0,
+                                                                     [self sizeOfString:switchString
+                                                                               withFont:[UIFont systemFontOfSize: LARGE_FONT_SIZE]].width,
+                                                                                        CELL_HEIGHT)];
     switchLable.text = switchString;
     switchLable.backgroundColor = [UIColor clearColor];
     switchLable.textColor = [UIColor blackColor];
@@ -272,7 +287,7 @@
 
     // set navbar settings
     self.navigationController.navigationBar.barTintColor = navBarColor;
-    self.navigationController.navigationBar.tintColor = buttonColor;
+    self.navigationController.navigationBar.tintColor = self.buttonColor;
     [self.navigationController setToolbarHidden:NO animated:YES];
 
     // Uncomment the following line to preserve selection between presentations.
@@ -290,7 +305,7 @@
 
 }
 
-- (void) orientationChanged:(NSNotification *)note {
+-(void)orientationChanged:(NSNotification *)note {
 
     NSLog(@"Rotated!");
     CGFloat height = 0.0;
@@ -561,7 +576,7 @@
     if ([[dict objectForKey:@"isDir"] boolValue]) {
 
         // set up state for subTableViewController
-        NSString *subPath = [NSString stringWithFormat:@"%s/%@", _iPadState.currentPath, key];
+        NSString *subPath = [NSString stringWithFormat:@"%s%@", _iPadState.currentPath, key];
 
         // Make subTableviewcontroller to push onto nav stack
         IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithPath:subPath
@@ -573,7 +588,6 @@
         // Set up back button
         [subTableViewController.navigationItem setBackBarButtonItem:[self makeButtonWithTitle:key
                                                                                           Tag:BACK_TAG
-                                                                                        Color:nil
                                                                                        Target:nil
                                                                                        Action:nil]];
 
