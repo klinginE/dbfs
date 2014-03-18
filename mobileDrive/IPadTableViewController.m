@@ -22,6 +22,9 @@
 @property (strong, nonatomic) NSArray *fileKeys;
 @property (strong, nonatomic) UIScrollView *helpScroll;
 @property (strong, nonatomic) UILabel *helpView;
+@property (strong, nonatomic) UITableView *mainTableView;
+@property (strong, nonatomic) UIView *pathView;
+@property (strong, nonatomic) UIColor *barColor;
 
 @end
 
@@ -42,6 +45,10 @@
                                        green:(0.0/255.0)
                                         blue:(255.0/255.0)
                                        alpha:1.0f];
+        _barColor = [UIColor colorWithRed:0.75f
+                                    green:0.75f
+                                     blue:0.75f
+                                    alpha:1.0f];
 
         // set up connection switch
         _appDelegate = respond;
@@ -196,18 +203,37 @@
 
 -(void)loadView {
 
-    UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];//[[UITableView alloc] initWithFrame:CGRectMake(0, self.navigationController.navigationBar.frame.size.height, self.navigationController.navigationBar.frame.size.width, 1000) style:UITableViewStylePlain];
-    tableView.dataSource = self;
-    tableView.delegate = self;
+    CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
+    CGFloat mainScreenWidth = mainScreenBounds.size.width;
+    CGFloat mainScreenHeight = mainScreenBounds.size.height;
 
-    UIView *pathView = [[UIView alloc] initWithFrame:CGRectMake(0, self.navigationController.navigationBar.frame.size.height, self.navigationController.navigationBar.frame.size.width, 60)];
-    [pathView setBackgroundColor:[UIColor yellowColor]];
+    if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
+       [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
+
+        CGFloat temp = mainScreenWidth;
+        mainScreenWidth = mainScreenHeight;
+        mainScreenHeight = temp;
+
+    }
+
+    self.mainTableView = [[UITableView alloc] initWithFrame:CGRectMake(0,
+                                                                       self.navigationController.navigationBar.frame.size.height + PATH_VIEW_HEIGHT,
+                                                                       mainScreenWidth,
+                                                                       mainScreenHeight - self.navigationController.navigationBar.frame.size.height - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height)
+                                                      style:UITableViewStylePlain];
+    self.mainTableView.dataSource = self;
+    self.mainTableView.delegate = self;
+
+    self.pathView = [[UIView alloc] initWithFrame:CGRectMake(0,
+                                                             self.navigationController.navigationBar.frame.size.height,
+                                                             mainScreenWidth,
+                                                             PATH_VIEW_HEIGHT)];
+    [self.pathView setBackgroundColor:self.barColor];
     UIView *mainView = [[UIView alloc] initWithFrame:CGRectZero];
-    [mainView addSubview:tableView];
-    [mainView addSubview:tableView];
-    
-    //self.view = mainView;
-    self.view = tableView;
+
+    self.view = mainView;
+    [self.view addSubview:self.pathView];
+    [self.view addSubview:self.mainTableView];
 
 }
 
@@ -237,10 +263,6 @@
                                             green:0.65f
                                              blue:0.65f
                                             alpha:1.0f];
-    UIColor *navBarColor = [UIColor colorWithRed:0.75f
-                                           green:0.75f
-                                            blue:0.75f
-                                           alpha:1.0f];
 
     // Add a help button to the top right
     UIBarButtonItem *helpButton = [self makeButtonWithTitle:@"Need help?"
@@ -286,7 +308,7 @@
     [self.navigationController.toolbar setOpaque:YES];
 
     // set navbar settings
-    self.navigationController.navigationBar.barTintColor = navBarColor;
+    self.navigationController.navigationBar.barTintColor = self.barColor;
     self.navigationController.navigationBar.tintColor = self.buttonColor;
     [self.navigationController setToolbarHidden:NO animated:YES];
 
@@ -309,6 +331,28 @@
 
     NSLog(@"Rotated!");
     CGFloat height = 0.0;
+
+    CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
+    CGFloat mainScreenWidth = mainScreenBounds.size.width;
+    CGFloat mainScreenHeight = mainScreenBounds.size.height;
+    
+    if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
+       [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
+        
+        CGFloat temp = mainScreenWidth;
+        mainScreenWidth = mainScreenHeight;
+        mainScreenHeight = temp;
+        
+    }
+
+    self.mainTableView.frame = CGRectMake(self.mainTableView.frame.origin.x,
+                                          self.mainTableView.frame.origin.y,
+                                          mainScreenWidth,
+                                          mainScreenHeight);
+    self.pathView.frame = CGRectMake(self.pathView.frame.origin.x,
+                                     self.pathView.frame.origin.y,
+                                     mainScreenWidth,
+                                     mainScreenHeight);
 
     if (_helpScroll && _helpView) {
 
