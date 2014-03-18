@@ -12,8 +12,8 @@
 
 @interface IPadTableViewController ()
 
-@property (strong, atomic)NSMutableArray *alerts;
-@property (weak, nonatomic)MobileDriveAppDelegate *appDelegate;
+@property (strong, atomic) NSMutableArray *alerts;
+@property (weak, nonatomic) MobileDriveAppDelegate *appDelegate;
 @property (assign) SEL switchAction;
 @property (assign) State iPadState;
 @property (strong, atomic) UISwitch *conectSwitch;
@@ -25,6 +25,7 @@
 @property (strong, nonatomic) UITableView *mainTableView;
 @property (strong, nonatomic) UIView *pathView;
 @property (strong, nonatomic) UIColor *barColor;
+@property (strong, nonatomic) NSMutableArray *actionSheetButtons;
 
 @end
 
@@ -67,6 +68,9 @@
         _alerts = [[NSMutableArray alloc] init];
         [self initAlerts:_alerts];
 
+        _actionSheetButtons = [[NSMutableArray alloc] init];
+        [self initActionSheetButtons:_actionSheetButtons];
+
     }
 
     return self;
@@ -98,53 +102,53 @@
 
 -(void)initAlerts:(NSMutableArray *)alerts {
 
-    for (int i = ADD_TAG; i < (NUM_ALERTS + ADD_TAG); i++) {
+    for (int i = ADD_ALERT_TAG; i < (NUM_ALERTS + ADD_ALERT_TAG); i++) {
 
         UIAlertView *alert = [[UIAlertView alloc] init];
         switch (i) {
                 
-            case ADD_TAG:
+            case ADD_ALERT_TAG:
                 alert.alertViewStyle = UIAlertViewStylePlainTextInput;
                 [alert setDelegate:self];
                 [alert setTitle:@"Add a Directory"];
                 [alert setMessage:@"Give it a name:"];
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
-                alert.tag = ADD_TAG;
+                alert.tag = ADD_ALERT_TAG;
                 break;
-            case DELETE_TAG:
+            case DELETE_ALERT_TAG:
                 [alert setDelegate:self];
                 [alert setTitle:@"Deleting a File/Directory"];
                 [alert setMessage:@"Are You Sure?"];
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
-                alert.tag = DELETE_TAG;
+                alert.tag = DELETE_ALERT_TAG;
                 break;
-            case MOVE_TAG:
+            case MOVE_ALERT_TAG:
                 alert.alertViewStyle = UIAlertViewStylePlainTextInput;
                 [alert setDelegate:self];
                 [alert setTitle:@"Moving a File/Directory"];
                 [alert setMessage:@"Give it a new path:"];
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
-                alert.tag = MOVE_TAG;
+                alert.tag = MOVE_ALERT_TAG;
                 break;
-            case RENAME_TAG:
+            case RENAME_ALERT_TAG:
                 alert.alertViewStyle = UIAlertViewStylePlainTextInput;
                 [alert setDelegate:self];
                 [alert setTitle:@"Renaming a File/Directory"];
                 [alert setMessage:@"Give it a new name:"];
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
-                alert.tag = RENAME_TAG;
+                alert.tag = RENAME_ALERT_TAG;
                 break;
-            case CONFIRM_TAG:
+            case CONFIRM_ALERT_TAG:
                 [alert setDelegate:self];
                 [alert setTitle:@"This action is permanent!"];
                 [alert setMessage:@"Are you sure you want to perform this action?"];
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
-                alert.tag = CONFIRM_TAG;
+                alert.tag = CONFIRM_ALERT_TAG;
                 break;
             default:
                 break;
@@ -154,6 +158,15 @@
         [alerts addObject:alert];
 
     }
+
+}
+
+-(void)initActionSheetButtons:(NSMutableArray *)buttons {
+
+    [buttons addObject:@"Move"];
+    [buttons addObject:@"Rename"];
+    [buttons addObject:@"Delete"];
+    [buttons addObject:@"Cancel"];
 
 }
 
@@ -266,14 +279,14 @@
 
     // Add a help button to the top right
     UIBarButtonItem *helpButton = [self makeButtonWithTitle:@"Need help?"
-                                                        Tag:HELP_TAG
+                                                        Tag:HELP_BUTTON_TAG
                                                      Target:self
                                                      Action:@selector(buttonPressed:)];
     self.navigationItem.rightBarButtonItem = helpButton;
 
     // Add a add dir button to the bottom left
     UIBarButtonItem *addDirButton = [self makeButtonWithTitle:@"Add Directory"
-                                                          Tag:ADD_DIR_TAG
+                                                          Tag:ADD_DIR_BUTTON_TAG
                                                        Target:self
                                                        Action:@selector(buttonPressed:)];
 
@@ -288,7 +301,7 @@
                                                                      0,
                                                                      [self sizeOfString:switchString
                                                                                withFont:[UIFont systemFontOfSize: LARGE_FONT_SIZE]].width,
-                                                                                        CELL_HEIGHT)];
+                                                                     CELL_HEIGHT)];
     switchLable.text = switchString;
     switchLable.backgroundColor = [UIColor clearColor];
     switchLable.textColor = [UIColor blackColor];
@@ -376,46 +389,46 @@
     if (buttonIndex != 0) {
 
         static NSString *text = @"";
-        static allertTag previousTag = NONE;
+        static alertTag previousTag = NONE;
 
         switch (alertView.tag) {
 
-            case ADD_TAG:
-                previousTag = ADD_TAG;
+            case ADD_ALERT_TAG:
+                previousTag = ADD_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alerts WithTag:CONFIRM_TAG] show];
+                [[self objectInArray:self.alerts WithTag:CONFIRM_ALERT_TAG] show];
                 break;
-            case DELETE_TAG:
+            case DELETE_ALERT_TAG:
                 //FIXME add code here to delete
                 break;
-            case MOVE_TAG:
-                previousTag = MOVE_TAG;
+            case MOVE_ALERT_TAG:
+                previousTag = MOVE_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alerts WithTag:CONFIRM_TAG] show];
+                [[self objectInArray:self.alerts WithTag:CONFIRM_ALERT_TAG] show];
                 break;
-            case RENAME_TAG:
-                previousTag = RENAME_TAG;
+            case RENAME_ALERT_TAG:
+                previousTag = RENAME_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alerts WithTag:CONFIRM_TAG] show];
+                [[self objectInArray:self.alerts WithTag:CONFIRM_ALERT_TAG] show];
                 break;
-            case CONFIRM_TAG:
+            case CONFIRM_ALERT_TAG:
                 NSLog(@"Entered= %@", text);
                 switch (previousTag) {
 
-                    case ADD_TAG:
+                    case ADD_ALERT_TAG:
                         //FIXME add code here to add a directory
                         break;
-                    case MOVE_TAG:
+                    case MOVE_ALERT_TAG:
                         //FIXME add code here to move a file/directory
                         break;
-                    case RENAME_TAG:
+                    case RENAME_ALERT_TAG:
                         //FIXME add code here to rename a file/directory
                         break;
                     default:
                         break;
 
                 }
-                previousTag = CONFIRM_TAG;
+                previousTag = CONFIRM_ALERT_TAG;
                 break;
             default:
                 previousTag = NONE;
@@ -439,7 +452,7 @@
 
 }
 
--(void)disPlayHelpPage {
+-(void)displayHelpPage {
     
     NSString *helpMessagePath = [[NSBundle mainBundle] pathForResource:@"helpPage" ofType:@"txt"];
     NSString *helpMessage = [NSString stringWithContentsOfFile:helpMessagePath encoding:NSUTF8StringEncoding error:NULL];
@@ -449,7 +462,7 @@
         height = self.view.frame.size.height;
     else
         height = self.view.frame.size.width;
-    
+
     _helpView = [[UILabel alloc] initWithFrame:CGRectMake(LARGE_FONT_SIZE,
                                                           0.0,
                                                           self.view.frame.size.width,
@@ -480,7 +493,7 @@
 
 -(void)displayAddDirPage {
 
-    UIAlertView *addDirAlert = [self objectInArray:self.alerts WithTag:ADD_TAG];
+    UIAlertView *addDirAlert = [self objectInArray:self.alerts WithTag:ADD_ALERT_TAG];
     [addDirAlert show];
 
 }
@@ -490,10 +503,10 @@
     //NSLog(@"buttonPressed: %d", sender.tag);
     switch (sender.tag) {
 
-        case HELP_TAG:
-            [self disPlayHelpPage];
+        case HELP_BUTTON_TAG:
+            [self displayHelpPage];
             break;
-        case ADD_DIR_TAG:
+        case ADD_DIR_BUTTON_TAG:
             [self displayAddDirPage];
             break;
         default:
@@ -576,34 +589,25 @@
 
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 
-    switch (buttonIndex) {
-
-        case 0:
-            [[self objectInArray:self.alerts WithTag:MOVE_TAG] show];
-            break;
-        case 1:
-            [[self objectInArray:self.alerts WithTag:RENAME_TAG] show];
-            break;
-        case 2:
-            [[self objectInArray:self.alerts WithTag:DELETE_TAG] show];
-            break;
-        default:
-            break;
-
-    }
+    if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Move"])
+        [[self objectInArray:self.alerts WithTag:MOVE_ALERT_TAG] show];
+    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Rename"])
+        [[self objectInArray:self.alerts WithTag:RENAME_ALERT_TAG] show];
+    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Delete"])
+        [[self objectInArray:self.alerts WithTag:DELETE_ALERT_TAG] show];
 
 }
 
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
-    UIActionSheet *detailSheet = [[UIActionSheet alloc] initWithTitle:@"File/Directory Details"
-                                                             delegate:self
-                                                    cancelButtonTitle:@"Cancel"
-                                               destructiveButtonTitle:nil
-                                                    otherButtonTitles:@"Move",
-                                                                      @"Rename",
-                                                                      @"Delete",
-                                                                      nil];
+    UIActionSheet *detailSheet = [[UIActionSheet alloc] init];
+
+    [detailSheet setTitle:@"File/Directory Details"];
+    [detailSheet setDelegate:self];
+    for (NSString *button in self.actionSheetButtons)
+        [detailSheet addButtonWithTitle:button];
+    [detailSheet setCancelButtonIndex:([self.actionSheetButtons count] - 1)];
+
     [detailSheet showInView:self.view];
 
 }
@@ -631,7 +635,7 @@
 
         // Set up back button
         [subTableViewController.navigationItem setBackBarButtonItem:[self makeButtonWithTitle:key
-                                                                                          Tag:BACK_TAG
+                                                                                          Tag:BACK_BUTTON_TAG
                                                                                        Target:nil
                                                                                        Action:nil]];
 
