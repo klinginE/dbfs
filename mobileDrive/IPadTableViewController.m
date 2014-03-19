@@ -15,9 +15,10 @@
 @property (strong, atomic) NSMutableArray *alerts;
 @property (weak, nonatomic) MobileDriveAppDelegate *appDelegate;
 @property (assign) SEL switchAction;
-@property (assign) State iPadState;
 @property (strong, atomic) UISwitch *conectSwitch;
 @property (assign) UIControlEvents switchEvents;
+@property (assign) SEL pathAction;
+@property (assign) UIControlEvents pathEvents;
 @property (strong, nonatomic) NSDictionary *filesDictionary;
 @property (strong, nonatomic) NSArray *fileKeys;
 @property (strong, nonatomic) UIScrollView *helpScroll;
@@ -33,22 +34,25 @@
 @implementation IPadTableViewController
 
 -(id)initWithPath:(NSString *)currentPath
+         ipAddress:(NSString *)ip
            target:(MobileDriveAppDelegate *)respond
      switchAction:(SEL)action
-        forEvents:(UIControlEvents)events {
+        forEvents:(UIControlEvents)events
+       pathAction:(SEL)pAction
+       pathEvents:(UIControlEvents)pEvents {
 
     self = [super init];
     if (self) {
 
         // init state
-        [self initState:&_iPadState WithPath:currentPath];
+        [self initState:&_iPadState WithPath:currentPath Address:ip];
         self.title = [NSString stringWithUTF8String:_iPadState.currentDir];
 
         // Set up back button
-        [self.navigationItem setBackBarButtonItem:[self makeButtonWithTitle:self.title
-                                                                        Tag:BACK_BUTTON_TAG
-                                                                     Target:nil
-                                                                     Action:nil]];
+        [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:self.title
+                                                                           Tag:BACK_BUTTON_TAG
+                                                                        Target:nil
+                                                                        Action:nil]];
 
         _buttonColor = [UIColor colorWithRed:(0.0/255.0)
                                        green:(0.0/255.0)
@@ -72,6 +76,9 @@
         else
             _conectSwitch.on = NO;
 
+        _pathAction = pAction;
+        _pathEvents = pEvents;
+
         //Set up alerts
         _alerts = [[NSMutableArray alloc] init];
         [self initAlerts:_alerts];
@@ -85,9 +92,10 @@
 
 }
 
--(void)initState:(State *)state WithPath:(NSString *)path {
+-(void)initState:(State *)state WithPath:(NSString *)path Address:(NSString *)ip {
 
     state->currentPath = [self nsStringToCString:path];
+    state->ipAddress = [self nsStringToCString:ip];
     NSUInteger len = [path length];
     assert(len > 0);
     assert([path characterAtIndex:0] == '/');
@@ -178,6 +186,61 @@
 
 }
 
+-(void)initPathViewWithAction:(SEL)action ForEvents:(UIControlEvents)events {
+
+    if (self.pathView && self.view) {
+
+        UILabel *ipLabel = [[UILabel alloc] init];
+        ipLabel.text = [NSString stringWithFormat:@"IP Address: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
+        ipLabel.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
+        ipLabel.frame = CGRectMake(self.pathView.frame.origin.x + self.pathView.frame.size.width / 2.0,
+                                             self.view.frame.origin.y + PATH_VIEW_HEIGHT / 2.0,
+                                             [self sizeOfString:ipLabel.text withFont:ipLabel.font].width,
+                                             PATH_VIEW_HEIGHT/2.0);
+        [self.pathView addSubview:ipLabel];
+
+        NSString *title = @"/";
+        NSInteger len = 0;
+        UILabel *currentPath = [[UILabel alloc] init];
+        currentPath.text = @"Path: ";
+        [currentPath setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
+        [currentPath setFrame:CGRectMake(0, self.view.frame.origin.y, [self sizeOfString:currentPath.text withFont:currentPath.font].width, PATH_VIEW_HEIGHT/ 2.0)];
+
+        [self.pathView addSubview:currentPath];
+
+        for (int i = 1; i <= (self.iPadState.depth + 1); i++) {
+
+            title = [self dirAtDepth:(i - 1)
+                              InPath:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+
+            UIButton *pathButton = [self makeButtonWithTitle:title
+                                                         Tag:(i - 1)
+                                                      Target:self.appDelegate
+                                                      Action:action
+                                                     ForEvents:events];
+
+            pathButton.frame = CGRectMake([self sizeOfString:currentPath.text withFont:currentPath.font].width + self.view.frame.origin.x + len,
+                                          self.view.frame.origin.y,
+                                          [self sizeOfString:title withFont:pathButton.titleLabel.font].width,
+                                          PATH_VIEW_HEIGHT/2.0);
+            pathButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+
+            if (i == (self.iPadState.depth + 1)) {
+
+                [pathButton setEnabled:NO];
+                [pathButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+
+            }
+            len += [self sizeOfString:title withFont:pathButton.titleLabel.font].width;
+
+            [self.pathView addSubview:pathButton];
+
+        }
+
+    }
+
+}
+
 -(void)dealloc {
 
     //NSLog(@"dealloc");
@@ -203,18 +266,52 @@
         free(state.currentDir);
     if (state.currentPath != NULL)
         free(state.currentPath);
+    if (state.ipAddress != NULL)
+        free(state.ipAddress);
 
 }
 
--(UIBarButtonItem *)makeButtonWithTitle:(NSString *)title
-                                    Tag:(NSInteger)tag
-                                 Target:(id)target
-                                 Action:(SEL)action {
+-(NSString *)dirAtDepth:(NSInteger)depth InPath:(NSString *)path {
+
+    NSString *dir = @"/";
+    NSInteger count = -1;
+    NSInteger len = [path length];
+    int right = 0;
+    for (; right < len; right++) {
+
+        if ([path characterAtIndex:right] == '/')
+            count++;
+
+        if (count == depth) {
+
+            int left = right;
+            for (; left > 0; left--)
+                if ([path characterAtIndex:(left - 1)] == '/')
+                    break;
+
+            NSRange range;
+            range.location = left;
+            range.length = ((right + 1) - left);
+            dir = [path substringWithRange:range];
+            break;
+
+        }
+            
+    }
+
+    return dir;
+
+}
+
+-(UIBarButtonItem *)makeBarButtonWithTitle:(NSString *)title
+                                       Tag:(NSInteger)tag
+                                    Target:(id)target
+                                    Action:(SEL)action {
 
     UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:title
-                                                                   style:UIBarButtonItemStyleBordered
-                                                                  target:target
-                                                                  action:action];
+                                                               style:UIBarButtonItemStyleBordered
+                                                              target:target
+                                                              action:action];
     [button setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize: LARGE_FONT_SIZE],
                                                                               NSFontAttributeName,
                                                                               nil]
@@ -224,6 +321,25 @@
 
     return button;
 
+}
+
+-(UIButton *)makeButtonWithTitle:(NSString *)title
+                             Tag:(NSInteger)tag
+                          Target:(id)target
+                          Action:(SEL)action
+                       ForEvents:(UIControlEvents)events{
+    
+    UIButton *button = [[UIButton alloc] init];
+    [button addTarget:target
+               action:action
+     forControlEvents:events];
+    [button setTitle:title forState:UIControlStateNormal];
+    [button.titleLabel setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
+    button.tag = tag;
+    [button setTitleColor:self.buttonColor forState:UIControlStateNormal];
+
+    return button;
+    
 }
 
 -(CGSize)sizeOfString:(NSString *)string withFont:(UIFont *)font {
@@ -306,11 +422,13 @@
 
     self.pathView = [[UIView alloc] initWithFrame:CGRectZero];
     [self.pathView setBackgroundColor:self.barColor];
-    UIView *mainView = [[UIView alloc] initWithFrame:CGRectZero];
 
+    UIView *mainView = [[UIView alloc] initWithFrame:CGRectZero];
     self.view = mainView;
+
     [self.view addSubview:self.pathView];
     [self.view addSubview:self.mainTableView];
+    [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
     [self makeFrameForViews];
 
 }
@@ -343,17 +461,17 @@
                                             alpha:1.0f];
 
     // Add a help button to the top right
-    UIBarButtonItem *helpButton = [self makeButtonWithTitle:@"Need help?"
-                                                        Tag:HELP_BUTTON_TAG
-                                                     Target:self
-                                                     Action:@selector(buttonPressed:)];
+    UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"Need help?"
+                                                           Tag:HELP_BUTTON_TAG
+                                                        Target:self
+                                                        Action:@selector(buttonPressed:)];
     self.navigationItem.rightBarButtonItem = helpButton;
 
     // Add a add dir button to the bottom left
-    UIBarButtonItem *addDirButton = [self makeButtonWithTitle:@"Add Directory"
-                                                          Tag:ADD_DIR_BUTTON_TAG
-                                                       Target:self
-                                                       Action:@selector(buttonPressed:)];
+    UIBarButtonItem *addDirButton = [self makeBarButtonWithTitle:@"Add Directory"
+                                                             Tag:ADD_DIR_BUTTON_TAG
+                                                          Target:self
+                                                          Action:@selector(buttonPressed:)];
 
     // flexiable space holder
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
@@ -644,9 +762,10 @@
 
         // Make subTableviewcontroller to push onto nav stack
         IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithPath:subPath
+                                                                                               ipAddress:[NSString stringWithUTF8String:self.iPadState.ipAddress]
                                                                                                   target:self.appDelegate
                                                                                             switchAction:self.switchAction
-                                                                                               forEvents:_switchEvents];
+                                                                                              forEvents:_switchEvents pathAction:self.pathAction pathEvents:self.pathEvents];
 
         // push new controller onto nav stack
         [self.navigationController pushViewController:subTableViewController animated:YES];

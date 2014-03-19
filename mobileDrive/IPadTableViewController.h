@@ -14,7 +14,7 @@
 #define SMALL_FONT_SIZE 20.0
 #define CELL_HEIGHT (LARGE_FONT_SIZE + SMALL_FONT_SIZE + 10.0)
 #define NUM_ALERTS 5
-#define PATH_VIEW_HEIGHT 70
+#define PATH_VIEW_HEIGHT (SMALL_FONT_SIZE * 3)
 
 @interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate>
 
@@ -25,18 +25,27 @@ typedef struct {
 
     char *currentDir;
     char *currentPath;
+    char *ipAddress;
     int depth;
 
 }State;
 
--(id)initWithPath:(NSString *)currentPath target:(MobileDriveAppDelegate *)respond switchAction:(SEL)action forEvents:(UIControlEvents)events;
+@property (assign) State iPadState;
+
+-(id)initWithPath:(NSString *)currentPath
+         ipAddress:(NSString *)ip
+           target:(MobileDriveAppDelegate *)respond
+     switchAction:(SEL)action
+        forEvents:(UIControlEvents)events
+       pathAction:(SEL)pAction
+       pathEvents:(UIControlEvents)pEvents;
 -(void)buttonPressed:(id)sendr;
--(UIBarButtonItem *)makeButtonWithTitle:(NSString *)title
-                                    Tag:(NSInteger)tag
-                                 Target:(id)target
-                                 Action:(SEL)action;
+-(UIBarButtonItem *)makeBarButtonWithTitle:(NSString *)title
+                                       Tag:(NSInteger)tag
+                                    Target:(id)target
+                                    Action:(SEL)action;
 -(char *)nsStringToCString:(NSString *)str;
--(void)initState:(State *)state WithPath:(NSString *)path;
+-(void)initState:(State *)state WithPath:(NSString *)path Address:(NSString *)ip;
 -(void)freeState:(State)state;
 
 @end
