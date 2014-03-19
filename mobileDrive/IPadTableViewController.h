@@ -29,8 +29,6 @@ typedef struct {
 
 }State;
 
-@property(strong, nonatomic)UIColor *buttonColor;
-
 -(id)initWithPath:(NSString *)currentPath target:(MobileDriveAppDelegate *)respond switchAction:(SEL)action forEvents:(UIControlEvents)events;
 -(void)buttonPressed:(id)sendr;
 -(UIBarButtonItem *)makeButtonWithTitle:(NSString *)title

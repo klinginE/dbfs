@@ -26,6 +26,7 @@
 @property (strong, nonatomic) UIView *pathView;
 @property (strong, nonatomic) UIColor *barColor;
 @property (strong, nonatomic) NSMutableArray *actionSheetButtons;
+@property (strong, nonatomic) UIColor *buttonColor;
 
 @end
 
@@ -41,6 +42,13 @@
 
         // init state
         [self initState:&_iPadState WithPath:currentPath];
+        self.title = [NSString stringWithUTF8String:_iPadState.currentDir];
+
+        // Set up back button
+        [self.navigationItem setBackBarButtonItem:[self makeButtonWithTitle:self.title
+                                                                        Tag:BACK_BUTTON_TAG
+                                                                     Target:nil
+                                                                     Action:nil]];
 
         _buttonColor = [UIColor colorWithRed:(0.0/255.0)
                                        green:(0.0/255.0)
@@ -174,6 +182,17 @@
 
     //NSLog(@"dealloc");
     [self freeState:self.iPadState];
+    self.alerts = nil;
+    self.conectSwitch = nil;
+    self.filesDictionary = nil;
+    self.fileKeys = nil;
+    self.helpScroll = nil;
+    self.helpView = nil;
+    self.mainTableView = nil;
+    self.pathView = nil;
+    self.barColor = nil;
+    self.actionSheetButtons = nil;
+    self.buttonColor = nil;
 
 }
 
@@ -214,6 +233,57 @@
 
 }
 
+-(void)makeFrameForViews {
+
+    CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
+    CGFloat mainScreenWidth = mainScreenBounds.size.width;
+    CGFloat mainScreenHeight = mainScreenBounds.size.height;
+    CGFloat textHeight = mainScreenHeight;
+    
+    if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
+       [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
+        
+        CGFloat temp = mainScreenWidth;
+        mainScreenWidth = mainScreenHeight;
+        mainScreenHeight = temp;
+        textHeight = mainScreenWidth;
+
+    }
+
+    if (self.pathView)
+        self.pathView.frame = CGRectMake(0,
+                                         self.navigationController.navigationBar.frame.origin.y + self. navigationController.navigationBar.frame.size.height,
+                                         mainScreenWidth,
+                                         PATH_VIEW_HEIGHT);
+    if (self.mainTableView)
+        self.mainTableView.frame = CGRectMake(0,
+                                              self.pathView.frame.origin.y + PATH_VIEW_HEIGHT,
+                                              mainScreenWidth,
+                                              mainScreenHeight - self.pathView.frame.origin.y - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height);
+    if (self.view)
+        self.view.frame = CGRectMake(0,
+                                     0,
+                                     mainScreenWidth,
+                                     self.mainTableView.frame.size.height + PATH_VIEW_HEIGHT);
+    if (self.helpView)
+        self.helpView.frame = CGRectMake(LARGE_FONT_SIZE,
+                                         self.view.frame.origin.y,
+                                         self.view.frame.size.width,
+                                         textHeight);
+
+    if (self.helpScroll && self.helpView) {
+
+        self.helpScroll.frame = CGRectMake(self.view.frame.origin.x,
+                                           self.view.frame.origin.y,
+                                           self.view.frame.size.width,
+                                           mainScreenHeight);
+        self.helpScroll.contentSize = CGSizeMake(self.helpView.frame.size.width,
+                                                 self.helpView.frame.size.height);
+
+    }
+
+}
+
 -(void)loadView {
 
     CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
@@ -229,28 +299,23 @@
 
     }
 
-    self.mainTableView = [[UITableView alloc] initWithFrame:CGRectMake(0,
-                                                                       self.navigationController.navigationBar.frame.size.height + PATH_VIEW_HEIGHT,
-                                                                       mainScreenWidth,
-                                                                       mainScreenHeight - self.navigationController.navigationBar.frame.size.height - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height)
+    self.mainTableView = [[UITableView alloc] initWithFrame:CGRectZero
                                                       style:UITableViewStylePlain];
     self.mainTableView.dataSource = self;
     self.mainTableView.delegate = self;
 
-    self.pathView = [[UIView alloc] initWithFrame:CGRectMake(0,
-                                                             self.navigationController.navigationBar.frame.size.height,
-                                                             mainScreenWidth,
-                                                             PATH_VIEW_HEIGHT)];
+    self.pathView = [[UIView alloc] initWithFrame:CGRectZero];
     [self.pathView setBackgroundColor:self.barColor];
     UIView *mainView = [[UIView alloc] initWithFrame:CGRectZero];
 
     self.view = mainView;
     [self.view addSubview:self.pathView];
     [self.view addSubview:self.mainTableView];
+    [self makeFrameForViews];
 
 }
 
-- (void)viewDidLoad {
+-(void)viewDidLoad {
 
     [super viewDidLoad];
 
@@ -343,44 +408,7 @@
 -(void)orientationChanged:(NSNotification *)note {
 
     NSLog(@"Rotated!");
-    CGFloat height = 0.0;
-
-    CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
-    CGFloat mainScreenWidth = mainScreenBounds.size.width;
-    CGFloat mainScreenHeight = mainScreenBounds.size.height;
-    
-    if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
-       [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
-        
-        CGFloat temp = mainScreenWidth;
-        mainScreenWidth = mainScreenHeight;
-        mainScreenHeight = temp;
-        
-    }
-
-    self.mainTableView.frame = CGRectMake(self.mainTableView.frame.origin.x,
-                                          self.mainTableView.frame.origin.y,
-                                          mainScreenWidth,
-                                          mainScreenHeight);
-    self.pathView.frame = CGRectMake(self.pathView.frame.origin.x,
-                                     self.pathView.frame.origin.y,
-                                     mainScreenWidth,
-                                     mainScreenHeight);
-
-    if (_helpScroll && _helpView) {
-
-        if (self.view.frame.size.width > self.view.frame.size.height)
-            height = self.view.frame.size.width;
-
-        else
-            height = self.view.frame.size.height;
-
-        NSLog(@"changing frames.");
-
-        _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height + self.navigationController.navigationBar.frame.size.height + self.navigationController.toolbar.frame.size.height);
-        [_helpScroll setNeedsDisplay];
-
-    }
+    [self makeFrameForViews];
 
 }
 
@@ -456,17 +484,8 @@
     
     NSString *helpMessagePath = [[NSBundle mainBundle] pathForResource:@"helpPage" ofType:@"txt"];
     NSString *helpMessage = [NSString stringWithContentsOfFile:helpMessagePath encoding:NSUTF8StringEncoding error:NULL];
-    
-    CGFloat height = 0;
-    if (self.view.frame.size.height > self.view.frame.size.width)
-        height = self.view.frame.size.height;
-    else
-        height = self.view.frame.size.width;
 
-    _helpView = [[UILabel alloc] initWithFrame:CGRectMake(LARGE_FONT_SIZE,
-                                                          0.0,
-                                                          self.view.frame.size.width,
-                                                          height)];
+    _helpView = [[UILabel alloc] initWithFrame:CGRectZero];
     _helpView.text = helpMessage;
     _helpView.backgroundColor = [UIColor clearColor];
     _helpView.textColor = [UIColor blackColor];
@@ -474,19 +493,16 @@
     _helpView.numberOfLines = 0;
     [_helpView sizeToFit];
     
-    _helpScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x,
-                                                                 self.view.frame.origin.y + self.navigationController.navigationBar.frame.size.height,
-                                                                 self.view.frame.size.width,
-                                                                 height - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height)];
+    _helpScroll = [[UIScrollView alloc] initWithFrame:CGRectZero];
     [_helpScroll addSubview:_helpView];
     [_helpScroll setScrollEnabled:YES];
     [_helpScroll setBounces:NO];
-    
-    _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height + self.navigationController.navigationBar.frame.size.height + self.navigationController.toolbar.frame.size.height);
-    
+
     UIViewController *helpController = [[UIViewController alloc] init];
     helpController.title = @"Help Page.";
+
     [helpController.view addSubview:_helpScroll];
+    [self makeFrameForViews];
     [self.navigationController pushViewController:helpController animated:YES];
     
 }
@@ -631,13 +647,6 @@
                                                                                                   target:self.appDelegate
                                                                                             switchAction:self.switchAction
                                                                                                forEvents:_switchEvents];
-        subTableViewController.title = key;
-
-        // Set up back button
-        [subTableViewController.navigationItem setBackBarButtonItem:[self makeButtonWithTitle:key
-                                                                                          Tag:BACK_BUTTON_TAG
-                                                                                       Target:nil
-                                                                                       Action:nil]];
 
         // push new controller onto nav stack
         [self.navigationController pushViewController:subTableViewController animated:YES];

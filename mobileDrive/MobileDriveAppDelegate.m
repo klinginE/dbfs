@@ -35,15 +35,9 @@
 
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
-                                                                           target:self
-                                                                     switchAction:@selector(switchChanged:)
-                                                                        forEvents:UIControlEventValueChanged];
-    self.iPadTableViewController.title = @"/";
-    UIBarButtonItem *backButton = [self.iPadTableViewController makeButtonWithTitle:@"/"
-                                                                           Tag:HELP_BUTTON_TAG
-                                                                             Target:nil
-                                                                        Action:nil];
-    [self.iPadTableViewController.navigationItem setBackBarButtonItem:backButton];
+                                                                          target:self
+                                                                    switchAction:@selector(switchChanged:)
+                                                                       forEvents:UIControlEventValueChanged];
 
     // init nav controller
     UINavigationController *iPadNavController = [[UINavigationController alloc] initWithRootViewController:self.iPadTableViewController];
