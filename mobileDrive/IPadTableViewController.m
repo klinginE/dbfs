@@ -327,8 +327,8 @@
                              Tag:(NSInteger)tag
                           Target:(id)target
                           Action:(SEL)action
-                       ForEvents:(UIControlEvents)events{
-    
+                       ForEvents:(UIControlEvents)events {
+
     UIButton *button = [[UIButton alloc] init];
     [button addTarget:target
                action:action
@@ -339,7 +339,7 @@
     [button setTitleColor:self.buttonColor forState:UIControlStateNormal];
 
     return button;
-    
+
 }
 
 -(CGSize)sizeOfString:(NSString *)string withFont:(UIFont *)font {
@@ -493,7 +493,7 @@
     UIBarButtonItem *switchButtonItem = [[UIBarButtonItem alloc] initWithCustomView:switchLable];
 
     // add switch to the bottom right
-    UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:_conectSwitch];
+    UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:self.conectSwitch];
 
     // put objects in toolbar
     NSArray *toolBarItems = [[NSArray alloc] initWithObjects:addDirButton, flex, switchButtonItem, cSwitch, nil];
@@ -518,7 +518,7 @@
 
 -(void)viewWillAppear:(BOOL)animated {
 
-    _conectSwitch.on = self.appDelegate.isConnected;
+    self.conectSwitch.on = self.appDelegate.isConnected;
     [super viewWillAppear:animated];
 
 }
@@ -661,7 +661,7 @@
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 
-    return [_fileKeys count];
+    return [self.fileKeys count];
 
 }
 
@@ -686,8 +686,8 @@
     }
 
     // fecthc key and dict info
-    NSString *key = [_fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [_filesDictionary objectForKey:key];
+    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
+    NSDictionary *dict = [self.filesDictionary objectForKey:key];
 
     // set up cell text and other atributes
     cell.detailTextLabel.text = [dict objectForKey:@"path"];
@@ -735,7 +735,6 @@
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
     UIActionSheet *detailSheet = [[UIActionSheet alloc] init];
-
     [detailSheet setTitle:@"File/Directory Details"];
     [detailSheet setDelegate:self];
     for (NSString *button in self.actionSheetButtons)
@@ -743,6 +742,16 @@
     [detailSheet setCancelButtonIndex:([self.actionSheetButtons count] - 1)];
 
     [detailSheet showInView:self.view];
+    CGRect rect = detailSheet.frame;
+    rect.origin.y += SMALL_FONT_SIZE * 2;
+    rect.size.height = SMALL_FONT_SIZE * 6;
+    UIView *detailView = [[UIView alloc] initWithFrame:rect];
+    [detailView setBackgroundColor:detailSheet.backgroundColor];
+    [detailSheet addSubview:detailView];
+
+    CGRect rect2 = detailSheet.frame;
+    rect2.size.height += rect.size.height;
+    detailSheet.frame = rect2;
 
 }
 
@@ -751,21 +760,21 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
     // Fetch data from keys and dictionary
-    NSString *key = [_fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [_filesDictionary objectForKey:key];
+    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
+    NSDictionary *dict = [self.filesDictionary objectForKey:key];
 
     // if the dict object is a directory then...
     if ([[dict objectForKey:@"isDir"] boolValue]) {
 
         // set up state for subTableViewController
-        NSString *subPath = [NSString stringWithFormat:@"%s%@", _iPadState.currentPath, key];
+        NSString *subPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, key];
 
         // Make subTableviewcontroller to push onto nav stack
         IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithPath:subPath
                                                                                                ipAddress:[NSString stringWithUTF8String:self.iPadState.ipAddress]
                                                                                                   target:self.appDelegate
                                                                                             switchAction:self.switchAction
-                                                                                              forEvents:_switchEvents pathAction:self.pathAction pathEvents:self.pathEvents];
+                                                                                              forEvents:self.switchEvents pathAction:self.pathAction pathEvents:self.pathEvents];
 
         // push new controller onto nav stack
         [self.navigationController pushViewController:subTableViewController animated:YES];
@@ -782,8 +791,8 @@
 
     CGPoint location = [sender locationInView:self.view];
     NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:location];
-    NSString *key = [_fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [_filesDictionary objectForKey:key];
+    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
+    NSDictionary *dict = [self.filesDictionary objectForKey:key];
 
     if (sender.state == UIGestureRecognizerStateBegan)
         [self displayDetailedViwForItem:dict WithKey:key];
