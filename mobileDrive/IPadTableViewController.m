@@ -9,6 +9,7 @@
 #import "IPadTableViewController.h"
 #import <string.h>
 #import <assert.h>
+#import "CODialog.h"
 
 @interface IPadTableViewController ()
 
@@ -28,6 +29,7 @@
 @property (strong, nonatomic) UIColor *barColor;
 @property (strong, nonatomic) NSMutableArray *actionSheetButtons;
 @property (strong, nonatomic) UIColor *buttonColor;
+@property (strong, nonatomic) CODialog *myDialog;
 
 @end
 
@@ -721,37 +723,55 @@
 
 }
 
--(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+-(void)actionSheet:(UIButton *)sender {
 
-    if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Move"])
+    if ([sender.titleLabel.text isEqualToString:@"Move"])
         [[self objectInArray:self.alerts WithTag:MOVE_ALERT_TAG] show];
-    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Rename"])
+    else if ([sender.titleLabel.text isEqualToString:@"Rename"])
         [[self objectInArray:self.alerts WithTag:RENAME_ALERT_TAG] show];
-    else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:@"Delete"])
+    else if ([sender.titleLabel.text isEqualToString:@"Delete"])
         [[self objectInArray:self.alerts WithTag:DELETE_ALERT_TAG] show];
+    [self.myDialog hideAnimated:NO];
 
 }
 
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
-    UIActionSheet *detailSheet = [[UIActionSheet alloc] init];
-    [detailSheet setTitle:@"File/Directory Details"];
-    [detailSheet setDelegate:self];
-    for (NSString *button in self.actionSheetButtons)
-        [detailSheet addButtonWithTitle:button];
-    [detailSheet setCancelButtonIndex:([self.actionSheetButtons count] - 1)];
+    self.myDialog = [[CODialog alloc] initWithWindow:[[UIApplication sharedApplication] keyWindow]];
+    [self.myDialog setTitle:@"File/Directory details:"];
+    self.myDialog.dialogStyle = CODialogStyleCustomView;
+    
+    UILabel *nameLabel = [[UILabel alloc] init];
+    nameLabel.text = [NSString stringWithFormat:@"Name: %@", key];
+    nameLabel.frame = CGRectMake(0, 0, [self sizeOfString:nameLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
+    [nameLabel setTextColor:[UIColor whiteColor]];
 
-    [detailSheet showInView:self.view];
-    CGRect rect = detailSheet.frame;
-    rect.origin.y += SMALL_FONT_SIZE * 2;
-    rect.size.height = SMALL_FONT_SIZE * 6;
-    UIView *detailView = [[UIView alloc] initWithFrame:rect];
-    [detailView setBackgroundColor:detailSheet.backgroundColor];
-    [detailSheet addSubview:detailView];
+    UILabel *pathLabel = [[UILabel alloc] init];
+    pathLabel.text = [NSString stringWithFormat:@"Path: %@", [NSString stringWithUTF8String:self.iPadState.currentPath]];
+    pathLabel.frame = CGRectMake(0, SMALL_FONT_SIZE, [self sizeOfString:pathLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
+    [pathLabel setTextColor:[UIColor whiteColor]];
+    
+    UILabel *dateLabel = [[UILabel alloc] init];
+    dateLabel.text = [NSString stringWithFormat:@"Date last modified: %@", [dict objectForKey:@"date"]];
+    dateLabel.frame = CGRectMake(0, SMALL_FONT_SIZE * 2, [self sizeOfString:dateLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
+    [dateLabel setTextColor:[UIColor whiteColor]];
+    
+    UILabel *sizeLabel = [[UILabel alloc] init];
+    sizeLabel.text = [NSString stringWithFormat:@"Size: %@ Byte(s)", [dict objectForKey:@"size"]];
+    sizeLabel.frame = CGRectMake(0, SMALL_FONT_SIZE * 3, [self sizeOfString:sizeLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
+    [sizeLabel setTextColor:[UIColor whiteColor]];
 
-    CGRect rect2 = detailSheet.frame;
-    rect2.size.height += rect.size.height;
-    detailSheet.frame = rect2;
+    UIView *custom = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self sizeOfString:dateLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, 4 * SMALL_FONT_SIZE)];
+    [custom setBackgroundColor:[UIColor clearColor]];
+    [custom addSubview:nameLabel];
+    [custom addSubview:pathLabel];
+    [custom addSubview:dateLabel];
+    [custom addSubview:sizeLabel];
+    self.myDialog.customView = custom;
+    for (NSString *b in self.actionSheetButtons)
+        [self.myDialog addButtonWithTitle:b target:self selector:@selector(actionSheet:)];
+
+    [self.myDialog showOrUpdateAnimated:NO];
 
 }
 
