@@ -258,6 +258,7 @@
     self.barColor = nil;
     self.actionSheetButtons = nil;
     self.buttonColor = nil;
+    self.detailView = nil;
 
 }
 
@@ -724,13 +725,14 @@
 
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
+    [self.detailView hideAnimated:NO];
+    self.detailView = nil;
     if ([sender.titleLabel.text isEqualToString:@"Move"])
         [[self objectInArray:self.alerts WithTag:MOVE_ALERT_TAG] show];
     else if ([sender.titleLabel.text isEqualToString:@"Rename"])
         [[self objectInArray:self.alerts WithTag:RENAME_ALERT_TAG] show];
     else if ([sender.titleLabel.text isEqualToString:@"Delete"])
         [[self objectInArray:self.alerts WithTag:DELETE_ALERT_TAG] show];
-    [self.detailView hideAnimated:NO];
 
 }
 
