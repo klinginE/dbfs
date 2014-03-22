@@ -4,75 +4,47 @@
 <dict>
 	<key>File1</key>
 	<dict>
-		<key>size</key>
+		<key>Number of Bytes</key>
 		<integer>12</integer>
-		<key>date</key>
+		<key>Date Last Modified</key>
 		<date>2014-03-20T04:36:39Z</date>
-		<key>isDir</key>
+		<key>Type</key>
 		<false/>
-		<key>path</key>
+		<key>Path</key>
 		<string>/File1</string>
 	</dict>
 	<key>File2</key>
 	<dict>
-		<key>size</key>
+		<key>Number of Bytes</key>
 		<integer>22</integer>
-		<key>date</key>
+		<key>Date Last Modified</key>
 		<date>2014-03-20T04:36:52Z</date>
-		<key>isDir</key>
+		<key>Type</key>
 		<false/>
-		<key>path</key>
+		<key>Path</key>
 		<string>/File2</string>
 	</dict>
 	<key>DirectoryB/</key>
 	<dict>
-		<key>size</key>
+		<key>Number of Bytes</key>
 		<integer>0</integer>
-		<key>date</key>
-		<date>2014-03-20T04:37:01Z</date>
-		<key>isDir</key>
+		<key>Date Last Modified</key>
+		<date>2014-03-21T23:50:29Z</date>
+		<key>Type</key>
 		<true/>
-		<key>path</key>
+		<key>Path</key>
 		<string>/DirectoryB/</string>
-		<key>OneFile</key>
-		<dict>
-			<key>isDir</key>
-			<false/>
-			<key>path</key>
-			<string>/DirectoryB/One File</string>
-		</dict>
-		<key>Another File</key>
-		<dict>
-			<key>isDir</key>
-			<false/>
-			<key>path</key>
-			<string>/DirectoryB/AnotherFile</string>
-		</dict>
 	</dict>
 	<key>DirectoryA/</key>
 	<dict>
-		<key>size</key>
+		<key>Number of Bytes</key>
 		<integer>0</integer>
-		<key>date</key>
+		<key>Date Last Modified</key>
 		<date>2014-03-20T04:37:13Z</date>
-		<key>isDir</key>
+		<key>Type</key>
 		<true/>
-		<key>path</key>
+		<key>Path</key>
 		<string>/DirectoryA/</string>
-		<key>FileA</key>
-		<dict>
-			<key>isDir</key>
-			<false/>
-			<key>path</key>
-			<string>/DirectoryA/FileA</string>
-		</dict>
-		<key>FileB</key>
-		<dict>
-			<key>isDir</key>
-			<false/>
-			<key>path</key>
-			<string>/DirectoryA/FileB</string>
-		</dict>
 	</dict>
 </dict>
 </plist>

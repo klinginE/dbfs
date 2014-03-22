@@ -29,7 +29,7 @@
 @property (strong, nonatomic) UIColor *barColor;
 @property (strong, nonatomic) NSMutableArray *actionSheetButtons;
 @property (strong, nonatomic) UIColor *buttonColor;
-@property (strong, nonatomic) CODialog *myDialog;
+@property (strong, nonatomic) CODialog *detailView;
 
 @end
 
@@ -195,7 +195,7 @@
         UILabel *ipLabel = [[UILabel alloc] init];
         ipLabel.text = [NSString stringWithFormat:@"IP Address: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
         ipLabel.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
-        ipLabel.frame = CGRectMake(self.pathView.frame.origin.x + self.pathView.frame.size.width / 2.0,
+        ipLabel.frame = CGRectMake(self.pathView.frame.origin.x + SMALL_FONT_SIZE,
                                              self.view.frame.origin.y + PATH_VIEW_HEIGHT / 2.0,
                                              [self sizeOfString:ipLabel.text withFont:ipLabel.font].width,
                                              PATH_VIEW_HEIGHT/2.0);
@@ -206,7 +206,7 @@
         UILabel *currentPath = [[UILabel alloc] init];
         currentPath.text = @"Path: ";
         [currentPath setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
-        [currentPath setFrame:CGRectMake(0, self.view.frame.origin.y, [self sizeOfString:currentPath.text withFont:currentPath.font].width, PATH_VIEW_HEIGHT/ 2.0)];
+        [currentPath setFrame:CGRectMake(self.view.frame.origin.x + SMALL_FONT_SIZE, self.view.frame.origin.y, [self sizeOfString:currentPath.text withFont:currentPath.font].width, PATH_VIEW_HEIGHT/ 2.0)];
 
         [self.pathView addSubview:currentPath];
 
@@ -221,7 +221,7 @@
                                                       Action:action
                                                      ForEvents:events];
 
-            pathButton.frame = CGRectMake([self sizeOfString:currentPath.text withFont:currentPath.font].width + self.view.frame.origin.x + len,
+            pathButton.frame = CGRectMake([self sizeOfString:currentPath.text withFont:currentPath.font].width + self.view.frame.origin.x + len + SMALL_FONT_SIZE,
                                           self.view.frame.origin.y,
                                           [self sizeOfString:title withFont:pathButton.titleLabel.font].width,
                                           PATH_VIEW_HEIGHT/2.0);
@@ -360,7 +360,7 @@
     
     if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
        [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
-        
+
         CGFloat temp = mainScreenWidth;
         mainScreenWidth = mainScreenHeight;
         mainScreenHeight = temp;
@@ -527,7 +527,6 @@
 
 -(void)orientationChanged:(NSNotification *)note {
 
-    NSLog(@"Rotated!");
     [self makeFrameForViews];
 
 }
@@ -692,8 +691,8 @@
     NSDictionary *dict = [self.filesDictionary objectForKey:key];
 
     // set up cell text and other atributes
-    cell.detailTextLabel.text = [dict objectForKey:@"path"];
-    if ([[dict objectForKey:@"isDir"] boolValue]) {
+    cell.detailTextLabel.text = [dict objectForKey:@"Path"];
+    if ([[dict objectForKey:@"Type"] boolValue]) {
 
         cell.textLabel.text = [NSString stringWithFormat:@"📂 %@", key];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -723,7 +722,7 @@
 
 }
 
--(void)actionSheet:(UIButton *)sender {
+-(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
     if ([sender.titleLabel.text isEqualToString:@"Move"])
         [[self objectInArray:self.alerts WithTag:MOVE_ALERT_TAG] show];
@@ -731,47 +730,51 @@
         [[self objectInArray:self.alerts WithTag:RENAME_ALERT_TAG] show];
     else if ([sender.titleLabel.text isEqualToString:@"Delete"])
         [[self objectInArray:self.alerts WithTag:DELETE_ALERT_TAG] show];
-    [self.myDialog hideAnimated:NO];
+    [self.detailView hideAnimated:NO];
 
 }
 
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
-    self.myDialog = [[CODialog alloc] initWithWindow:[[UIApplication sharedApplication] keyWindow]];
-    [self.myDialog setTitle:@"File/Directory details:"];
-    self.myDialog.dialogStyle = CODialogStyleCustomView;
-    
+    self.detailView = [[CODialog alloc] initWithWindow:[[UIApplication sharedApplication] keyWindow]];
+    [self.detailView setTitle:@"File/Directory details:"];
+    self.detailView.dialogStyle = CODialogStyleCustomView;
+
     UILabel *nameLabel = [[UILabel alloc] init];
     nameLabel.text = [NSString stringWithFormat:@"Name: %@", key];
     nameLabel.frame = CGRectMake(0, 0, [self sizeOfString:nameLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
     [nameLabel setTextColor:[UIColor whiteColor]];
 
-    UILabel *pathLabel = [[UILabel alloc] init];
-    pathLabel.text = [NSString stringWithFormat:@"Path: %@", [NSString stringWithUTF8String:self.iPadState.currentPath]];
-    pathLabel.frame = CGRectMake(0, SMALL_FONT_SIZE, [self sizeOfString:pathLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
-    [pathLabel setTextColor:[UIColor whiteColor]];
-    
-    UILabel *dateLabel = [[UILabel alloc] init];
-    dateLabel.text = [NSString stringWithFormat:@"Date last modified: %@", [dict objectForKey:@"date"]];
-    dateLabel.frame = CGRectMake(0, SMALL_FONT_SIZE * 2, [self sizeOfString:dateLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
-    [dateLabel setTextColor:[UIColor whiteColor]];
-    
-    UILabel *sizeLabel = [[UILabel alloc] init];
-    sizeLabel.text = [NSString stringWithFormat:@"Size: %@ Byte(s)", [dict objectForKey:@"size"]];
-    sizeLabel.frame = CGRectMake(0, SMALL_FONT_SIZE * 3, [self sizeOfString:sizeLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
-    [sizeLabel setTextColor:[UIColor whiteColor]];
-
-    UIView *custom = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [self sizeOfString:dateLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, 4 * SMALL_FONT_SIZE)];
+    UIView *custom = [[UIView alloc] initWithFrame:CGRectZero];
     [custom setBackgroundColor:[UIColor clearColor]];
     [custom addSubview:nameLabel];
-    [custom addSubview:pathLabel];
-    [custom addSubview:dateLabel];
-    [custom addSubview:sizeLabel];
-    self.myDialog.customView = custom;
-    for (NSString *b in self.actionSheetButtons)
-        [self.myDialog addButtonWithTitle:b target:self selector:@selector(actionSheet:)];
 
-    [self.myDialog showOrUpdateAnimated:NO];
+    int i = 1;
+    CGFloat maxWidth = 0;
+    for (NSString *k in [dict keyEnumerator]) {
+        
+        UILabel *l = [[UILabel alloc] init];
+        l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
+        CGFloat width = [self sizeOfString:l.text
+                                  withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width;
+        l.frame = CGRectMake(0, SMALL_FONT_SIZE * i, width, SMALL_FONT_SIZE);
+        [l setTextColor:[UIColor whiteColor]];
+        [custom addSubview:l];
+
+        if (width > maxWidth)
+            maxWidth = width;
+        i++;
+
+    }
+    custom.frame = CGRectMake(0, 0, maxWidth, i * SMALL_FONT_SIZE);
+
+    self.detailView.customView = custom;
+    for (NSString *b in self.actionSheetButtons)
+        [self.detailView addButtonWithTitle:b
+                                     target:self
+                                   selector:@selector(detailedVeiwButtonPressed:)];
+
+    [self.detailView showOrUpdateAnimated:NO];
 
 }
 
@@ -784,7 +787,7 @@
     NSDictionary *dict = [self.filesDictionary objectForKey:key];
 
     // if the dict object is a directory then...
-    if ([[dict objectForKey:@"isDir"] boolValue]) {
+    if ([[dict objectForKey:@"Type"] boolValue]) {
 
         // set up state for subTableViewController
         NSString *subPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, key];
@@ -809,8 +812,8 @@
 
 -(void)handleLongPress:(UILongPressGestureRecognizer*)sender {
 
-    CGPoint location = [sender locationInView:self.view];
-    NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:location];
+    CGPoint location = [sender locationInView:self.mainTableView];
+    NSIndexPath *indexPath = [self.mainTableView indexPathForRowAtPoint:location];
     NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
     NSDictionary *dict = [self.filesDictionary objectForKey:key];
 

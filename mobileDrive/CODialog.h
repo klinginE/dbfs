@@ -4,7 +4,8 @@
 //
 //  Created by Erik Aigner on 10.04.12.
 //  Copyright (c) 2012 chocomoko.com. All rights reserved.
-//
+
+//  The code found in this file was found on the internet at:https://github.com/ohsc/CODialog
 
 #import <UIKit/UIKit.h>
 
