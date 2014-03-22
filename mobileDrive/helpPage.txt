@@ -2,7 +2,7 @@ To change directories:
     1) Tap once on any directory
 
 To go back:
-    1) Tap once on the "<"
+    1) Tap once on the "<" button
 
 To add a directory:
     1) Tap once on the add directory button
