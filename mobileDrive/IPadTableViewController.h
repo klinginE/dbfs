@@ -14,7 +14,8 @@
 #define SMALL_FONT_SIZE 20.0
 #define CELL_HEIGHT (LARGE_FONT_SIZE + SMALL_FONT_SIZE + 10.0)
 #define NUM_ALERTS 5
-#define PATH_VIEW_HEIGHT (MEDIAN_FONT_SIZE * 3.5)
+#define PATH_VIEW_HEIGHT (MEDIAN_FONT_SIZE * 3)
+#define IP_TAG 512
 
 @interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
 
@@ -46,6 +47,7 @@ typedef struct {
                                     Action:(SEL)action;
 -(char *)nsStringToCString:(NSString *)str;
 -(void)initState:(State *)state WithPath:(NSString *)path Address:(NSString *)ip;
+-(void)setIPAdress:(NSString *)ip;
 -(void)freeState:(State)state;
 
 @end

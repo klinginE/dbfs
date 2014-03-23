@@ -192,20 +192,11 @@
 
     if (self.pathScroll && self.view) {
 
-//        UILabel *ipLabel = [[UILabel alloc] init];
-//        ipLabel.text = [NSString stringWithFormat:@"IP Address: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
-//        ipLabel.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
-//        ipLabel.frame = CGRectMake(self.pathView.frame.origin.x + SMALL_FONT_SIZE,
-//                                             self.view.frame.origin.y + self.pathView.frame.size.height - SMALL_FONT_SIZE,
-//                                             [self sizeOfString:ipLabel.text withFont:ipLabel.font].width,
-//                                             SMALL_FONT_SIZE);
-//        [self.pathView addSubview:ipLabel];
-
         UILabel *currentPath = [[UILabel alloc] initWithFrame:CGRectZero];
         currentPath.text = @"Path: ";
         [currentPath setFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]];
         [currentPath setFrame:CGRectMake(SMALL_FONT_SIZE,
-                                         (self.pathScroll.frame.size.height - MEDIAN_FONT_SIZE)/ 2.0,
+                                         (self.pathScroll.frame.size.height - MEDIAN_FONT_SIZE)/ 4.0,
                                          [self sizeOfString:currentPath.text withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width, MEDIAN_FONT_SIZE)];
 
         [self.pathScroll addSubview:currentPath];
@@ -224,7 +215,7 @@
                                                      ForEvents:events];
 
             pathButton.frame = CGRectMake([self sizeOfString:currentPath.text withFont:currentPath.font].width + self.view.frame.origin.x + len + SMALL_FONT_SIZE,
-                                          (self.pathScroll.frame.size.height - MEDIAN_FONT_SIZE)/ 2.0,
+                                          (self.pathScroll.frame.size.height - MEDIAN_FONT_SIZE)/ 4.0,
                                           [self sizeOfString:title withFont:pathButton.titleLabel.font].width,
                                           MEDIAN_FONT_SIZE);
             pathButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
@@ -241,6 +232,29 @@
         }
 
     }
+
+}
+
+-(void)setIPAdress:(NSString *)ip {
+
+    free(_iPadState.ipAddress);
+    _iPadState.ipAddress = [self nsStringToCString:ip];
+    for (UIViewController *vc in [self.navigationController viewControllers])
+        for (UIBarButtonItem *bi in vc.toolbarItems)
+            if (bi.tag == IP_TAG) {
+
+                UILabel *newLabel = [[UILabel alloc] init];
+                newLabel.text = [NSString stringWithFormat:@"IP Address: %@", ip];
+                newLabel.frame = CGRectMake(0,
+                                            0,
+                                            [self sizeOfString:newLabel.text
+                                                      withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width,
+                                            MEDIAN_FONT_SIZE);
+                newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
+                bi.customView = newLabel;
+                break;
+
+            }
 
 }
 
@@ -316,7 +330,7 @@
                                                                style:UIBarButtonItemStyleBordered
                                                               target:target
                                                               action:action];
-    [button setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize: LARGE_FONT_SIZE],
+    [button setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE],
                                                                               NSFontAttributeName,
                                                                               nil]
                           forState:UIControlStateNormal];
@@ -358,7 +372,9 @@
     CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
     CGFloat mainScreenWidth = mainScreenBounds.size.width;
     CGFloat mainScreenHeight = mainScreenBounds.size.height;
-    CGFloat textHeight = mainScreenHeight;
+    CGSize textSize = CGSizeZero;
+    if (self.helpView)
+        textSize = [self sizeOfString:self.helpView.text withFont:self.helpView.font];
     
     if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
        [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
@@ -366,7 +382,7 @@
         CGFloat temp = mainScreenWidth;
         mainScreenWidth = mainScreenHeight;
         mainScreenHeight = temp;
-        textHeight = mainScreenWidth;
+        //textHeight = mainScreenWidth;
 
     }
 
@@ -383,9 +399,6 @@
                                            mainScreenWidth,
                                            PATH_VIEW_HEIGHT);
         self.pathScroll.contentSize = CGSizeMake([self sizeOfString:@"Path: " withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width + self.view.frame.origin.x + [self sizeOfString:[NSString stringWithUTF8String:self.iPadState.currentPath] withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width + (SMALL_FONT_SIZE * 2), self.pathScroll.frame.size.height);
-        NSLog(@"%f", self.pathScroll.contentSize.width);
-        NSLog(@"%f", self.pathScroll.contentSize.height);
-        NSLog(@"%@", self.pathScroll);
 
     }
 
@@ -397,8 +410,8 @@
     if (self.helpView)
         self.helpView.frame = CGRectMake(LARGE_FONT_SIZE,
                                          self.view.frame.origin.y,
-                                         self.view.frame.size.width,
-                                         textHeight);
+                                         textSize.width + LARGE_FONT_SIZE * 2,
+                                         textSize.height);
 
     if (self.helpScroll && self.helpView) {
 
@@ -493,18 +506,31 @@
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
                                                                           target:nil
                                                                           action:nil];
+    UIBarButtonItem *flex2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+                                                                          target:nil
+                                                                          action:nil];
+    
+    UILabel *ipLabel = [[UILabel alloc] init];
+    ipLabel.text = [NSString stringWithFormat:@"IP Address: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
+    ipLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
+    ipLabel.frame = CGRectMake(0,
+                               0,
+                               [self sizeOfString:ipLabel.text withFont:ipLabel.font].width,
+                               MEDIAN_FONT_SIZE);
+    UIBarButtonItem *ipButtonItem = [[UIBarButtonItem alloc] initWithCustomView:ipLabel];
+    ipButtonItem.tag = IP_TAG;
 
     // make lable for switch
     NSString *switchString = @"Turn on/off server:";
     UILabel *switchLable = [[UILabel alloc] initWithFrame:CGRectMake(0,
                                                                      0,
                                                                      [self sizeOfString:switchString
-                                                                               withFont:[UIFont systemFontOfSize: LARGE_FONT_SIZE]].width,
+                                                                               withFont:[UIFont systemFontOfSize: MEDIAN_FONT_SIZE]].width,
                                                                      CELL_HEIGHT)];
     switchLable.text = switchString;
     switchLable.backgroundColor = [UIColor clearColor];
     switchLable.textColor = [UIColor blackColor];
-    switchLable.font = [UIFont systemFontOfSize:LARGE_FONT_SIZE];
+    switchLable.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     [switchLable setTextAlignment:NSTextAlignmentCenter];
     UIBarButtonItem *switchButtonItem = [[UIBarButtonItem alloc] initWithCustomView:switchLable];
 
@@ -512,7 +538,7 @@
     UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:self.conectSwitch];
 
     // put objects in toolbar
-    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:addDirButton, flex, switchButtonItem, cSwitch, nil];
+    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:addDirButton, flex, ipButtonItem, flex2, switchButtonItem, cSwitch, nil];
     self.toolbarItems = toolBarItems;
 
     // set tool bar settings
@@ -760,9 +786,12 @@
     nameLabel.text = [NSString stringWithFormat:@"Name: %@", key];
     nameLabel.frame = CGRectMake(0, 0, [self sizeOfString:nameLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
     [nameLabel setTextColor:[UIColor whiteColor]];
+    [nameLabel setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
 
-    UIView *custom = [[UIView alloc] initWithFrame:CGRectZero];
+    UIScrollView *custom = [[UIScrollView alloc] initWithFrame:CGRectZero];
     [custom setBackgroundColor:[UIColor clearColor]];
+    [custom setBounces:NO];
+
     [custom addSubview:nameLabel];
 
     int i = 1;
@@ -771,6 +800,7 @@
         
         UILabel *l = [[UILabel alloc] init];
         l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
+        [l setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
         CGFloat width = [self sizeOfString:l.text
                                   withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width;
         l.frame = CGRectMake(0, SMALL_FONT_SIZE * i, width, SMALL_FONT_SIZE);
@@ -782,7 +812,6 @@
         i++;
 
     }
-    custom.frame = CGRectMake(0, 0, maxWidth, i * SMALL_FONT_SIZE);
 
     self.detailView.customView = custom;
     for (NSString *b in self.actionSheetButtons)
@@ -791,6 +820,8 @@
                                    selector:@selector(detailedVeiwButtonPressed:)];
 
     [self.detailView showOrUpdateAnimated:NO];
+    custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, (i + 1) * SMALL_FONT_SIZE);
+    custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);
 
 }
 
