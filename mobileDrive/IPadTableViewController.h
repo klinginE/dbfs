@@ -14,7 +14,7 @@
 #define SMALL_FONT_SIZE 20.0
 #define CELL_HEIGHT (LARGE_FONT_SIZE + SMALL_FONT_SIZE + 10.0)
 #define NUM_ALERTS 5
-#define PATH_VIEW_HEIGHT (SMALL_FONT_SIZE * 3)
+#define PATH_VIEW_HEIGHT (MEDIAN_FONT_SIZE * 3.5)
 
 @interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
 

@@ -25,7 +25,7 @@
 @property (strong, nonatomic) UIScrollView *helpScroll;
 @property (strong, nonatomic) UILabel *helpView;
 @property (strong, nonatomic) UITableView *mainTableView;
-@property (strong, nonatomic) UIView *pathView;
+@property (strong, nonatomic) UIScrollView *pathScroll;
 @property (strong, nonatomic) UIColor *barColor;
 @property (strong, nonatomic) NSMutableArray *actionSheetButtons;
 @property (strong, nonatomic) UIColor *buttonColor;
@@ -190,26 +190,28 @@
 
 -(void)initPathViewWithAction:(SEL)action ForEvents:(UIControlEvents)events {
 
-    if (self.pathView && self.view) {
+    if (self.pathScroll && self.view) {
 
-        UILabel *ipLabel = [[UILabel alloc] init];
-        ipLabel.text = [NSString stringWithFormat:@"IP Address: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
-        ipLabel.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
-        ipLabel.frame = CGRectMake(self.pathView.frame.origin.x + SMALL_FONT_SIZE,
-                                             self.view.frame.origin.y + PATH_VIEW_HEIGHT / 2.0,
-                                             [self sizeOfString:ipLabel.text withFont:ipLabel.font].width,
-                                             PATH_VIEW_HEIGHT/2.0);
-        [self.pathView addSubview:ipLabel];
+//        UILabel *ipLabel = [[UILabel alloc] init];
+//        ipLabel.text = [NSString stringWithFormat:@"IP Address: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
+//        ipLabel.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
+//        ipLabel.frame = CGRectMake(self.pathView.frame.origin.x + SMALL_FONT_SIZE,
+//                                             self.view.frame.origin.y + self.pathView.frame.size.height - SMALL_FONT_SIZE,
+//                                             [self sizeOfString:ipLabel.text withFont:ipLabel.font].width,
+//                                             SMALL_FONT_SIZE);
+//        [self.pathView addSubview:ipLabel];
+
+        UILabel *currentPath = [[UILabel alloc] initWithFrame:CGRectZero];
+        currentPath.text = @"Path: ";
+        [currentPath setFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]];
+        [currentPath setFrame:CGRectMake(SMALL_FONT_SIZE,
+                                         (self.pathScroll.frame.size.height - MEDIAN_FONT_SIZE)/ 2.0,
+                                         [self sizeOfString:currentPath.text withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width, MEDIAN_FONT_SIZE)];
+
+        [self.pathScroll addSubview:currentPath];
 
         NSString *title = @"/";
         NSInteger len = 0;
-        UILabel *currentPath = [[UILabel alloc] init];
-        currentPath.text = @"Path: ";
-        [currentPath setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
-        [currentPath setFrame:CGRectMake(self.view.frame.origin.x + SMALL_FONT_SIZE, self.view.frame.origin.y, [self sizeOfString:currentPath.text withFont:currentPath.font].width, PATH_VIEW_HEIGHT/ 2.0)];
-
-        [self.pathView addSubview:currentPath];
-
         for (int i = 1; i <= (self.iPadState.depth + 1); i++) {
 
             title = [self dirAtDepth:(i - 1)
@@ -222,9 +224,9 @@
                                                      ForEvents:events];
 
             pathButton.frame = CGRectMake([self sizeOfString:currentPath.text withFont:currentPath.font].width + self.view.frame.origin.x + len + SMALL_FONT_SIZE,
-                                          self.view.frame.origin.y,
+                                          (self.pathScroll.frame.size.height - MEDIAN_FONT_SIZE)/ 2.0,
                                           [self sizeOfString:title withFont:pathButton.titleLabel.font].width,
-                                          PATH_VIEW_HEIGHT/2.0);
+                                          MEDIAN_FONT_SIZE);
             pathButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
 
             if (i == (self.iPadState.depth + 1)) {
@@ -234,8 +236,7 @@
 
             }
             len += [self sizeOfString:title withFont:pathButton.titleLabel.font].width;
-
-            [self.pathView addSubview:pathButton];
+            [self.pathScroll addSubview:pathButton];
 
         }
 
@@ -254,7 +255,7 @@
     self.helpScroll = nil;
     self.helpView = nil;
     self.mainTableView = nil;
-    self.pathView = nil;
+    self.pathScroll = nil;
     self.barColor = nil;
     self.actionSheetButtons = nil;
     self.buttonColor = nil;
@@ -337,7 +338,7 @@
                action:action
      forControlEvents:events];
     [button setTitle:title forState:UIControlStateNormal];
-    [button.titleLabel setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
+    [button.titleLabel setFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]];
     button.tag = tag;
     [button setTitleColor:self.buttonColor forState:UIControlStateNormal];
 
@@ -369,21 +370,30 @@
 
     }
 
-    if (self.pathView)
-        self.pathView.frame = CGRectMake(0,
-                                         self.navigationController.navigationBar.frame.origin.y + self. navigationController.navigationBar.frame.size.height,
-                                         mainScreenWidth,
-                                         PATH_VIEW_HEIGHT);
-    if (self.mainTableView)
-        self.mainTableView.frame = CGRectMake(0,
-                                              self.pathView.frame.origin.y + PATH_VIEW_HEIGHT,
-                                              mainScreenWidth,
-                                              mainScreenHeight - self.pathView.frame.origin.y - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height);
     if (self.view)
         self.view.frame = CGRectMake(0,
                                      0,
                                      mainScreenWidth,
-                                     self.mainTableView.frame.size.height + PATH_VIEW_HEIGHT);
+                                     mainScreenHeight - self.navigationController.navigationBar.frame.origin.y - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height);
+    
+    if (self.pathScroll) {
+
+        self.pathScroll.frame = CGRectMake(self.view.frame.origin.x,
+                                           self.view.frame.origin.y + self.navigationController.navigationBar.frame.origin.y + self.navigationController.navigationBar.frame.size.height,
+                                           mainScreenWidth,
+                                           PATH_VIEW_HEIGHT);
+        self.pathScroll.contentSize = CGSizeMake([self sizeOfString:@"Path: " withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width + self.view.frame.origin.x + [self sizeOfString:[NSString stringWithUTF8String:self.iPadState.currentPath] withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width + (SMALL_FONT_SIZE * 2), self.pathScroll.frame.size.height);
+        NSLog(@"%f", self.pathScroll.contentSize.width);
+        NSLog(@"%f", self.pathScroll.contentSize.height);
+        NSLog(@"%@", self.pathScroll);
+
+    }
+
+    if (self.mainTableView)
+        self.mainTableView.frame = CGRectMake(0,
+                                              self.pathScroll.frame.origin.y + self.pathScroll.frame.size.height,
+                                              mainScreenWidth,
+                                              mainScreenHeight - self.pathScroll.frame.origin.y - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height);
     if (self.helpView)
         self.helpView.frame = CGRectMake(LARGE_FONT_SIZE,
                                          self.view.frame.origin.y,
@@ -423,16 +433,19 @@
     self.mainTableView.dataSource = self;
     self.mainTableView.delegate = self;
 
-    self.pathView = [[UIView alloc] initWithFrame:CGRectZero];
-    [self.pathView setBackgroundColor:self.barColor];
+    self.pathScroll = [[UIScrollView alloc] initWithFrame:CGRectZero];
+    [self.pathScroll setBackgroundColor:self.barColor];
+    [self.pathScroll setBounces:NO];
+    [self.pathScroll setScrollEnabled:YES];
+    self.automaticallyAdjustsScrollViewInsets = NO;
 
     UIView *mainView = [[UIView alloc] initWithFrame:CGRectZero];
     self.view = mainView;
 
-    [self.view addSubview:self.pathView];
+    [self makeFrameForViews];
+    [self.view addSubview:self.pathScroll];
     [self.view addSubview:self.mainTableView];
     [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
-    [self makeFrameForViews];
 
 }
 
@@ -521,8 +534,9 @@
 
 -(void)viewWillAppear:(BOOL)animated {
 
-    self.conectSwitch.on = self.appDelegate.isConnected;
     [super viewWillAppear:animated];
+    self.conectSwitch.on = self.appDelegate.isConnected;
+    [self.pathScroll setContentOffset:CGPointMake(0, 0)];
 
 }
 
