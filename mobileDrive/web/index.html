@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <title>Mobile Drive</title>
+    <meta charset="utf-8">
+    <meta name="description" content="Mobile Drive">
+    <meta name="author" content="Data Dryvers" />
+    <link rel="stylesheet" href="styles/style.css" />
+    <link rel="stylesheet" href="styles/gh-buttons.css" />
+    <script src="js/jquery.min.js" type="text/javascript"></script>
+    <script src="js/jquery.omniwindow.js" type="text/javascript"></script>
+    <script src="js/filesystem.js" type="text/javascript"></script>
+    <script src="js/ui.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div class="ow-overlay ow-closed"></div>
+    <div id="create-directory-window" class="modal ow-closed">
+      <h1 class="title">Create Directory</h1>
+      <a class="close-button" href="#"><img src="img/cross.png" /></a>
+      <form id="create-directory-form">
+        <label for="dir-name">Name</label>
+        <input type="text" id="dir-name" name="dir-name" />
+        <a href="#" class="button icon log">Create</a>
+      </form>
+    </div>
+    <div id="content">
+      <div id="breadcrumbs">
+      </div>
+      <table id="file-list">
+        <tr id="header-row">
+          <th id="sort-name">Name</th>
+          <th id="sort-date">Date Modified</th>
+          <th id="sort-type"><img src="img/arrow_down.png"> Type</th>
+          <th id="sort-size">Size</th>
+        </tr>
+      </table>
+      <div id="actions" class="button-container">
+        <div class="button-group">
+          <a id="create-directory-button" href="#" class="button icon log">Create Directory</a>
+        </div>
+        <div id="file-actions" class="button-group">
+          <a href="#" class="button danger icon remove disable">Delete</a>
+          <a href="#" class="button icon edit disable">Rename</a>
+          <a href="#" class="button icon arrowdown disable">Download</a>
+        </div>
+        <div class="button-group">
+          <form id="upload-form">
+            <input type="file" id="upload-file" name="upload-file" />
+            <a href="#" id="select-file-button" class="button icon tag">Select File...</a>
+            <a href="#" id="upload-button" class="button icon arrowup disable">Upload</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
