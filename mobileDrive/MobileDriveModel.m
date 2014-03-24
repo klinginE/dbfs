@@ -16,6 +16,13 @@
     DBFS *dbfs;
 }
 
+-(id)init {
+    self = [super init];
+    dbfs = [dbInterface openDatabase:@"database"];
+    
+    return self;
+}
+
 -(NSDictionary *)getCurrentContents {
     return _directoryContents;
 }
@@ -35,6 +42,10 @@
     [dbInterface putFile:fname fromDatabase:dbfs from:in withSize:size];
 }
 
+-(void)renameFile:(NSString *)oldName to:(NSString *)newName {
+    
+}
+
 -(void)overwriteFile:(NSString *)fname from:(FILE *)in {
     [dbInterface overwriteFile:fname inDatabase:dbfs from:in];
 }
@@ -48,6 +59,12 @@
 }
 
 -(DBFS_DirList *)getDirectoryListIn:(NSString *)dirName {
+    DBFS_DirList *dirList = nil;
+    dirList = [dbInterface getDirectoryListIn:dirName inDatabase:dbfs];
+    
+    NSDictionary *dirDict;
+    NSArray *keys;
+    
     return [dbInterface getDirectoryListIn:dirName inDatabase:dbfs];
 }
 
