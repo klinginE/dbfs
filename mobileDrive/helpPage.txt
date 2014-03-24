@@ -1,9 +1,10 @@
 To change directories:
     1) Tap once on any directory
 
-To cange to a previouse directory in current path:
-    1) Scroll over to the directory you want in the "Path" field at the top
-    2) Tap once on the directory that directory
+To cange to a previous directory in current path:
+    1) Scroll over to the directory you want in the "Path" field at
+        the top
+    2) Tap once on the directory you want to navigate to.
 
 To go back:
     1) Tap once on the "<" button

@@ -411,7 +411,7 @@
         self.helpView.frame = CGRectMake(LARGE_FONT_SIZE,
                                          self.view.frame.origin.y,
                                          textSize.width + LARGE_FONT_SIZE * 2,
-                                         textSize.height);
+                                         textSize.height + LARGE_FONT_SIZE);
 
     if (self.helpScroll && self.helpView) {
 
