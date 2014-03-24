@@ -25,7 +25,6 @@
 		DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */ = {isa = PBXBuildFile; fileRef = DE96FBC118CE618B008553D8 /* helpPage.txt */; };
 		DE9833C718C96BA0003CEA5B /* dbfs in Resources */ = {isa = PBXBuildFile; fileRef = DE9833C618C96BA0003CEA5B /* dbfs */; };
 		DED6C4C118D2643900F50F97 /* IPadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DED6C4C018D2643900F50F97 /* IPadTableViewController.m */; };
-		DEF5A1D618E0F2AA0006D1AE /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1D518E0F2AA0006D1AE /* README.md */; };
 		DEF5A1E918E0F2BC0006D1AE /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1D918E0F2BC0006D1AE /* arrow_down.png */; };
 		DEF5A1EA18E0F2BC0006D1AE /* arrow_up.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1DA18E0F2BC0006D1AE /* arrow_up.png */; };
 		DEF5A1EB18E0F2BC0006D1AE /* cross.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1DB18E0F2BC0006D1AE /* cross.png */; };
@@ -40,6 +39,7 @@
 		DEF5A1F418E0F2BC0006D1AE /* ui.js in Sources */ = {isa = PBXBuildFile; fileRef = DEF5A1E518E0F2BC0006D1AE /* ui.js */; };
 		DEF5A1F518E0F2BC0006D1AE /* gh-buttons.css in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1E718E0F2BC0006D1AE /* gh-buttons.css */; };
 		DEF5A1F618E0F2BC0006D1AE /* style.css in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1E818E0F2BC0006D1AE /* style.css */; };
+		DEF84A6018E0FCF3009AC0CC /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DEF84A5F18E0FCF3009AC0CC /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,7 +81,6 @@
 		DED6C4BD18D2608300F50F97 /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
 		DED6C4BF18D2643900F50F97 /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
 		DED6C4C018D2643900F50F97 /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
-		DEF5A1D518E0F2AA0006D1AE /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		DEF5A1D918E0F2BC0006D1AE /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
 		DEF5A1DA18E0F2BC0006D1AE /* arrow_up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_up.png; sourceTree = "<group>"; };
 		DEF5A1DB18E0F2BC0006D1AE /* cross.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cross.png; sourceTree = "<group>"; };
@@ -96,6 +95,7 @@
 		DEF5A1E518E0F2BC0006D1AE /* ui.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ui.js; sourceTree = "<group>"; };
 		DEF5A1E718E0F2BC0006D1AE /* gh-buttons.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = "gh-buttons.css"; sourceTree = "<group>"; };
 		DEF5A1E818E0F2BC0006D1AE /* style.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = style.css; sourceTree = "<group>"; };
+		DEF84A5F18E0FCF3009AC0CC /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +125,7 @@
 		DE0FDF5618C963CA00843686 = {
 			isa = PBXGroup;
 			children = (
+				DEF84A5F18E0FCF3009AC0CC /* README.md */,
 				DE0FDF6818C963CB00843686 /* mobileDrive */,
 				DE0FDF8118C963CB00843686 /* mobileDriveTests */,
 				DE0FDF6118C963CB00843686 /* Frameworks */,
@@ -156,7 +157,6 @@
 		DE0FDF6818C963CB00843686 /* mobileDrive */ = {
 			isa = PBXGroup;
 			children = (
-				DEF5A1D518E0F2AA0006D1AE /* README.md */,
 				8AFF3ECB18D24CB300FB8A21 /* files.plist */,
 				DEF5A1D718E0F2BC0006D1AE /* web */,
 				DE9833C618C96BA0003CEA5B /* dbfs */,
@@ -331,9 +331,9 @@
 				DEF5A1F618E0F2BC0006D1AE /* style.css in Resources */,
 				DEF5A1EC18E0F2BC0006D1AE /* gh-icons.png in Resources */,
 				DEF5A1ED18E0F2BC0006D1AE /* page_link.png in Resources */,
-				DEF5A1D618E0F2AA0006D1AE /* README.md in Resources */,
 				DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */,
 				DEF5A1E918E0F2BC0006D1AE /* arrow_down.png in Resources */,
+				DEF84A6018E0FCF3009AC0CC /* README.md in Resources */,
 				8AFF3ECC18D24CB300FB8A21 /* files.plist in Resources */,
 				DEF5A1F018E0F2BC0006D1AE /* index.html in Resources */,
 				DE0FDF6D18C963CB00843686 /* InfoPlist.strings in Resources */,
