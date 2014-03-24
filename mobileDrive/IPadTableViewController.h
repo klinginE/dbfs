@@ -42,8 +42,8 @@ typedef struct {
 // Public inits
 -(id)initWithPath:(NSString *)currentPath
         ipAddress:(NSString *)ip
-     switchAction:(SEL)action
-        forEvents:(UIControlEvents)events
+     switchAction:(SEL)sAction
+        forEvents:(UIControlEvents)sEvents
        pathAction:(SEL)pAction
        pathEvents:(UIControlEvents)pEvents;
 -(void)initState:(State *)state WithPath:(NSString *)path Address:(NSString *)ip;

@@ -28,6 +28,7 @@
 @property (strong, nonatomic) UILabel *helpLabelView;
 @property (strong, nonatomic) UITableView *mainTableView;
 @property (strong, nonatomic) UIScrollView *pathScrollView;
+@property (strong, nonatomic) UILabel *pathLabelView;
 @property (strong, nonatomic) CODialog *detailView;
 
 // Actions
@@ -81,8 +82,8 @@
 
 -(id)initWithPath:(NSString *)currentPath
          ipAddress:(NSString *)ip
-     switchAction:(SEL)action
-        forEvents:(UIControlEvents)events
+     switchAction:(SEL)sAction
+        forEvents:(UIControlEvents)sEvents
        pathAction:(SEL)pAction
        pathEvents:(UIControlEvents)pEvents {
 
@@ -110,17 +111,18 @@
 
         // set up connection switch
         _appDelegate = (MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate;
-        _switchAction = action;
-        _switchEvents = events;
+        _switchAction = sAction;
+        _switchEvents = sEvents;
         _conectSwitchView = [[UISwitch alloc] init];
         [_conectSwitchView addTarget:_appDelegate
-                          action:_switchAction
-                forControlEvents:events];
+                              action:_switchAction
+                    forControlEvents:sEvents];
         if (self.appDelegate.isConnected)
             _conectSwitchView.on = YES;
         else
             _conectSwitchView.on = NO;
 
+        // Set up path
         _pathAction = pAction;
         _pathEvents = pEvents;
 
@@ -142,9 +144,10 @@
     state->currentPath = [self nsStringToCString:path];
     state->ipAddress = [self nsStringToCString:ip];
     NSUInteger len = [path length];
+    NSUInteger index = len - 1;
+
     assert(len > 0);
     assert([path characterAtIndex:0] == '/');
-    NSUInteger index = len - 1;
 
     if (index)
         for (; [path characterAtIndex:index - 1] != '/'; index--);
@@ -167,7 +170,7 @@
 
         UIAlertView *alert = [[UIAlertView alloc] init];
         switch (i) {
-                
+
             case ADD_ALERT_TAG:
                 alert.alertViewStyle = UIAlertViewStylePlainTextInput;
                 [alert setDelegate:self];
@@ -237,10 +240,13 @@
 
         UILabel *currentPath = [[UILabel alloc] initWithFrame:CGRectZero];
         currentPath.text = @"Path: ";
+        CGSize currentPathSize = [self sizeOfString:currentPath.text withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]];
+        CGFloat pathY = (self.pathScrollView.frame.size.height - MEDIAN_FONT_SIZE)/ 4.0;
         [currentPath setFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]];
         [currentPath setFrame:CGRectMake(SMALL_FONT_SIZE,
-                                         (self.pathScrollView.frame.size.height - MEDIAN_FONT_SIZE)/ 4.0,
-                                         [self sizeOfString:currentPath.text withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width, MEDIAN_FONT_SIZE)];
+                                         pathY,
+                                         currentPathSize.width,
+                                         MEDIAN_FONT_SIZE)];
 
         [self.pathScrollView addSubview:currentPath];
 
@@ -256,10 +262,11 @@
                                                       Target:self.appDelegate
                                                       Action:action
                                                      ForEvents:events];
+            CGSize titleSize = [self sizeOfString:title withFont:pathButton.titleLabel.font];
 
-            pathButton.frame = CGRectMake([self sizeOfString:currentPath.text withFont:currentPath.font].width + self.view.frame.origin.x + len + SMALL_FONT_SIZE,
-                                          (self.pathScrollView.frame.size.height - MEDIAN_FONT_SIZE)/ 4.0,
-                                          [self sizeOfString:title withFont:pathButton.titleLabel.font].width,
+            pathButton.frame = CGRectMake(self.view.frame.origin.x + SMALL_FONT_SIZE + currentPathSize.width + len,
+                                          pathY,
+                                          titleSize.width,
                                           MEDIAN_FONT_SIZE);
             pathButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
 
@@ -269,8 +276,9 @@
                 [pathButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
 
             }
-            len += [self sizeOfString:title withFont:pathButton.titleLabel.font].width;
+            len += titleSize.width;
             [self.pathScrollView addSubview:pathButton];
+            
 
         }
 
@@ -284,7 +292,7 @@
                                        Tag:(NSInteger)tag
                                     Target:(id)target
                                     Action:(SEL)action {
-    
+
     UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:title
                                                                style:UIBarButtonItemStyleBordered
                                                               target:target
@@ -295,9 +303,9 @@
                           forState:UIControlStateNormal];
     button.tag = tag;
     button.tintColor = self.buttonColor;
-    
+
     return button;
-    
+
 }
 
 -(UIButton *)makeButtonWithTitle:(NSString *)title
@@ -305,7 +313,7 @@
                           Target:(id)target
                           Action:(SEL)action
                        ForEvents:(UIControlEvents)events {
-    
+
     UIButton *button = [[UIButton alloc] init];
     [button addTarget:target
                action:action
@@ -314,51 +322,50 @@
     [button.titleLabel setFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]];
     button.tag = tag;
     [button setTitleColor:self.buttonColor forState:UIControlStateNormal];
-    
+
     return button;
-    
+
 }
 
 -(void)makeFrameForViews {
-    
+
     CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
     CGFloat mainScreenWidth = mainScreenBounds.size.width;
     CGFloat mainScreenHeight = mainScreenBounds.size.height;
     CGSize textSize = CGSizeZero;
     if (self.helpLabelView)
         textSize = [self sizeOfString:self.helpLabelView.text withFont:self.helpLabelView.font];
-    
+
     if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
        [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
-        
+
         CGFloat temp = mainScreenWidth;
         mainScreenWidth = mainScreenHeight;
         mainScreenHeight = temp;
-        //textHeight = mainScreenWidth;
-        
+
     }
-    
+
     if (self.view)
         self.view.frame = CGRectMake(0,
                                      0,
                                      mainScreenWidth,
                                      mainScreenHeight - self.navigationController.navigationBar.frame.origin.y - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height);
-    
+
     if (self.pathScrollView) {
-        
+
         self.pathScrollView.frame = CGRectMake(self.view.frame.origin.x,
                                            self.view.frame.origin.y + self.navigationController.navigationBar.frame.origin.y + self.navigationController.navigationBar.frame.size.height,
                                            mainScreenWidth,
                                            PATH_VIEW_HEIGHT);
         self.pathScrollView.contentSize = CGSizeMake([self sizeOfString:@"Path: " withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width + self.view.frame.origin.x + [self sizeOfString:[NSString stringWithUTF8String:self.iPadState.currentPath] withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width + (SMALL_FONT_SIZE * 2), self.pathScrollView.frame.size.height);
-        
+
     }
 
     if (self.mainTableView)
         self.mainTableView.frame = CGRectMake(0,
-                                              self.pathScrollView.frame.origin.y + self.pathScrollView.frame.size.height,
-                                              mainScreenWidth,
-                                              mainScreenHeight - self.pathScrollView.frame.origin.y - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height);
+                                          self.pathScrollView.frame.origin.y + self.pathScrollView.frame.size.height,
+                                          mainScreenWidth,
+                                          mainScreenHeight - self.pathScrollView.frame.origin.y - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height);
     if (self.helpLabelView)
         self.helpLabelView.frame = CGRectMake(LARGE_FONT_SIZE,
                                          self.view.frame.origin.y,
@@ -383,7 +390,7 @@
     CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
     CGFloat mainScreenWidth = mainScreenBounds.size.width;
     CGFloat mainScreenHeight = mainScreenBounds.size.height;
-    
+
     if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
        [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
         
@@ -392,21 +399,21 @@
         mainScreenHeight = temp;
         
     }
-    
+
     self.mainTableView = [[UITableView alloc] initWithFrame:CGRectZero
                                                       style:UITableViewStylePlain];
     self.mainTableView.dataSource = self;
     self.mainTableView.delegate = self;
+    self.tableView = self.mainTableView;
 
     self.pathScrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
     [self.pathScrollView setBackgroundColor:self.barColor];
     [self.pathScrollView setBounces:NO];
     [self.pathScrollView setScrollEnabled:YES];
     self.automaticallyAdjustsScrollViewInsets = NO;
-    
-    UIView *mainView = [[UIView alloc] initWithFrame:CGRectZero];
-    self.view = mainView;
-    
+
+    self.view = [[UIView alloc] initWithFrame:CGRectZero];
+
     [self makeFrameForViews];
     [self.view addSubview:self.pathScrollView];
     [self.view addSubview:self.mainTableView];
@@ -747,7 +754,8 @@
     self.navigationController.navigationBar.barTintColor = self.barColor;
     self.navigationController.navigationBar.tintColor = self.buttonColor;
     [self.navigationController setToolbarHidden:NO animated:YES];
-    
+
+    [self.tableView reloadData];
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
     
