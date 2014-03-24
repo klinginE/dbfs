@@ -68,4 +68,7 @@ void dbfs_free_file_list(DBFS_FileList fl);
 DBFS_Error dbfs_lsd(DBFS *db, DBFS_DirName dir, DBFS_DirList *dirs);
 void dbfs_free_dir_list(DBFS_DirList dl);
 
+DBFS_Error dbfs_mvf(DBFS *db, DBFS_FileName from, DBFS_FileName to);
+DBFS_Error dbfs_mvd(DBFS *db, DBFS_DirName from, DBFS_DirName to);
+
 #endif //DBFS_H

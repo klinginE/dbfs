@@ -17,6 +17,8 @@ struct DBFS
     sqlite3_stmt *del;
     sqlite3_stmt *lsf;
     sqlite3_stmt *lsd;
+    sqlite3_stmt *mvf;
+    sqlite3_stmt *mvd;
 };
 
 
@@ -328,6 +330,52 @@ DBFS_Error run_query_lsd(sqlite3_stmt *query, const char *name, DBFS_DirName **o
     return DBFS_OKAY;
 }
 
+static
+DBFS_Error run_query_mvf(sqlite3_stmt *query, const char *from, const char *to)
+{
+    sqlite3_bind_text(query, 1, from, strlen(from), SQLITE_TRANSIENT);
+    sqlite3_bind_text(query, 2, to, strlen(to), SQLITE_TRANSIENT);
+    while (true)
+    {
+        int status = sqlite3_step(query);
+        if (status == SQLITE_ROW)
+        {
+            debug_result(query);
+            abort();
+            continue;
+        }
+        sqlite3_reset(query);
+        if (status == SQLITE_DONE)
+            break;
+        dbfs_fatal();
+    }
+    sqlite3_clear_bindings(query);
+    return DBFS_OKAY;
+}
+
+static
+DBFS_Error run_query_mvd(sqlite3_stmt *query, const char *from, const char *to)
+{
+    sqlite3_bind_text(query, 1, from, strlen(from), SQLITE_TRANSIENT);
+    sqlite3_bind_text(query, 2, to, strlen(to), SQLITE_TRANSIENT);
+    while (true)
+    {
+        int status = sqlite3_step(query);
+        if (status == SQLITE_ROW)
+        {
+            debug_result(query);
+            abort();
+            continue;
+        }
+        sqlite3_reset(query);
+        if (status == SQLITE_DONE)
+            break;
+        dbfs_fatal();
+    }
+    sqlite3_clear_bindings(query);
+    return DBFS_OKAY;
+}
+
 
 DBFS *dbfs_open(const char *name)
 {
@@ -348,6 +396,8 @@ DBFS *dbfs_open(const char *name)
     rv->del = compile_statement(db, sql_fs1_del);
     rv->lsf = compile_statement(db, sql_fs1_lsf);
     rv->lsd = compile_statement(db, sql_fs1_lsd);
+    rv->mvf = compile_statement(db, sql_fs1_mvf);
+    rv->mvd = compile_statement(db, sql_fs1_mvd);
     return rv;
 }
 
@@ -359,6 +409,8 @@ void dbfs_close(DBFS *dbfs)
     free_statement(dbfs->del);
     free_statement(dbfs->lsf);
     free_statement(dbfs->lsd);
+    free_statement(dbfs->mvf);
+    free_statement(dbfs->mvd);
     if (SQLITE_OK != sqlite3_close(dbfs->db))
         dbfs_fatal();
     free(dbfs);
@@ -462,4 +514,22 @@ void dbfs_free_dir_list(DBFS_DirList dl)
         free((char *)dl.dirs[dl.count].name);
     }
     free((DBFS_DirName *)dl.dirs);
+}
+
+DBFS_Error dbfs_mvf(DBFS *dbfs, DBFS_FileName from, DBFS_FileName to)
+{
+    if (!check_file(from) || !check_file(to))
+        return DBFS_NO_SLASH;
+    DBFS_Error err;
+    err = run_query_mvf(dbfs->mvf, from.name, to.name);
+    return err;
+}
+
+DBFS_Error dbfs_mvd(DBFS *dbfs, DBFS_DirName from, DBFS_DirName to)
+{
+    if (!check_dir(from) || !check_dir(to))
+        return DBFS_NO_SLASH;
+    DBFS_Error err;
+    err = run_query_mvd(dbfs->mvd, from.name, to.name);
+    return err;
 }

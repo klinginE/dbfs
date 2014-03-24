@@ -43,3 +43,15 @@ const char *sql_fs1_lsd = QUOTE(
     SELECT DISTINCT substr(name, length(?1) + 1, instr(substr(name, length(?1) + 1), '/')) FROM filesystem_v1
     WHERE instr(name, ?1) == 1 and instr(substr(name, length(?1) + 1), '/') != 0;
 );
+
+const char *sql_fs1_mvf = QUOTE(
+    UPDATE filesystem_v1
+    SET name = ?2
+    WHERE name = ?1;
+);
+
+const char *sql_fs1_mvd = QUOTE(
+    UPDATE filesystem_v1
+    SET name = ?2 || substr(name, length(?1) + 1)
+    WHERE instr(name, ?1) == 1;
+);

@@ -27,3 +27,11 @@ echo 'list sub'
 echo 'list sub2'
 ./dbfs-demo lsd /sub/subdir2/
 ./dbfs-demo lsf /sub/subdir2/
+
+echo 'mvf foo'
+./dbfs-demo mvf /foo /foo2
+echo 'mvd sub'
+./dbfs-demo mvd /sub/ /sub2/
+echo 'list root again'
+./dbfs-demo lsd /
+./dbfs-demo lsf /

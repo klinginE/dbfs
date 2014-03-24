@@ -150,6 +150,38 @@ int do_lsd(DBFS *dbfs, const char *fname, FILE *out)
     return 0;
 }
 
+static
+int do_mvf(DBFS *dbfs, const char *from, const char *to)
+{
+    if (!from || !to)
+    {
+        puts("missing argument");
+        return 1;
+    }
+    if (DBFS_OKAY != dbfs_mvf(dbfs, (DBFS_FileName){from}, (DBFS_FileName){to}))
+    {
+        puts("not okay");
+        return 2;
+    }
+    return 0;
+}
+
+static
+int do_mvd(DBFS *dbfs, const char *from, const char *to)
+{
+    if (!from || !to)
+    {
+        puts("missing argument");
+        return 1;
+    }
+    if (DBFS_OKAY != dbfs_mvd(dbfs, (DBFS_DirName){from}, (DBFS_DirName){to}))
+    {
+        puts("not okay");
+        return 2;
+    }
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     int rv = 0;
@@ -158,7 +190,8 @@ int main(int argc, char **argv)
 
     if (argc < 2 || argv[1][0] == '-')
     {
-        printf("Usage: %s {get|put} filename\n", argv[0]);
+        printf("Usage: %s {get|put|ovr|del|lsf|lsd} filename\n", argv[0]);
+        printf("       %s {mvf|mvd} filename filename2\n", argv[0]);
         return 0;
     }
 
@@ -198,6 +231,14 @@ int main(int argc, char **argv)
     else if (strcmp(argv[1], "lsd") == 0)
     {
         rv = do_lsd(dbfs_handle, argv[2], stdout);
+    }
+    else if (strcmp(argv[1], "mvf") == 0)
+    {
+        rv = do_mvf(dbfs_handle, argv[2], argv[3]);
+    }
+    else if (strcmp(argv[1], "mvd") == 0)
+    {
+        rv = do_mvd(dbfs_handle, argv[2], argv[3]);
     }
     else
     {
