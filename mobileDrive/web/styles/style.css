@@ -1,0 +1,212 @@
+body {
+  font:12px/normal sans-serif;
+  color: #333333;
+}
+
+
+#content {
+  margin-left: auto;
+  margin-right: auto;
+  width: 800px;
+}
+
+
+#actions {
+  padding-top: 10px;
+}
+
+
+#breadcrumbs {
+  font:20px/normal sans-serif;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+
+#breadcrumbs a, #breacrumbs a:visited {
+  color: #4183c4;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+
+#breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+
+#file-list {
+  border-collapse: separate;
+  border-spacing: 0px;
+  border: #c0c0c0 1px solid;
+  width: 100%;
+}
+
+
+#file-list #sort-name {
+  width: 40%;
+}
+
+
+#file-list #sort-date {
+  width: 20%;
+}
+
+
+#file-list #sort-type {
+  width: 20%;
+}
+
+
+#file-list #sort-size {
+  width: 20%;
+}
+
+
+#file-list img {
+  position: relative;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+}
+
+
+#file-list #header-row {
+  background-color: #eeeeee;
+}
+
+
+#file-list tr th {
+  height: 24px;
+  text-align: left;
+  vertical-align: center;
+  color: #4e575b;
+  border-bottom: #c0c0c0 1px solid;
+  padding-left: 4px;
+  font:12px/normal sans-serif;
+  cursor: default;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+
+#file-list tr th:hover {
+  background-color: #cfcfcf;
+}
+
+
+#file-list tr td {
+  font:12px/normal sans-serif;
+  height: 24px;
+  vertical-align: center;
+  cursor: default;
+  padding-left: 4px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+
+#file-list tr .selected {
+  background-color: #4183c4;
+  color: #ffffff;
+}
+
+
+#file-list tr td img, #file-list tr th img {
+  top: 3px;
+}
+
+
+#upload-form {
+  display: inline;
+}
+
+
+#upload-form #upload-file {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  font-size: 12px;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  z-index:-1;
+}
+
+
+#create-directory-window {
+
+    border: #c0c0c0 1px solid;
+}
+
+
+#create-directory-form {
+  clear:both;
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+#create-directory-form input {
+  margin-left: 15px;
+}
+
+
+label {
+  display: block;
+  float: left;
+  position: relative;
+  top: 5px;
+}
+
+
+/* Default class for an overlay */
+.ow-overlay {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: #424242;
+  opacity: 0.8;
+}
+
+
+/* Default class for both hidden overlay and modal window */
+.ow-closed {
+  display: none;
+}
+
+
+/* Default class for modal window */
+.modal {
+  position: fixed;
+  z-index: 20;
+  width: 320px;
+  height: 100px;
+  left: 50%;
+  top: 50px;
+  background-color: #fff;
+  padding: 10px;
+}
+
+.title {
+  float: left;
+  padding-top: 0px;
+  padding-bottom: 20px;
+  margin: 0;
+}
+
+.close-button {
+  float: right;
+  display: block;
+}
