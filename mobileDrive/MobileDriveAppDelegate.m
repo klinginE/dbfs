@@ -8,7 +8,7 @@
 #import "MobileDriveAppDelegate.h"
 #import <string.h>
 #import "ServerViewController.h"
-
+#import "IPadTableViewController.h"
 
 
 @implementation MobileDriveAppDelegate

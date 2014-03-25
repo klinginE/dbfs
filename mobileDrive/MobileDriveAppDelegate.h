@@ -7,14 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "ServerViewController.h"
-#import "IPadTableViewController.h"
+#import "ServerViewController.h";
 #import "MobileDriveModel.h"
 
 #define PUBLIC_EXT @".pub"
 #define PRIVATE_EXT @".pri"
 
-
+@class IPadTableViewController;
 @interface MobileDriveAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
