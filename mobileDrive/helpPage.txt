@@ -1,29 +1,34 @@
 To change directories:
     1) Tap once on any directory
 
+To change to a previous directory in current path:
+    1) Scroll over to the directory you want in the "Path" field at
+        the top
+    2) Tap once on the directory you want to navigate to
+
 To go back:
-    1) Tap once on the "<"
+    1) Tap once on the "<" button
 
 To add a directory:
     1) Tap once on the add directory button
     2) Enter in a name
     3) Tap "OK"
-    
-To see a file's/directoie's meta data:
+
+To see a file's/directory's meta data:
     1) Tap and hold any file/directory
-    
+
 To rename a file/directory:
     1) Tap and hold the file/directory
     2) Tap the rename button
     3) Enter a new name
     4) Tap "OK"
-    
+
 To move a file/directory:
     1) Tap and hold the file/directory
     2) Tap the move button
     3) Enter a new path
     4) Tap "OK"
-    
+
 To delete a file/directory:
     1) Tap and hold the file/directory
     2) Tap the delete button

@@ -8,70 +8,69 @@
 
 #import "IPadTableViewController.h"
 #import <string.h>
+#import <assert.h>
+#import "CODialog.h"
 
 @interface IPadTableViewController ()
 
-@property(weak, atomic) id model;//FIXME chage type from id to pointer to iPad file system model
-@property(strong, atomic)NSMutableArray *alerts;
+@property (strong, atomic) NSMutableArray *alerts;
+@property (weak, nonatomic) MobileDriveAppDelegate *appDelegate;
+@property (assign) SEL switchAction;
+@property (strong, atomic) UISwitch *conectSwitch;
+@property (assign) UIControlEvents switchEvents;
+@property (assign) SEL pathAction;
+@property (assign) UIControlEvents pathEvents;
+@property (strong, nonatomic) NSDictionary *filesDictionary;
+@property (strong, nonatomic) NSArray *fileKeys;
+@property (strong, nonatomic) UIScrollView *helpScroll;
+@property (strong, nonatomic) UILabel *helpView;
+@property (strong, nonatomic) UITableView *mainTableView;
+@property (strong, nonatomic) UIScrollView *pathScroll;
+@property (strong, nonatomic) UIColor *barColor;
+@property (strong, nonatomic) NSMutableArray *actionSheetButtons;
+@property (strong, nonatomic) UIColor *buttonColor;
+@property (strong, nonatomic) CODialog *detailView;
 
 @end
 
-@implementation IPadTableViewController {
+@implementation IPadTableViewController
 
-    __weak MobileDriveAppDelegate *_iPadResponder;
-    SEL _switchAction;
-    UIControlEvents _switchEvents;
-    state _iPadState;
-    UISwitch *_conectSwitch;
-    NSDictionary *_filesDictionary;
-    NSArray *_fileKeys;
-    UIScrollView *_helpScroll;
-    UILabel *_helpView;
-
-}
-
-// We may need these inits for later but for right now they are useles
-//-(id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
-//
-//    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-//    if (self) {
-//    
-//    }
-//    return self;
-//}
-//
-//-(id)initWithStyle:(UITableViewStyle)style {
-//
-//    self = [super initWithStyle:style];
-//    if (self) {
-//        // Custom initialization
-//    }
-//    return self;
-//
-//}
-
--(id)initWithState:(state)currentState
-             model:(id)fsModel
-            target:(MobileDriveAppDelegate *)respond
-      switchAction:(SEL)action
-         forEvents:(UIControlEvents)events {
+-(id)initWithPath:(NSString *)currentPath
+         ipAddress:(NSString *)ip
+           target:(MobileDriveAppDelegate *)respond
+     switchAction:(SEL)action
+        forEvents:(UIControlEvents)events
+       pathAction:(SEL)pAction
+       pathEvents:(UIControlEvents)pEvents {
 
     self = [super init];
     if (self) {
 
         // init state
-        _iPadState.currentDir = currentState.currentDir;
-        _iPadState.currentPath = currentState.currentPath;
+        [self initState:&_iPadState WithPath:currentPath Address:ip];
+        self.title = [NSString stringWithUTF8String:_iPadState.currentDir];
 
-        // init model
-        _model = fsModel;
+        // Set up back button
+        [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:self.title
+                                                                           Tag:BACK_BUTTON_TAG
+                                                                        Target:nil
+                                                                        Action:nil]];
+
+        _buttonColor = [UIColor colorWithRed:(0.0/255.0)
+                                       green:(0.0/255.0)
+                                        blue:(255.0/255.0)
+                                       alpha:1.0f];
+        _barColor = [UIColor colorWithRed:0.75f
+                                    green:0.75f
+                                     blue:0.75f
+                                    alpha:1.0f];
 
         // set up connection switch
-        _iPadResponder = respond;
+        _appDelegate = respond;
         _switchAction = action;
         _switchEvents = events;
         _conectSwitch = [[UISwitch alloc] init];
-        [_conectSwitch addTarget:_iPadResponder
+        [_conectSwitch addTarget:_appDelegate
                           action:_switchAction
                 forControlEvents:events];
         if (respond.isConnected)
@@ -79,63 +78,15 @@
         else
             _conectSwitch.on = NO;
 
-        self.alerts = [[NSMutableArray alloc] init];
-        for (int i = ADD_TAG; i < (NUM_ALERTS + ADD_TAG); i++) {
+        _pathAction = pAction;
+        _pathEvents = pEvents;
 
-            UIAlertView *alert = [[UIAlertView alloc] init];
-            switch (i) {
+        //Set up alerts
+        _alerts = [[NSMutableArray alloc] init];
+        [self initAlerts:_alerts];
 
-                case ADD_TAG:
-                    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
-                    [alert setDelegate:self];
-                    [alert setTitle:@"Add a Directory"];
-                    [alert setMessage:@"Give it a name:"];
-                    [alert addButtonWithTitle:@"Cancel"];
-                    [alert addButtonWithTitle:@"OK"];
-                    alert.tag = ADD_TAG;
-                    break;
-                case DELETE_TAG:
-                    [alert setDelegate:self];
-                    [alert setTitle:@"Deleting a File/Directory"];
-                    [alert setMessage:@"Are You Sure?"];
-                    [alert addButtonWithTitle:@"Cancel"];
-                    [alert addButtonWithTitle:@"OK"];
-                    alert.tag = DELETE_TAG;
-                    break;
-                case MOVE_TAG:
-                    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
-                    [alert setDelegate:self];
-                    [alert setTitle:@"Moving a File/Directory"];
-                    [alert setMessage:@"Give it a new path:"];
-                    [alert addButtonWithTitle:@"Cancel"];
-                    [alert addButtonWithTitle:@"OK"];
-                    alert.tag = MOVE_TAG;
-                    break;
-                case RENAME_TAG:
-                    alert.alertViewStyle = UIAlertViewStylePlainTextInput;
-                    [alert setDelegate:self];
-                    [alert setTitle:@"Renaming a File/Directory"];
-                    [alert setMessage:@"Give it a new name:"];
-                    [alert addButtonWithTitle:@"Cancel"];
-                    [alert addButtonWithTitle:@"OK"];
-                    alert.tag = RENAME_TAG;
-                    break;
-                case CONFIRM_TAG:
-                    [alert setDelegate:self];
-                    [alert setTitle:@"This action is permanent!"];
-                    [alert setMessage:@"Are you sure you want to perform this action?"];
-                    [alert addButtonWithTitle:@"Cancel"];
-                    [alert addButtonWithTitle:@"OK"];
-                    alert.tag = CONFIRM_TAG;
-                    break;
-                default:
-                    break;
-
-            }
-
-            [self.alerts addObject:alert];
-
-        }
+        _actionSheetButtons = [[NSMutableArray alloc] init];
+        [self initActionSheetButtons:_actionSheetButtons];
 
     }
 
@@ -143,35 +94,269 @@
 
 }
 
--(void)dealloc {
+-(void)initState:(State *)state WithPath:(NSString *)path Address:(NSString *)ip {
 
-    //NSLog(@"dealloc");
-    //This assumes that the strings were created on the heap
-    if (_iPadState.currentDir != NULL)
-        free(_iPadState.currentDir);
-    if (_iPadState.currentPath != NULL)
-        free(_iPadState.currentPath);
+    state->currentPath = [self nsStringToCString:path];
+    state->ipAddress = [self nsStringToCString:ip];
+    NSUInteger len = [path length];
+    assert(len > 0);
+    assert([path characterAtIndex:0] == '/');
+    NSUInteger index = len - 1;
+
+    if (index)
+        for (; [path characterAtIndex:index - 1] != '/'; index--);
+    state->currentDir = [self nsStringToCString:[path substringFromIndex:index]];
+
+    state->depth = 0;
+    for (int i = 0; i < (len - 1); i++)
+        if ([path characterAtIndex:i] == '/')
+            state->depth++;
+
+    NSLog(@"dir= %s", state->currentDir);
+    NSLog(@"path= %s", state->currentPath);
+    NSLog(@"depth= %d", state->depth);
 
 }
 
--(UIBarButtonItem *)makeButtonWithTitle:(NSString *)title
-                                    Tag:(NSInteger)tag
-                                  Color:(UIColor *)color
-                                 Target:(id)target
-                                 Action:(SEL)action {
-    
-    UIBarButtonItem *backButton = [[UIBarButtonItem alloc] initWithTitle:title
-                                                                   style:UIBarButtonItemStyleBordered
-                                                                  target:target
-                                                                  action:action];
-    [backButton setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
-                                                                                  NSFontAttributeName,
-                                                                                  nil]
-                              forState:UIControlStateNormal];
-    backButton.tag = tag;
-    backButton.tintColor = color;
+-(void)initAlerts:(NSMutableArray *)alerts {
 
-    return backButton;
+    for (int i = ADD_ALERT_TAG; i < (NUM_ALERTS + ADD_ALERT_TAG); i++) {
+
+        UIAlertView *alert = [[UIAlertView alloc] init];
+        switch (i) {
+                
+            case ADD_ALERT_TAG:
+                alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+                [alert setDelegate:self];
+                [alert setTitle:@"Add a Directory"];
+                [alert setMessage:@"Give it a name:"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = ADD_ALERT_TAG;
+                break;
+            case DELETE_ALERT_TAG:
+                [alert setDelegate:self];
+                [alert setTitle:@"Deleting a File/Directory"];
+                [alert setMessage:@"Are You Sure?"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = DELETE_ALERT_TAG;
+                break;
+            case MOVE_ALERT_TAG:
+                alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+                [alert setDelegate:self];
+                [alert setTitle:@"Moving a File/Directory"];
+                [alert setMessage:@"Give it a new path:"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = MOVE_ALERT_TAG;
+                break;
+            case RENAME_ALERT_TAG:
+                alert.alertViewStyle = UIAlertViewStylePlainTextInput;
+                [alert setDelegate:self];
+                [alert setTitle:@"Renaming a File/Directory"];
+                [alert setMessage:@"Give it a new name:"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = RENAME_ALERT_TAG;
+                break;
+            case CONFIRM_ALERT_TAG:
+                [alert setDelegate:self];
+                [alert setTitle:@"This action is permanent!"];
+                [alert setMessage:@"Are you sure you want to perform this action?"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = CONFIRM_ALERT_TAG;
+                break;
+            default:
+                break;
+
+        }
+
+        [alerts addObject:alert];
+
+    }
+
+}
+
+-(void)initActionSheetButtons:(NSMutableArray *)buttons {
+
+    [buttons addObject:@"Move"];
+    [buttons addObject:@"Rename"];
+    [buttons addObject:@"Delete"];
+    [buttons addObject:@"Cancel"];
+
+}
+
+-(void)initPathViewWithAction:(SEL)action ForEvents:(UIControlEvents)events {
+
+    if (self.pathScroll && self.view) {
+
+        UILabel *currentPath = [[UILabel alloc] initWithFrame:CGRectZero];
+        currentPath.text = @"Path: ";
+        [currentPath setFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]];
+        [currentPath setFrame:CGRectMake(SMALL_FONT_SIZE,
+                                         (self.pathScroll.frame.size.height - MEDIAN_FONT_SIZE)/ 4.0,
+                                         [self sizeOfString:currentPath.text withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width, MEDIAN_FONT_SIZE)];
+
+        [self.pathScroll addSubview:currentPath];
+
+        NSString *title = @"/";
+        NSInteger len = 0;
+        for (int i = 1; i <= (self.iPadState.depth + 1); i++) {
+
+            title = [self dirAtDepth:(i - 1)
+                              InPath:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+
+            UIButton *pathButton = [self makeButtonWithTitle:title
+                                                         Tag:(i - 1)
+                                                      Target:self.appDelegate
+                                                      Action:action
+                                                     ForEvents:events];
+
+            pathButton.frame = CGRectMake([self sizeOfString:currentPath.text withFont:currentPath.font].width + self.view.frame.origin.x + len + SMALL_FONT_SIZE,
+                                          (self.pathScroll.frame.size.height - MEDIAN_FONT_SIZE)/ 4.0,
+                                          [self sizeOfString:title withFont:pathButton.titleLabel.font].width,
+                                          MEDIAN_FONT_SIZE);
+            pathButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
+
+            if (i == (self.iPadState.depth + 1)) {
+
+                [pathButton setEnabled:NO];
+                [pathButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+
+            }
+            len += [self sizeOfString:title withFont:pathButton.titleLabel.font].width;
+            [self.pathScroll addSubview:pathButton];
+
+        }
+
+    }
+
+}
+
+-(void)setIPAdress:(NSString *)ip {
+
+    free(_iPadState.ipAddress);
+    _iPadState.ipAddress = [self nsStringToCString:ip];
+    for (UIViewController *vc in [self.navigationController viewControllers])
+        for (UIBarButtonItem *bi in vc.toolbarItems)
+            if (bi.tag == IP_TAG) {
+
+                UILabel *newLabel = [[UILabel alloc] init];
+                newLabel.text = [NSString stringWithFormat:@"IP Address: %@", ip];
+                newLabel.frame = CGRectMake(0,
+                                            0,
+                                            [self sizeOfString:newLabel.text
+                                                      withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width,
+                                            MEDIAN_FONT_SIZE);
+                newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
+                bi.customView = newLabel;
+                break;
+
+            }
+
+}
+
+-(void)dealloc {
+
+    //NSLog(@"dealloc");
+    [self freeState:self.iPadState];
+    self.alerts = nil;
+    self.conectSwitch = nil;
+    self.filesDictionary = nil;
+    self.fileKeys = nil;
+    self.helpScroll = nil;
+    self.helpView = nil;
+    self.mainTableView = nil;
+    self.pathScroll = nil;
+    self.barColor = nil;
+    self.actionSheetButtons = nil;
+    self.buttonColor = nil;
+    self.detailView = nil;
+
+}
+
+-(void)freeState:(State)state {
+
+    //This assumes that the strings were created on the heap
+    if (state.currentDir != NULL)
+        free(state.currentDir);
+    if (state.currentPath != NULL)
+        free(state.currentPath);
+    if (state.ipAddress != NULL)
+        free(state.ipAddress);
+
+}
+
+-(NSString *)dirAtDepth:(NSInteger)depth InPath:(NSString *)path {
+
+    NSString *dir = @"/";
+    NSInteger count = -1;
+    NSInteger len = [path length];
+    int right = 0;
+    for (; right < len; right++) {
+
+        if ([path characterAtIndex:right] == '/')
+            count++;
+
+        if (count == depth) {
+
+            int left = right;
+            for (; left > 0; left--)
+                if ([path characterAtIndex:(left - 1)] == '/')
+                    break;
+
+            NSRange range;
+            range.location = left;
+            range.length = ((right + 1) - left);
+            dir = [path substringWithRange:range];
+            break;
+
+        }
+            
+    }
+
+    return dir;
+
+}
+
+-(UIBarButtonItem *)makeBarButtonWithTitle:(NSString *)title
+                                       Tag:(NSInteger)tag
+                                    Target:(id)target
+                                    Action:(SEL)action {
+
+    UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:title
+                                                               style:UIBarButtonItemStyleBordered
+                                                              target:target
+                                                              action:action];
+    [button setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE],
+                                                                              NSFontAttributeName,
+                                                                              nil]
+                          forState:UIControlStateNormal];
+    button.tag = tag;
+    button.tintColor = self.buttonColor;
+
+    return button;
+
+}
+
+-(UIButton *)makeButtonWithTitle:(NSString *)title
+                             Tag:(NSInteger)tag
+                          Target:(id)target
+                          Action:(SEL)action
+                       ForEvents:(UIControlEvents)events {
+
+    UIButton *button = [[UIButton alloc] init];
+    [button addTarget:target
+               action:action
+     forControlEvents:events];
+    [button setTitle:title forState:UIControlStateNormal];
+    [button.titleLabel setFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]];
+    button.tag = tag;
+    [button setTitleColor:self.buttonColor forState:UIControlStateNormal];
+
+    return button;
 
 }
 
@@ -182,24 +367,110 @@
 
 }
 
--(void)loadView {
+-(void)makeFrameForViews {
 
-    UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
-    tableView.dataSource = self;
-    tableView.delegate = self;
-    self.view = tableView;
+    CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
+    CGFloat mainScreenWidth = mainScreenBounds.size.width;
+    CGFloat mainScreenHeight = mainScreenBounds.size.height;
+    CGSize textSize = CGSizeZero;
+    if (self.helpView)
+        textSize = [self sizeOfString:self.helpView.text withFont:self.helpView.font];
+    
+    if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
+       [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
+
+        CGFloat temp = mainScreenWidth;
+        mainScreenWidth = mainScreenHeight;
+        mainScreenHeight = temp;
+        //textHeight = mainScreenWidth;
+
+    }
+
+    if (self.view)
+        self.view.frame = CGRectMake(0,
+                                     0,
+                                     mainScreenWidth,
+                                     mainScreenHeight - self.navigationController.navigationBar.frame.origin.y - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height);
+    
+    if (self.pathScroll) {
+
+        self.pathScroll.frame = CGRectMake(self.view.frame.origin.x,
+                                           self.view.frame.origin.y + self.navigationController.navigationBar.frame.origin.y + self.navigationController.navigationBar.frame.size.height,
+                                           mainScreenWidth,
+                                           PATH_VIEW_HEIGHT);
+        self.pathScroll.contentSize = CGSizeMake([self sizeOfString:@"Path: " withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width + self.view.frame.origin.x + [self sizeOfString:[NSString stringWithUTF8String:self.iPadState.currentPath] withFont:[UIFont systemFontOfSize:MEDIAN_FONT_SIZE]].width + (SMALL_FONT_SIZE * 2), self.pathScroll.frame.size.height);
+
+    }
+
+    if (self.mainTableView)
+        self.mainTableView.frame = CGRectMake(0,
+                                              self.pathScroll.frame.origin.y + self.pathScroll.frame.size.height,
+                                              mainScreenWidth,
+                                              mainScreenHeight - self.pathScroll.frame.origin.y - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height);
+    if (self.helpView)
+        self.helpView.frame = CGRectMake(LARGE_FONT_SIZE,
+                                         self.view.frame.origin.y,
+                                         textSize.width + LARGE_FONT_SIZE * 2,
+                                         textSize.height + LARGE_FONT_SIZE);
+
+    if (self.helpScroll && self.helpView) {
+
+        self.helpScroll.frame = CGRectMake(self.view.frame.origin.x,
+                                           self.view.frame.origin.y,
+                                           self.view.frame.size.width,
+                                           mainScreenHeight);
+        self.helpScroll.contentSize = CGSizeMake(self.helpView.frame.size.width,
+                                                 self.helpView.frame.size.height);
+
+    }
 
 }
 
-- (void)viewDidLoad {
+-(void)loadView {
+
+    CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
+    CGFloat mainScreenWidth = mainScreenBounds.size.width;
+    CGFloat mainScreenHeight = mainScreenBounds.size.height;
+
+    if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
+       [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
+
+        CGFloat temp = mainScreenWidth;
+        mainScreenWidth = mainScreenHeight;
+        mainScreenHeight = temp;
+
+    }
+
+    self.mainTableView = [[UITableView alloc] initWithFrame:CGRectZero
+                                                      style:UITableViewStylePlain];
+    self.mainTableView.dataSource = self;
+    self.mainTableView.delegate = self;
+
+    self.pathScroll = [[UIScrollView alloc] initWithFrame:CGRectZero];
+    [self.pathScroll setBackgroundColor:self.barColor];
+    [self.pathScroll setBounces:NO];
+    [self.pathScroll setScrollEnabled:YES];
+    self.automaticallyAdjustsScrollViewInsets = NO;
+
+    UIView *mainView = [[UIView alloc] initWithFrame:CGRectZero];
+    self.view = mainView;
+
+    [self makeFrameForViews];
+    [self.view addSubview:self.pathScroll];
+    [self.view addSubview:self.mainTableView];
+    [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
+
+}
+
+-(void)viewDidLoad {
 
     [super viewDidLoad];
 
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-    [[NSNotificationCenter defaultCenter]
-     addObserver:self selector:@selector(orientationChanged:)
-     name:UIDeviceOrientationDidChangeNotification
-     object:[UIDevice currentDevice]];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(orientationChanged:)
+                                                 name:UIDeviceOrientationDidChangeNotification
+                                               object:[UIDevice currentDevice]];
 
     // Set up directory Contents
     if(_filesDictionary == nil) {
@@ -208,59 +479,66 @@
         NSString *path = [[NSBundle mainBundle] pathForResource:@"files" ofType:@"plist"];
         _filesDictionary = [[NSDictionary alloc] initWithContentsOfFile:path];
         _fileKeys = [[_filesDictionary allKeys] sortedArrayUsingSelector:@selector(compare:)];
+        //[self.appDelegate.model getDirectoryListIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
 
     }
 
     // Get colors
-    UIColor *buttonColor = [UIColor colorWithRed:(220.0/255.0)
-                                           green:(20.0/255.0)
-                                            blue:(60.0/255.0)
-                                           alpha:1.0f];
     UIColor *toolBarColor = [UIColor colorWithRed:0.65f
                                             green:0.65f
                                              blue:0.65f
                                             alpha:1.0f];
-    UIColor *navBarColor = [UIColor colorWithRed:0.75f
-                                           green:0.75f
-                                            blue:0.75f
-                                           alpha:1.0f];
 
     // Add a help button to the top right
-    UIBarButtonItem *helpButton = [self makeButtonWithTitle:@"Need help?"
-                                                        Tag:HELP_TAG
-                                                      Color:buttonColor
-                                                     Target:self
-                                                     Action:@selector(buttonPressed:)];
+    UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"Need help?"
+                                                           Tag:HELP_BUTTON_TAG
+                                                        Target:self
+                                                        Action:@selector(buttonPressed:)];
     self.navigationItem.rightBarButtonItem = helpButton;
 
     // Add a add dir button to the bottom left
-    UIBarButtonItem *addDirButton = [self makeButtonWithTitle:@"Add Directory"
-                                                          Tag:ADD_DIR_TAG
-                                                        Color:buttonColor
-                                                       Target:self
-                                                       Action:@selector(buttonPressed:)];
+    UIBarButtonItem *addDirButton = [self makeBarButtonWithTitle:@"Add Directory"
+                                                             Tag:ADD_DIR_BUTTON_TAG
+                                                          Target:self
+                                                          Action:@selector(buttonPressed:)];
 
     // flexiable space holder
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
                                                                           target:nil
                                                                           action:nil];
+    UIBarButtonItem *flex2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+                                                                          target:nil
+                                                                          action:nil];
+    
+    UILabel *ipLabel = [[UILabel alloc] init];
+    ipLabel.text = [NSString stringWithFormat:@"IP Address: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
+    ipLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
+    ipLabel.frame = CGRectMake(0,
+                               0,
+                               [self sizeOfString:ipLabel.text withFont:ipLabel.font].width,
+                               MEDIAN_FONT_SIZE);
+    UIBarButtonItem *ipButtonItem = [[UIBarButtonItem alloc] initWithCustomView:ipLabel];
+    ipButtonItem.tag = IP_TAG;
 
     // make lable for switch
     NSString *switchString = @"Turn on/off server:";
-    UILabel *switchLable = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, [self sizeOfString:switchString
-                                                                                      withFont:[UIFont systemFontOfSize:LARGE_FONT_SIZE]].width, CELL_HEIGHT)];
+    UILabel *switchLable = [[UILabel alloc] initWithFrame:CGRectMake(0,
+                                                                     0,
+                                                                     [self sizeOfString:switchString
+                                                                               withFont:[UIFont systemFontOfSize: MEDIAN_FONT_SIZE]].width,
+                                                                     CELL_HEIGHT)];
     switchLable.text = switchString;
     switchLable.backgroundColor = [UIColor clearColor];
     switchLable.textColor = [UIColor blackColor];
-    switchLable.font = [UIFont systemFontOfSize:LARGE_FONT_SIZE];
+    switchLable.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     [switchLable setTextAlignment:NSTextAlignmentCenter];
     UIBarButtonItem *switchButtonItem = [[UIBarButtonItem alloc] initWithCustomView:switchLable];
 
     // add switch to the bottom right
-    UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:_conectSwitch];
+    UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:self.conectSwitch];
 
     // put objects in toolbar
-    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:addDirButton, flex, switchButtonItem, cSwitch, nil];
+    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:addDirButton, flex, ipButtonItem, flex2, switchButtonItem, cSwitch, nil];
     self.toolbarItems = toolBarItems;
 
     // set tool bar settings
@@ -268,8 +546,8 @@
     [self.navigationController.toolbar setOpaque:YES];
 
     // set navbar settings
-    self.navigationController.navigationBar.barTintColor = navBarColor;
-    self.navigationController.navigationBar.tintColor = buttonColor;
+    self.navigationController.navigationBar.barTintColor = self.barColor;
+    self.navigationController.navigationBar.tintColor = self.buttonColor;
     [self.navigationController setToolbarHidden:NO animated:YES];
 
     // Uncomment the following line to preserve selection between presentations.
@@ -282,30 +560,15 @@
 
 -(void)viewWillAppear:(BOOL)animated {
 
-    _conectSwitch.on = _iPadResponder.isConnected;
     [super viewWillAppear:animated];
+    self.conectSwitch.on = self.appDelegate.isConnected;
+    [self.pathScroll setContentOffset:CGPointMake(0, 0)];
 
 }
 
-- (void) orientationChanged:(NSNotification *)note {
+-(void)orientationChanged:(NSNotification *)note {
 
-    NSLog(@"Rotated!");
-    CGFloat height = 0.0;
-
-    if (_helpScroll && _helpView) {
-
-        if (self.view.frame.size.width > self.view.frame.size.height)
-            height = self.view.frame.size.width;
-
-        else
-            height = self.view.frame.size.height;
-
-        NSLog(@"changing frames.");
-
-        _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height + self.navigationController.navigationBar.frame.size.height + self.navigationController.toolbar.frame.size.height);
-        [_helpScroll setNeedsDisplay];
-
-    }
+    [self makeFrameForViews];
 
 }
 
@@ -314,46 +577,46 @@
     if (buttonIndex != 0) {
 
         static NSString *text = @"";
-        static allertTag previousTag = NONE;
+        static alertTag previousTag = NONE;
 
         switch (alertView.tag) {
 
-            case ADD_TAG:
-                previousTag = ADD_TAG;
+            case ADD_ALERT_TAG:
+                previousTag = ADD_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alerts WithTag:CONFIRM_TAG] show];
+                [[self objectInArray:self.alerts WithTag:CONFIRM_ALERT_TAG] show];
                 break;
-            case DELETE_TAG:
+            case DELETE_ALERT_TAG:
                 //FIXME add code here to delete
                 break;
-            case MOVE_TAG:
-                previousTag = MOVE_TAG;
+            case MOVE_ALERT_TAG:
+                previousTag = MOVE_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alerts WithTag:CONFIRM_TAG] show];
+                [[self objectInArray:self.alerts WithTag:CONFIRM_ALERT_TAG] show];
                 break;
-            case RENAME_TAG:
-                previousTag = RENAME_TAG;
+            case RENAME_ALERT_TAG:
+                previousTag = RENAME_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alerts WithTag:CONFIRM_TAG] show];
+                [[self objectInArray:self.alerts WithTag:CONFIRM_ALERT_TAG] show];
                 break;
-            case CONFIRM_TAG:
+            case CONFIRM_ALERT_TAG:
                 NSLog(@"Entered= %@", text);
                 switch (previousTag) {
 
-                    case ADD_TAG:
+                    case ADD_ALERT_TAG:
                         //FIXME add code here to add a directory
                         break;
-                    case MOVE_TAG:
+                    case MOVE_ALERT_TAG:
                         //FIXME add code here to move a file/directory
                         break;
-                    case RENAME_TAG:
+                    case RENAME_ALERT_TAG:
                         //FIXME add code here to rename a file/directory
                         break;
                     default:
                         break;
 
                 }
-                previousTag = CONFIRM_TAG;
+                previousTag = CONFIRM_ALERT_TAG;
                 break;
             default:
                 previousTag = NONE;
@@ -377,21 +640,12 @@
 
 }
 
--(void)disPlayHelpPage {
+-(void)displayHelpPage {
     
     NSString *helpMessagePath = [[NSBundle mainBundle] pathForResource:@"helpPage" ofType:@"txt"];
     NSString *helpMessage = [NSString stringWithContentsOfFile:helpMessagePath encoding:NSUTF8StringEncoding error:NULL];
-    
-    CGFloat height = 0;
-    if (self.view.frame.size.height > self.view.frame.size.width)
-        height = self.view.frame.size.height;
-    else
-        height = self.view.frame.size.width;
-    
-    _helpView = [[UILabel alloc] initWithFrame:CGRectMake(LARGE_FONT_SIZE,
-                                                          0.0,
-                                                          self.view.frame.size.width,
-                                                          height)];
+
+    _helpView = [[UILabel alloc] initWithFrame:CGRectZero];
     _helpView.text = helpMessage;
     _helpView.backgroundColor = [UIColor clearColor];
     _helpView.textColor = [UIColor blackColor];
@@ -399,26 +653,23 @@
     _helpView.numberOfLines = 0;
     [_helpView sizeToFit];
     
-    _helpScroll = [[UIScrollView alloc] initWithFrame:CGRectMake(self.view.frame.origin.x,
-                                                                 self.view.frame.origin.y + self.navigationController.navigationBar.frame.size.height,
-                                                                 self.view.frame.size.width,
-                                                                 height - self.navigationController.navigationBar.frame.size.height - self.navigationController.toolbar.frame.size.height)];
+    _helpScroll = [[UIScrollView alloc] initWithFrame:CGRectZero];
     [_helpScroll addSubview:_helpView];
     [_helpScroll setScrollEnabled:YES];
     [_helpScroll setBounces:NO];
-    
-    _helpScroll.contentSize = CGSizeMake(_helpScroll.frame.size.width, height + self.navigationController.navigationBar.frame.size.height + self.navigationController.toolbar.frame.size.height);
-    
+
     UIViewController *helpController = [[UIViewController alloc] init];
     helpController.title = @"Help Page.";
+
     [helpController.view addSubview:_helpScroll];
+    [self makeFrameForViews];
     [self.navigationController pushViewController:helpController animated:YES];
     
 }
 
 -(void)displayAddDirPage {
 
-    UIAlertView *addDirAlert = [self objectInArray:self.alerts WithTag:ADD_TAG];
+    UIAlertView *addDirAlert = [self objectInArray:self.alerts WithTag:ADD_ALERT_TAG];
     [addDirAlert show];
 
 }
@@ -428,10 +679,10 @@
     //NSLog(@"buttonPressed: %d", sender.tag);
     switch (sender.tag) {
 
-        case HELP_TAG:
-            [self disPlayHelpPage];
+        case HELP_BUTTON_TAG:
+            [self displayHelpPage];
             break;
-        case ADD_DIR_TAG:
+        case ADD_DIR_BUTTON_TAG:
             [self displayAddDirPage];
             break;
         default:
@@ -452,7 +703,7 @@
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 
-    return [_fileKeys count];
+    return [self.fileKeys count];
 
 }
 
@@ -477,12 +728,12 @@
     }
 
     // fecthc key and dict info
-    NSString *key = [_fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [_filesDictionary objectForKey:key];
+    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
+    NSDictionary *dict = [self.filesDictionary objectForKey:key];
 
     // set up cell text and other atributes
-    cell.detailTextLabel.text = [dict objectForKey:@"path"];
-    if ([[dict objectForKey:@"isDir"] boolValue]) {
+    cell.detailTextLabel.text = [dict objectForKey:@"Path"];
+    if ([[dict objectForKey:@"Type"] boolValue]) {
 
         cell.textLabel.text = [NSString stringWithFormat:@"📂 %@", key];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -504,48 +755,73 @@
     NSInteger len = [s length];
     char *c = (char *)malloc(len + 1);
     NSInteger i = 0;
-    for (; i < len; i++) {
-
+    for (; i < len; i++)
         c[i] = [s characterAtIndex:i];
-
-    }
     c[i] = '\0';
 
     return c;
 
 }
 
--(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+-(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
-    switch (buttonIndex) {
-
-        case 0:
-            [[self objectInArray:self.alerts WithTag:MOVE_TAG] show];
-            break;
-        case 1:
-            [[self objectInArray:self.alerts WithTag:RENAME_TAG] show];
-            break;
-        case 2:
-            [[self objectInArray:self.alerts WithTag:DELETE_TAG] show];
-            break;
-        default:
-            break;
-
-    }
+    [self.detailView hideAnimated:NO];
+    self.detailView = nil;
+    if ([sender.titleLabel.text isEqualToString:@"Move"])
+        [[self objectInArray:self.alerts WithTag:MOVE_ALERT_TAG] show];
+    else if ([sender.titleLabel.text isEqualToString:@"Rename"])
+        [[self objectInArray:self.alerts WithTag:RENAME_ALERT_TAG] show];
+    else if ([sender.titleLabel.text isEqualToString:@"Delete"])
+        [[self objectInArray:self.alerts WithTag:DELETE_ALERT_TAG] show];
 
 }
 
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
-    UIActionSheet *detailSheet = [[UIActionSheet alloc] initWithTitle:@"File/Directory Details"
-                                                             delegate:self
-                                                    cancelButtonTitle:@"Cancel"
-                                               destructiveButtonTitle:nil
-                                                    otherButtonTitles:@"Move",
-                                                                      @"Rename",
-                                                                      @"Delete",
-                                                                      nil];
-    [detailSheet showInView:self.view];
+    self.detailView = [[CODialog alloc] initWithWindow:[[UIApplication sharedApplication] keyWindow]];
+    [self.detailView setTitle:@"File/Directory details:"];
+    self.detailView.dialogStyle = CODialogStyleCustomView;
+
+    UILabel *nameLabel = [[UILabel alloc] init];
+    nameLabel.text = [NSString stringWithFormat:@"Name: %@", key];
+    nameLabel.frame = CGRectMake(0, 0, [self sizeOfString:nameLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
+    [nameLabel setTextColor:[UIColor whiteColor]];
+    [nameLabel setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
+
+    UIScrollView *custom = [[UIScrollView alloc] initWithFrame:CGRectZero];
+    [custom setBackgroundColor:[UIColor clearColor]];
+    [custom setBounces:NO];
+
+    [custom addSubview:nameLabel];
+
+    int i = 1;
+    CGFloat maxWidth = 0;
+    for (NSString *k in [dict keyEnumerator]) {
+        
+        UILabel *l = [[UILabel alloc] init];
+        l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
+        [l setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
+        CGFloat width = [self sizeOfString:l.text
+                                  withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width;
+        l.frame = CGRectMake(0, SMALL_FONT_SIZE * i, width, SMALL_FONT_SIZE);
+        [l setTextColor:[UIColor whiteColor]];
+        [custom addSubview:l];
+
+        if (width > maxWidth)
+            maxWidth = width;
+        i++;
+
+    }
+
+    self.detailView.customView = custom;
+    for (NSString *b in self.actionSheetButtons)
+        [self.detailView addButtonWithTitle:b
+                                     target:self
+                                   selector:@selector(detailedVeiwButtonPressed:)];
+
+    [self.detailView showOrUpdateAnimated:NO];
+    custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, (i + 1) * SMALL_FONT_SIZE);
+    custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);
 
 }
 
@@ -554,34 +830,21 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
     // Fetch data from keys and dictionary
-    NSString *key = [_fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [_filesDictionary objectForKey:key];
+    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
+    NSDictionary *dict = [self.filesDictionary objectForKey:key];
 
     // if the dict object is a directory then...
-    if ([[dict objectForKey:@"isDir"] boolValue]) {
+    if ([[dict objectForKey:@"Type"] boolValue]) {
 
         // set up state for subTableViewController
-        NSString *subPath = [NSString stringWithFormat:@"%s/%@", _iPadState.currentPath, key];
-        state newState;
-        newState.currentDir = [self nsStringToCString:key];
-        newState.currentPath = [self nsStringToCString:subPath];
-
-        NSLog(@"%s", newState.currentPath);
+        NSString *subPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, key];
 
         // Make subTableviewcontroller to push onto nav stack
-        IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithState:newState
-                                                                                                   model:self.model
-                                                                                                  target:_iPadResponder
-                                                                                            switchAction:_switchAction
-                                                                                               forEvents:_switchEvents];
-        subTableViewController.title = key;
-
-        // Set up back button
-        [subTableViewController.navigationItem setBackBarButtonItem:[self makeButtonWithTitle:key
-                                                                                          Tag:BACK_TAG
-                                                                                        Color:nil
-                                                                                       Target:nil
-                                                                                       Action:nil]];
+        IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithPath:subPath
+                                                                                               ipAddress:[NSString stringWithUTF8String:self.iPadState.ipAddress]
+                                                                                                  target:self.appDelegate
+                                                                                            switchAction:self.switchAction
+                                                                                              forEvents:self.switchEvents pathAction:self.pathAction pathEvents:self.pathEvents];
 
         // push new controller onto nav stack
         [self.navigationController pushViewController:subTableViewController animated:YES];
@@ -596,10 +859,10 @@
 
 -(void)handleLongPress:(UILongPressGestureRecognizer*)sender {
 
-    CGPoint location = [sender locationInView:self.view];
-    NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:location];
-    NSString *key = [_fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [_filesDictionary objectForKey:key];
+    CGPoint location = [sender locationInView:self.mainTableView];
+    NSIndexPath *indexPath = [self.mainTableView indexPathForRowAtPoint:location];
+    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
+    NSDictionary *dict = [self.filesDictionary objectForKey:key];
 
     if (sender.state == UIGestureRecognizerStateBegan)
         [self displayDetailedViwForItem:dict WithKey:key];

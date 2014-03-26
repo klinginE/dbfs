@@ -20,8 +20,8 @@
 @property (atomic) BOOL isConnected;
 @property (strong, nonatomic) ServerViewController *serverController;
 @property (strong, atomic) MobileDriveModel *model;
-@property (strong, nonatomic) IPadTableViewController *iPadTableViewController;
 
 -(void)switchChanged:(UISwitch *)sender;
+-(void)pathButtonPressed:(UIButton *)sender;
 
 @end

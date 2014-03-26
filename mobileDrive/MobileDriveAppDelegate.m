@@ -6,10 +6,17 @@
 //  Copyright (c) 2014 Eric Klinginsmith. All rights reserved.
 
 #import "MobileDriveAppDelegate.h"
+#import "IPadTableViewController.h"
 #import <string.h>
 #import "ServerViewController.h"
 #import "IPadTableViewController.h"
 
+
+@interface MobileDriveAppDelegate()
+
+@property (strong, nonatomic) IPadTableViewController *iPadTableViewController;
+
+@end
 
 @implementation MobileDriveAppDelegate
 
@@ -30,43 +37,39 @@
 
 }
 
+-(void)pathButtonPressed:(UIButton *)sender {
+
+ [self.iPadNavController popToViewController:[self.iPadNavController.viewControllers objectAtIndex:sender.tag]
+                                    animated:YES];
+
+}
+
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     // intit global app properties
     self.isConnected = YES;
 
-    // set up state for root table view controller
-    state rootState;
-    rootState.currentPath = strdup("");
-    rootState.currentDir = strdup("/");
-
 //  intit the model
     self.model = [[MobileDriveModel alloc] init];
 
     // init root table view controler
-    self.iPadTableViewController = [[IPadTableViewController alloc] initWithState:rootState
-                                                                            model:nil
-                                                                           target:self
-                                                                     switchAction:@selector(switchChanged:)
-                                                                        forEvents:UIControlEventValueChanged];
-    self.iPadTableViewController.title = @"/";
-    UIBarButtonItem *backButton = [self.iPadTableViewController makeButtonWithTitle:@"/"
-                                                                           Tag:HELP_TAG
-                                                                         Color:nil
-                                                                        Target:nil
-                                                                        Action:nil];
-    [self.iPadTableViewController.navigationItem setBackBarButtonItem:backButton];
+    self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
+                                                                        ipAddress:@"12.123.123.12"
+                                                                          target:self
+                                                                    switchAction:@selector(switchChanged:)
+                                                                       forEvents:UIControlEventValueChanged
+                                                                      pathAction:@selector(pathButtonPressed:) pathEvents:UIControlEventTouchUpInside];
 
     // init nav controller
-    UINavigationController *iPadNavController = [[UINavigationController alloc] initWithRootViewController:self.iPadTableViewController];
-    iPadNavController.title = @"NavController";
-    [iPadNavController.navigationBar setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
+    _iPadNavController = [[UINavigationController alloc] initWithRootViewController:self.iPadTableViewController];
+    _iPadNavController.title = @"NavController";
+    [_iPadNavController.navigationBar setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
                                                             NSFontAttributeName,
                                                             nil]];
 
     // set up window
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    self.window.rootViewController = iPadNavController;
+    self.window.rootViewController = _iPadNavController;
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     

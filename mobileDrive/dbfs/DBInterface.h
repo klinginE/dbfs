@@ -13,6 +13,7 @@
 
 -(char *)nsStringToCString:(NSString *)s;
 -(DBFS_Blob)slurp:(FILE *)in;
+-(DBFS *)openDatabase:(NSString *)name;
 -(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out withSize:(int *)size;
 -(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in withSize:(int)size;
 -(int)overwriteFile:(NSString *)fname inDatabase:(DBFS *)dbfs from:(FILE *)in;
