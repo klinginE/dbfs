@@ -26,10 +26,10 @@
 
     NSLog(@"switchChanged %d", self.isConnected);
     if(self.isConnected){
-        [self.serverController turnOnServer];
+      //  [self.serverController turnOnServer];
         NSLog( [self.serverController getIPAddress] );
     }else{
-        [self.serverController turnOffServer];
+        //[self.serverController turnOffServer];
     }
 
     //FIXME add code to turn on/off server here
@@ -73,7 +73,7 @@
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     
-    self.serverController = [[ServerViewController alloc] init];
+    //self.serverController = [[ServerViewController alloc] init];
 
     return YES;
 

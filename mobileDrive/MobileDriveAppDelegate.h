@@ -18,6 +18,7 @@
 
 @property (strong, nonatomic) UIWindow *window;
 @property (atomic) BOOL isConnected;
+@property (strong, nonatomic) UINavigationController *iPadNavController;
 @property (strong, nonatomic) ServerViewController *serverController;
 @property (strong, atomic) MobileDriveModel *model;
 
