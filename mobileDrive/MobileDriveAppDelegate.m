@@ -5,9 +5,8 @@
 //  Created by Eric Klinginsmith on 3/6/14.
 //  Copyright (c) 2014 Eric Klinginsmith. All rights reserved.
 
-#import "MobileDriveAppDelegate.h"
-#import "IPadTableViewController.h"
 #import <string.h>
+#import "MobileDriveAppDelegate.h"
 #import "ServerViewController.h"
 #import "IPadTableViewController.h"
 
@@ -26,15 +25,13 @@
 
     NSLog(@"switchChanged %d", self.isConnected);
     if(self.isConnected){
-      //  [self.serverController turnOnServer];
-        NSLog( [self.serverController getIPAddress] );
+        [self.serverController turnOnServer];
+        //NSLog( [self.serverController getIPAddress] );
     }else{
-        //[self.serverController turnOffServer];
+        [self.serverController turnOffServer];
     }
 
     //FIXME add code to turn on/off server here
-    
-
 }
 
 -(void)pathButtonPressed:(UIButton *)sender {
@@ -73,7 +70,12 @@
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     
-    //self.serverController = [[ServerViewController alloc] init];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.serverController = [[ServerViewController alloc] init];
+        });
+    });
+
 
     return YES;
 

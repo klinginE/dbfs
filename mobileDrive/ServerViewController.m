@@ -31,11 +31,40 @@
     return self;
 }
 
+-(id) init{
+    NSLog(@"viewDidLoad ServerViewController.m");
+    @autoreleasepool {
+        
+        // Create server
+        webServer = [[GCDWebServer alloc] init];
+        
+        // Add a handler to respond to requests on any URL
+        [webServer addDefaultHandlerForMethod:@"GET"
+                                 requestClass:[GCDWebServerRequest class]
+                                 processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+                                     
+                                     return [GCDWebServerDataResponse responseWithHTML:@"<html><body><p>Hello World</p></body></html>"];
+                                     
+                                 }];
+        
+        NSLog(@"Before Running server");
+        // Use convenience method that runs server on port 8080 until SIGINT received
+        [webServer start];
+        NSLog( [self getIPAddress] );
+        // Destroy server
+        //   [webServer release];
+        
+    }
+    return self;
+}
+
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    GCDWebServer* webServer = [[GCDWebServer alloc] init];
+    NSLog(@"viewDidLoad ServerViewController.m");
+    //	webServer = [[GCDWebServer alloc] init];
 	// Do any additional setup after loading the view.
+
     
 }
 
@@ -55,10 +84,13 @@
                                      return [GCDWebServerDataResponse responseWithHTML:@"<html><body><p>Hello World</p></body></html>"];
                                      
                                  }];
-        
+
         // Use convenience method that runs server on port 8080 until SIGINT received
         [webServer runWithPort:8080];
+         NSLog( [self getIPAddress] );
+
     }
+    
     NSLog(@"End of turnOnServer");
 }
 
@@ -92,6 +124,5 @@
     // Free memory
     freeifaddrs(interfaces);
     return address;
-    
 }
 @end

@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "ServerViewController.h";
+#import "ServerViewController.h"
 #import "MobileDriveModel.h"
 
 #define PUBLIC_EXT @".pub"
@@ -19,7 +19,7 @@
 @property (strong, nonatomic) UIWindow *window;
 @property (atomic) BOOL isConnected;
 @property (strong, nonatomic) UINavigationController *iPadNavController;
-@property (strong, nonatomic) ServerViewController *serverController;
+@property (strong, atomic) ServerViewController *serverController;
 @property (strong, atomic) MobileDriveModel *model;
 
 -(void)switchChanged:(UISwitch *)sender;
