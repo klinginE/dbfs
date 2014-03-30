@@ -1,37 +1,52 @@
 #!/bin/sh -e
 make
+
+TESTER=valgrind
+TESTER=
+
 export DBFS=test.db
 rm -f "$DBFS"
 echo 'put foo'
-echo '(contents of foo)' | ./dbfs-demo put /foo
+echo '(contents of foo)' | $TESTER ./dbfs-demo put /foo
 echo 'ovr foo'
-echo '(ovr contents of foo)' | ./dbfs-demo ovr /foo
+echo '(ovr contents of foo)' | $TESTER ./dbfs-demo ovr /foo
+echo 'fail bar'
+! echo '(contents of bar)' | $TESTER ./dbfs-demo put /sub/bar
+echo 'mkdir sub'
+$TESTER ./dbfs-demo mkd /sub/
 echo 'put bar'
-echo '(contents of bar)' | ./dbfs-demo put /sub/bar
+echo '(contents of bar)' | $TESTER ./dbfs-demo put /sub/bar
 echo 'put baz'
-echo '(contents of baz)' | ./dbfs-demo put /sub/baz
+echo '(contents of baz)' | $TESTER ./dbfs-demo put /sub/baz
 echo 'put qux'
-echo '(contents of qux)' | ./dbfs-demo put /sub/subdir2/qux
+$TESTER ./dbfs-demo mkd /sub/subsub/
+echo '(contents of qux)' | $TESTER ./dbfs-demo put /sub/subsub/qux
 echo 'get foo'
-./dbfs-demo get /foo
+$TESTER ./dbfs-demo get /foo
 echo 'get bar'
-./dbfs-demo get /sub/bar
+$TESTER ./dbfs-demo get /sub/bar
 echo 'get qux'
-./dbfs-demo get /sub/subdir2/qux
+$TESTER ./dbfs-demo get /sub/subsub/qux
 echo 'list root'
-./dbfs-demo lsd /
-./dbfs-demo lsf /
+$TESTER ./dbfs-demo lsd /
+$TESTER ./dbfs-demo lsf /
 echo 'list sub'
-./dbfs-demo lsd /sub/
-./dbfs-demo lsf /sub/
-echo 'list sub2'
-./dbfs-demo lsd /sub/subdir2/
-./dbfs-demo lsf /sub/subdir2/
+$TESTER ./dbfs-demo lsd /sub/
+$TESTER ./dbfs-demo lsf /sub/
+echo 'list subsub'
+$TESTER ./dbfs-demo lsd /sub/subsub/
+$TESTER ./dbfs-demo lsf /sub/subsub/
 
 echo 'mvf foo'
-./dbfs-demo mvf /foo /foo2
+$TESTER ./dbfs-demo mvf /foo /foo2
 echo 'mvd sub'
-./dbfs-demo mvd /sub/ /sub2/
+$TESTER ./dbfs-demo mvd /sub/ /sub2/
 echo 'list root again'
-./dbfs-demo lsd /
-./dbfs-demo lsf /
+$TESTER ./dbfs-demo lsd /
+$TESTER ./dbfs-demo lsf /
+
+echo 'rmd subsub'
+$TESTER ./dbfs-demo rmd /sub2/subsub/
+echo 'list sub again'
+$TESTER ./dbfs-demo lsd /sub2/
+$TESTER ./dbfs-demo lsf /sub2/

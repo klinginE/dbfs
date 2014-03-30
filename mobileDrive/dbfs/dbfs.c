@@ -11,14 +11,17 @@
 struct DBFS
 {
     sqlite3 *db;
-    sqlite3_stmt *get;
-    sqlite3_stmt *put;
-    sqlite3_stmt *ovr;
-    sqlite3_stmt *del;
-    sqlite3_stmt *lsf;
-    sqlite3_stmt *lsd;
-    sqlite3_stmt *mvf;
-    sqlite3_stmt *mvd;
+    sqlite3_stmt *indir;
+    sqlite3_stmt *mkd1;
+    sqlite3_stmt *rmd1;
+    sqlite3_stmt *mvd1;
+    sqlite3_stmt *lsd1;
+    sqlite3_stmt *lsf1;
+    sqlite3_stmt *get1;
+    sqlite3_stmt *put1;
+    sqlite3_stmt *ovr1;
+    sqlite3_stmt *del1;
+    sqlite3_stmt *mvf1;
 };
 
 
@@ -123,10 +126,50 @@ void *memdup(const void *mem, size_t sz)
     return rv;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
-static
-void run_query_init(sqlite3_stmt *query)
+#define BIND_INDEX(name) ({ int idx = sqlite3_bind_parameter_index(query, ":" #name); if (!idx) dbfs_fatal(); idx; })
+
+#define BIND_INT(name) if (SQLITE_OK != sqlite3_bind_int(query, BIND_INDEX(name), name)) dbfs_fatal(); else (void)0
+#define BIND_TEXT(name, size) if (SQLITE_OK != sqlite3_bind_text(query, BIND_INDEX(name), name, size, SQLITE_TRANSIENT)) dbfs_fatal(); else (void)0
+#define BIND_BLOB(name, size) if (SQLITE_OK != sqlite3_bind_blob(query, BIND_INDEX(name), name, size, SQLITE_TRANSIENT)) dbfs_fatal(); else (void)0
+
+DBFS_Error query_id1(DBFS *db, int *in_dir, const char *name, size_t name_len)
 {
+    sqlite3_stmt *query = db->indir;
+    int indir = *in_dir;
+    BIND_INT(indir);
+    BIND_TEXT(name, name_len);
+    int count = 0;
+    while (true)
+    {
+        int status = sqlite3_step(query);
+        if (status == SQLITE_ROW)
+        {
+            debug_result(query);
+            if (count)
+                dbfs_fatal();
+            count++;
+            *in_dir = sqlite3_column_int(query, 0);
+            continue;
+        }
+        sqlite3_reset(query);
+        if (status == SQLITE_DONE)
+            break;
+        dbfs_fatal();
+    }
+    sqlite3_clear_bindings(query);
+    if (!count)
+        return DBFS_LIGHTS_ON;
+    return DBFS_OKAY;
+}
+
+DBFS_Error query_mkd1(DBFS *db, int indir, const char *name)
+{
+    sqlite3_stmt *query = db->mkd1;
+    BIND_INT(indir);
+    BIND_TEXT(name, -1);
     while (true)
     {
         int status = sqlite3_step(query);
@@ -142,29 +185,138 @@ void run_query_init(sqlite3_stmt *query)
         dbfs_fatal();
     }
     sqlite3_clear_bindings(query);
+    return DBFS_OKAY;
 }
 
-static
-DBFS_Error run_query_get(sqlite3_stmt *query, const char *name, uint8_t **out_body, size_t *out_size)
+DBFS_Error query_rmd1(DBFS *db, int indir, const char *name)
 {
-    // bindings are 1-based but result columns are 0-based. Wtf?
-    int count = 0;
-    sqlite3_bind_text(query, 1, name, strlen(name), SQLITE_TRANSIENT);
+    sqlite3_stmt *query = db->rmd1;
+    BIND_INT(indir);
+    BIND_TEXT(name, -1);
     while (true)
     {
         int status = sqlite3_step(query);
         if (status == SQLITE_ROW)
         {
-            const void *blob;
-            size_t size;
+            debug_result(query);
+            dbfs_fatal();
+            continue;
+        }
+        sqlite3_reset(query);
+        if (status == SQLITE_DONE)
+            break;
+        dbfs_fatal();
+    }
+    sqlite3_clear_bindings(query);
+    return DBFS_OKAY;
+}
+
+DBFS_Error query_mvd1(DBFS *db, int from_dir, const char *from_name, int to_dir, const char *to_name)
+{
+    sqlite3_stmt *query = db->mvd1;
+    BIND_INT(from_dir);
+    BIND_TEXT(from_name, -1);
+    BIND_INT(to_dir);
+    BIND_TEXT(to_name, -1);
+    while (true)
+    {
+        int status = sqlite3_step(query);
+        if (status == SQLITE_ROW)
+        {
+            debug_result(query);
+            dbfs_fatal();
+            continue;
+        }
+        sqlite3_reset(query);
+        if (status == SQLITE_DONE)
+            break;
+        dbfs_fatal();
+    }
+    sqlite3_clear_bindings(query);
+    return DBFS_OKAY;
+}
+
+DBFS_Error query_lsd1(DBFS *db, int indir, DBFS_DirName **out_dirs, size_t *out_size)
+{
+    sqlite3_stmt *query = db->lsd1;
+    BIND_INT(indir);
+    size_t out_cap = 16;
+    *out_dirs = malloc(out_cap * sizeof(**out_dirs));
+    *out_size = 0;
+    while (true)
+    {
+        int status = sqlite3_step(query);
+        if (status == SQLITE_ROW)
+        {
+            debug_result(query);
+            const char *text = strdup((const char *)sqlite3_column_text(query, 0));
+            if (out_cap == *out_size)
+            {
+                out_cap *= 2;
+                *out_dirs = realloc(*out_dirs, out_cap * sizeof(**out_dirs));
+            }
+            (*out_dirs)[(*out_size)++] = (DBFS_DirName){text};
+            continue;
+        }
+        sqlite3_reset(query);
+        if (status == SQLITE_DONE)
+            break;
+        dbfs_fatal();
+    }
+    sqlite3_clear_bindings(query);
+    return DBFS_OKAY;
+}
+
+DBFS_Error query_lsf1(DBFS *db, int indir, DBFS_FileName **out_files, size_t *out_size)
+{
+    sqlite3_stmt *query = db->lsf1;
+    BIND_INT(indir);
+    size_t out_cap = 16;
+    *out_files = malloc(out_cap * sizeof(**out_files));
+    *out_size = 0;
+    while (true)
+    {
+        int status = sqlite3_step(query);
+        if (status == SQLITE_ROW)
+        {
+            debug_result(query);
+            const char *text = (const char *)(sqlite3_column_text(query, 0));
+            text = strdup(text);
+            if (out_cap == *out_size)
+            {
+                out_cap *= 2;
+                *out_files = realloc(*out_files, out_cap * sizeof(**out_files));
+            }
+            (*out_files)[(*out_size)++] = (DBFS_FileName){text};
+            continue;
+        }
+        sqlite3_reset(query);
+        if (status == SQLITE_DONE)
+            break;
+        dbfs_fatal();
+    }
+    sqlite3_clear_bindings(query);
+    return DBFS_OKAY;
+}
+
+DBFS_Error query_get1(DBFS *db, int indir, const char *name, uint8_t **out_body, size_t *out_size)
+{
+    sqlite3_stmt *query = db->get1;
+    BIND_INT(indir);
+    BIND_TEXT(name, -1);
+    int count = 0;
+    while (true)
+    {
+        int status = sqlite3_step(query);
+        if (status == SQLITE_ROW)
+        {
             debug_result(query);
             if (count)
                 dbfs_fatal();
-            blob = sqlite3_column_blob(query, 0);
-            size = sqlite3_column_bytes(query, 0);
-            *out_body = memdup(blob, size);
-            *out_size = size;
             count++;
+            const uint8_t *blob = sqlite3_column_blob(query, 0);
+            *out_size = sqlite3_column_bytes(query, 0);
+            *out_body = memdup(blob, *out_size);
             continue;
         }
         sqlite3_reset(query);
@@ -173,27 +325,24 @@ DBFS_Error run_query_get(sqlite3_stmt *query, const char *name, uint8_t **out_bo
         dbfs_fatal();
     }
     sqlite3_clear_bindings(query);
-    if (count == 0)
-    {
-        *out_body = NULL;
-        *out_size = 0;
-        return DBFS_GENERAL_ERROR;
-    }
+    if (!count)
+        return DBFS_LIGHTS_ON;
     return DBFS_OKAY;
 }
 
-static
-DBFS_Error run_query_put(sqlite3_stmt *query, const char *name, const uint8_t *body, size_t size)
+DBFS_Error query_put1(DBFS *db, int indir, const char *name, const uint8_t *contents, size_t size)
 {
-    sqlite3_bind_text(query, 1, name, strlen(name), SQLITE_TRANSIENT);
-    sqlite3_bind_blob(query, 2, body, size, SQLITE_TRANSIENT);
+    sqlite3_stmt *query = db->put1;
+    BIND_INT(indir);
+    BIND_TEXT(name, -1);
+    BIND_BLOB(contents, size);
     while (true)
     {
         int status = sqlite3_step(query);
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            abort();
+            dbfs_fatal();
             continue;
         }
         sqlite3_reset(query);
@@ -205,18 +354,19 @@ DBFS_Error run_query_put(sqlite3_stmt *query, const char *name, const uint8_t *b
     return DBFS_OKAY;
 }
 
-static
-DBFS_Error run_query_ovr(sqlite3_stmt *query, const char *name, const uint8_t *body, size_t size)
+DBFS_Error query_ovr1(DBFS *db, int indir, const char *name, const uint8_t *contents, size_t size)
 {
-    sqlite3_bind_text(query, 2, name, strlen(name), SQLITE_TRANSIENT);
-    sqlite3_bind_blob(query, 1, body, size, SQLITE_TRANSIENT);
+    sqlite3_stmt *query = db->ovr1;
+    BIND_INT(indir);
+    BIND_TEXT(name, -1);
+    BIND_BLOB(contents, size);
     while (true)
     {
         int status = sqlite3_step(query);
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            abort();
+            dbfs_fatal();
             continue;
         }
         sqlite3_reset(query);
@@ -228,17 +378,18 @@ DBFS_Error run_query_ovr(sqlite3_stmt *query, const char *name, const uint8_t *b
     return DBFS_OKAY;
 }
 
-static
-DBFS_Error run_query_del(sqlite3_stmt *query, const char *name)
+DBFS_Error query_del1(DBFS *db, int indir, const char *name)
 {
-    sqlite3_bind_text(query, 1, name, strlen(name), SQLITE_TRANSIENT);
+    sqlite3_stmt *query = db->del1;
+    BIND_INT(indir);
+    BIND_TEXT(name, -1);
     while (true)
     {
         int status = sqlite3_step(query);
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            abort();
+            dbfs_fatal();
             continue;
         }
         sqlite3_reset(query);
@@ -250,98 +401,20 @@ DBFS_Error run_query_del(sqlite3_stmt *query, const char *name)
     return DBFS_OKAY;
 }
 
-static
-DBFS_Error run_query_lsf(sqlite3_stmt *query, const char *name, DBFS_FileName **out_body, size_t *out_size)
+DBFS_Error query_mvf1(DBFS *db, int from_dir, const char *from_name, int to_dir, const char *to_name)
 {
-    size_t cap = 16;
-    *out_body = malloc(cap * sizeof(DBFS_FileName));
-    *out_size = 0;
-
-    sqlite3_bind_text(query, 1, name, strlen(name), SQLITE_TRANSIENT);
-    while (true)
-    {
-        int status = sqlite3_step(query);
-        if (status == SQLITE_ROW)
-        {
-            const unsigned char *str;
-            debug_result(query);
-            str = sqlite3_column_text(query, 0);
-            if (cap == *out_size)
-            {
-                cap *= 2;
-                *out_body = realloc(*out_body, cap * sizeof(DBFS_FileName));
-            }
-            (*out_body)[*out_size].name = strdup((const char *)str);
-            ++*out_size;
-            continue;
-        }
-        sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        dbfs_fatal();
-    }
-    sqlite3_clear_bindings(query);
-    if (*out_size == 0)
-    {
-        free(*out_body);
-        *out_body = NULL;
-        *out_size = 0;
-    }
-    return DBFS_OKAY;
-}
-
-static
-DBFS_Error run_query_lsd(sqlite3_stmt *query, const char *name, DBFS_DirName **out_body, size_t *out_size)
-{
-    size_t cap = 16;
-    *out_body = malloc(cap * sizeof(DBFS_DirName));
-    *out_size = 0;
-
-    sqlite3_bind_text(query, 1, name, strlen(name), SQLITE_TRANSIENT);
-    while (true)
-    {
-        int status = sqlite3_step(query);
-        if (status == SQLITE_ROW)
-        {
-            const unsigned char *str;
-            debug_result(query);
-            str = sqlite3_column_text(query, 0);
-            if (cap == *out_size)
-            {
-                cap *= 2;
-                *out_body = realloc(*out_body, cap * sizeof(DBFS_DirName));
-            }
-            (*out_body)[*out_size].name = strdup((const char *)str);
-            ++*out_size;
-            continue;
-        }
-        sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        dbfs_fatal();
-    }
-    sqlite3_clear_bindings(query);
-    if (*out_size == 0)
-    {
-        free(*out_body);
-        *out_body = NULL;
-        *out_size = 0;
-    }
-    return DBFS_OKAY;
-}
-
-static
-DBFS_Error run_query_mvf(sqlite3_stmt *query, const char *from, const char *to)
-{
-    sqlite3_bind_text(query, 1, from, strlen(from), SQLITE_TRANSIENT);
-    sqlite3_bind_text(query, 2, to, strlen(to), SQLITE_TRANSIENT);
+    sqlite3_stmt *query = db->mvf1;
+    BIND_INT(from_dir);
+    BIND_TEXT(from_name, -1);
+    BIND_INT(to_dir);
+    BIND_TEXT(to_name, -1);
     while (true)
     {
         int status = sqlite3_step(query);
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            abort();
+            dbfs_fatal();
             continue;
         }
         sqlite3_reset(query);
@@ -353,28 +426,7 @@ DBFS_Error run_query_mvf(sqlite3_stmt *query, const char *from, const char *to)
     return DBFS_OKAY;
 }
 
-static
-DBFS_Error run_query_mvd(sqlite3_stmt *query, const char *from, const char *to)
-{
-    sqlite3_bind_text(query, 1, from, strlen(from), SQLITE_TRANSIENT);
-    sqlite3_bind_text(query, 2, to, strlen(to), SQLITE_TRANSIENT);
-    while (true)
-    {
-        int status = sqlite3_step(query);
-        if (status == SQLITE_ROW)
-        {
-            debug_result(query);
-            abort();
-            continue;
-        }
-        sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        dbfs_fatal();
-    }
-    sqlite3_clear_bindings(query);
-    return DBFS_OKAY;
-}
+#pragma GCC diagnostic pop
 
 
 DBFS *dbfs_open(const char *name)
@@ -384,127 +436,216 @@ DBFS *dbfs_open(const char *name)
 
     if (SQLITE_OK != sqlite3_open(name, &db))
         return NULL;
-    sqlite3_stmt *init = compile_statement(db, sql_fs1_init);
-    run_query_init(init);
-    free_statement(init);
+    if (SQLITE_OK != sqlite3_exec(db, sql_fs2_init, NULL, NULL, NULL))
+        dbfs_fatal();
 
     rv = malloc(sizeof(DBFS));
     rv->db = db;
-    rv->get = compile_statement(db, sql_fs1_get);
-    rv->put = compile_statement(db, sql_fs1_put);
-    rv->ovr = compile_statement(db, sql_fs1_ovr);
-    rv->del = compile_statement(db, sql_fs1_del);
-    rv->lsf = compile_statement(db, sql_fs1_lsf);
-    rv->lsd = compile_statement(db, sql_fs1_lsd);
-    rv->mvf = compile_statement(db, sql_fs1_mvf);
-    rv->mvd = compile_statement(db, sql_fs1_mvd);
+    rv->indir = compile_statement(db, sql_fs2_indir);
+    rv->mkd1 = compile_statement(db, sql_fs2_mkd1);
+    rv->rmd1 = compile_statement(db, sql_fs2_rmd1);
+    rv->mvd1 = compile_statement(db, sql_fs2_mvd1);
+    rv->lsd1 = compile_statement(db, sql_fs2_lsd1);
+    rv->lsf1 = compile_statement(db, sql_fs2_lsf1);
+    rv->get1 = compile_statement(db, sql_fs2_get1);
+    rv->put1 = compile_statement(db, sql_fs2_put1);
+    rv->ovr1 = compile_statement(db, sql_fs2_ovr1);
+    rv->del1 = compile_statement(db, sql_fs2_del1);
+    rv->mvf1 = compile_statement(db, sql_fs2_mvf1);
     return rv;
 }
 
 void dbfs_close(DBFS *dbfs)
 {
-    free_statement(dbfs->get);
-    free_statement(dbfs->put);
-    free_statement(dbfs->ovr);
-    free_statement(dbfs->del);
-    free_statement(dbfs->lsf);
-    free_statement(dbfs->lsd);
-    free_statement(dbfs->mvf);
-    free_statement(dbfs->mvd);
+    free_statement(dbfs->indir);
+    free_statement(dbfs->mkd1);
+    free_statement(dbfs->rmd1);
+    free_statement(dbfs->mvd1);
+    free_statement(dbfs->lsd1);
+    free_statement(dbfs->lsf1);
+    free_statement(dbfs->get1);
+    free_statement(dbfs->put1);
+    free_statement(dbfs->ovr1);
+    free_statement(dbfs->del1);
+    free_statement(dbfs->mvf1);
     if (SQLITE_OK != sqlite3_close(dbfs->db))
         dbfs_fatal();
     free(dbfs);
 }
 
-bool check_file(DBFS_FileName path)
+
+DBFS_Error lookup_dir(DBFS *db, int *in_dir, DBFS_DirName *dir)
 {
-    return path.name[0] == '/' && path.name[strlen(path.name)-1] != '/';
+    if (dir->name[0] != '/')
+        return DBFS_NOT_ABSOLUTE;
+    if (dir->name[strlen(dir->name)-1] != '/')
+        return DBFS_NOT_DIRNAME;
+    ++dir->name;
+    *in_dir = 0;
+    while (true)
+    {
+        const char *slash = strchr(dir->name, '/');
+        if (!slash[1])
+            return DBFS_OKAY;
+        ++slash;
+        DBFS_Error err = query_id1(db, in_dir, dir->name, slash - dir->name);
+        if (err)
+            return err;
+        dir->name = slash;
+    }
 }
 
-bool check_dir(DBFS_DirName path)
+DBFS_Error lookup_dir_harder(DBFS *db, int *in_dir, DBFS_DirName dir)
 {
-    return path.name[0] == '/' && path.name[strlen(path.name)-1] == '/';
-}
-
-DBFS_Error dbfs_get(DBFS *dbfs, DBFS_FileName path, DBFS_Blob *out)
-{
-    if (!check_file(path))
-        return DBFS_NO_SLASH;
-    uint8_t *data = NULL;
-    size_t size = 0;
+    if (strcmp(dir.name, "/") == 0)
+    {
+        *in_dir = 0;
+        return DBFS_OKAY;
+    }
     DBFS_Error err;
-    err = run_query_get(dbfs->get, path.name, &data, &size);
-    out->data = data;
-    out->size = size;
+    err = lookup_dir(db, in_dir, &dir);
+    if (!err)
+        err = query_id1(db, in_dir, dir.name, strlen(dir.name));
     return err;
 }
+
+DBFS_Error lookup_file(DBFS *db, int *in_dir, DBFS_FileName *file)
+{
+    if (file->name[0] != '/')
+        return DBFS_NOT_ABSOLUTE;
+    if (file->name[strlen(file->name)-1] == '/')
+        return DBFS_NOT_FILENAME;
+    ++file->name;
+    *in_dir = 0;
+    while (true)
+    {
+        const char *slash = strchr(file->name, '/');
+        if (!slash)
+            return DBFS_OKAY;
+        ++slash;
+        DBFS_Error err = query_id1(db, in_dir, file->name, slash - file->name);
+        if (err)
+            return err;
+        file->name = slash;
+    }
+}
+
+
+DBFS_Error dbfs_mkd(DBFS *db, DBFS_DirName name)
+{
+    DBFS_Error err;
+    int id;
+    err = lookup_dir(db, &id, &name);
+    if (err) return err;
+    err = query_mkd1(db, id, name.name);
+    return err;
+}
+
+DBFS_Error dbfs_rmd(DBFS *db, DBFS_DirName name)
+{
+    DBFS_Error err;
+    int id;
+    err = lookup_dir(db, &id, &name);
+    if (err) return err;
+    err = query_rmd1(db, id, name.name);
+    return err;
+}
+
+DBFS_Error dbfs_mvd(DBFS *db, DBFS_DirName old_name, DBFS_DirName new_name)
+{
+    DBFS_Error err;
+    int old_id, new_id;
+    err = lookup_dir(db, &old_id, &old_name);
+    if (err) return err;
+    err = lookup_dir(db, &new_id, &new_name);
+    if (err) return err;
+    err = query_mvd1(db, old_id, old_name.name, new_id, new_name.name);
+    return err;
+}
+
+DBFS_Error dbfs_lsd(DBFS *db, DBFS_DirName name, DBFS_DirList *dirs)
+{
+    DBFS_Error err;
+    int id;
+    DBFS_DirName *out_dirs = NULL;
+    err = lookup_dir_harder(db, &id, name);
+    if (err) return err;
+    err = query_lsd1(db, id, &out_dirs, &dirs->count);
+    dirs->dirs = out_dirs;
+    return err;
+}
+
+DBFS_Error dbfs_lsf(DBFS *db, DBFS_DirName name, DBFS_FileList *files)
+{
+    DBFS_Error err;
+    int id;
+    DBFS_FileName *out_files = NULL;
+    err = lookup_dir_harder(db, &id, name);
+    if (err) return err;
+    err = query_lsf1(db, id, &out_files, &files->count);
+    files->files = out_files;
+    return err;
+}
+
+DBFS_Error dbfs_get(DBFS *db, DBFS_FileName name, DBFS_Blob *out)
+{
+    DBFS_Error err;
+    int id;
+    uint8_t *out_bytes = NULL;
+    err = lookup_file(db, &id, &name);
+    if (err) return err;
+    err = query_get1(db, id, name.name, &out_bytes, &out->size);
+    out->data = out_bytes;
+    return err;
+}
+
+DBFS_Error dbfs_put(DBFS *db, DBFS_FileName name, DBFS_Blob in)
+{
+    DBFS_Error err;
+    int id;
+    err = lookup_file(db, &id, &name);
+    if (err) return err;
+    err = query_put1(db, id, name.name, in.data, in.size);
+    return err;
+}
+
+DBFS_Error dbfs_ovr(DBFS *db, DBFS_FileName name, DBFS_Blob in)
+{
+    DBFS_Error err;
+    int id;
+    err = lookup_file(db, &id, &name);
+    if (err) return err;
+    err = query_ovr1(db, id, name.name, in.data, in.size);
+    return err;
+}
+
+DBFS_Error dbfs_del(DBFS *db, DBFS_FileName name)
+{
+    DBFS_Error err;
+    int id;
+    err = lookup_file(db, &id, &name);
+    if (err) return err;
+    err = query_del1(db, id, name.name);
+    return err;
+}
+
+DBFS_Error dbfs_mvf(DBFS *db, DBFS_FileName old_name, DBFS_FileName new_name)
+{
+    DBFS_Error err;
+    int old_id, new_id;
+    err = lookup_file(db, &old_id, &old_name);
+    if (err) return err;
+    err = lookup_file(db, &new_id, &new_name);
+    if (err) return err;
+    err = query_mvf1(db, old_id, old_name.name, new_id, new_name.name);
+    return err;
+}
+
 
 void dbfs_free_blob(DBFS_Blob blob)
 {
     // cast away const
     free((uint8_t *)blob.data);
-}
-
-DBFS_Error dbfs_put(DBFS *dbfs, DBFS_FileName path, DBFS_Blob blob)
-{
-    if (!check_file(path))
-        return DBFS_NO_SLASH;
-    DBFS_Error err;
-    err = run_query_put(dbfs->put, path.name, blob.data, blob.size);
-    return err;
-}
-
-DBFS_Error dbfs_ovr(DBFS *dbfs, DBFS_FileName path, DBFS_Blob blob)
-{
-    if (!check_file(path))
-        return DBFS_NO_SLASH;
-    DBFS_Error err;
-    err = run_query_ovr(dbfs->ovr, path.name, blob.data, blob.size);
-    return err;
-}
-
-DBFS_Error dbfs_del(DBFS *dbfs, DBFS_FileName path)
-{
-    if (!check_file(path))
-        return DBFS_NO_SLASH;
-    DBFS_Error err;
-    err = run_query_del(dbfs->del, path.name);
-    return err;
-}
-
-DBFS_Error dbfs_lsf(DBFS *dbfs, DBFS_DirName path, DBFS_FileList *files)
-{
-    if (!check_dir(path))
-        return DBFS_NO_SLASH;
-    DBFS_FileName *data = NULL;
-    size_t size = 0;
-    DBFS_Error err;
-    err = run_query_lsf(dbfs->lsf, path.name, &data, &size);
-    files->files = data;
-    files->count = size;
-    return err;
-}
-
-void dbfs_free_file_list(DBFS_FileList fl)
-{
-    while (fl.count--)
-    {
-        free((char *)fl.files[fl.count].name);
-    }
-    free((DBFS_FileName *)fl.files);
-}
-
-DBFS_Error dbfs_lsd(DBFS *dbfs, DBFS_DirName path, DBFS_DirList *dirs)
-{
-    if (!check_dir(path))
-        return DBFS_NO_SLASH;
-    DBFS_DirName *data = NULL;
-    size_t size = 0;
-    DBFS_Error err;
-    err = run_query_lsd(dbfs->lsd, path.name, &data, &size);
-    dirs->dirs = data;
-    dirs->count = size;
-    return err;
 }
 
 void dbfs_free_dir_list(DBFS_DirList dl)
@@ -516,20 +657,11 @@ void dbfs_free_dir_list(DBFS_DirList dl)
     free((DBFS_DirName *)dl.dirs);
 }
 
-DBFS_Error dbfs_mvf(DBFS *dbfs, DBFS_FileName from, DBFS_FileName to)
+void dbfs_free_file_list(DBFS_FileList fl)
 {
-    if (!check_file(from) || !check_file(to))
-        return DBFS_NO_SLASH;
-    DBFS_Error err;
-    err = run_query_mvf(dbfs->mvf, from.name, to.name);
-    return err;
-}
-
-DBFS_Error dbfs_mvd(DBFS *dbfs, DBFS_DirName from, DBFS_DirName to)
-{
-    if (!check_dir(from) || !check_dir(to))
-        return DBFS_NO_SLASH;
-    DBFS_Error err;
-    err = run_query_mvd(dbfs->mvd, from.name, to.name);
-    return err;
+    while (fl.count--)
+    {
+        free((char *)fl.files[fl.count].name);
+    }
+    free((DBFS_FileName *)fl.files);
 }
