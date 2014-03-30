@@ -45,12 +45,6 @@
         // Get the path to the website directory
         NSString* websitePath = [[NSBundle mainBundle] pathForResource:@"Website" ofType:nil];
         
-        NSString* footer = [NSString stringWithFormat:NSLocalizedString(@"SERVER_FOOTER_FORMAT", nil),
-                            [[UIDevice currentDevice] name],
-                            [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
-        NSDictionary* baseVariables = [NSDictionary dictionaryWithObjectsAndKeys:footer, @"footer", nil];
-        
-        //[webServer addGETHandlerForBasePath:@"/" directoryPath:NSHomeDirectory() indexFilename:nil cacheAge:3600 allowRangeRequests:YES];
         [webServer addGETHandlerForBasePath:@"/" directoryPath:websitePath indexFilename:nil cacheAge:3600 allowRangeRequests:YES];
 
         // Redirect root website to index.html
@@ -60,26 +54,24 @@
             return [GCDWebServerResponse responseWithRedirect:[NSURL URLWithString:@"index.html" relativeToURL:request.URL] permanent:NO];
             
         }];
-        /*
-        [webServer addHandlerForMethod:@"GET" path:@"/index.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+        
+        //NSString* myFile = [[NSBundle mainBundle] pathForResource:@"arrow_down" ofType:@"png" inDirectory:@"Website/img"];
+        
+        [webServer addHandlerForMethod:@"GET" path:@"/download" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
             
             // Called from GCD thread
-            NSMutableDictionary* variables = [NSMutableDictionary dictionaryWithDictionary:baseVariables];
-            [variables setObject:[NSString stringWithFormat:@"%i", kTrialMaxUploads] forKey:@"max"];
-            return [GCDWebServerDataResponse responseWithHTMLTemplate:[websitePath stringByAppendingPathComponent:request.path] variables:variables];
+            GCDWebServerResponse* response = nil;
             
-        }];*/
-
-        /*
-        // Add a handler to respond to requests on any URL
-        [webServer addDefaultHandlerForMethod:@"GET"
-                                 requestClass:[GCDWebServerRequest class]
-                                 processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
-                                     
-                                     return [GCDWebServerDataResponse responseWithHTML:@"<html><body><p>Hello World</p></body></html>"];
-                                     
-                                 }]; */
-        
+            NSMutableString* content = [[NSMutableString alloc] init];
+            [content appendFormat:@"<html><body><p>/download?id=%@&name=%@</p></body></html>",
+             [request.query objectForKey:@"id"],
+             [request.query objectForKey:@"name"]
+             ];
+            //response = [GCDWebServerFileResponse responseWithFile:myFile isAttachment:YES];
+            //response = [GCDWebServerResponse responseWithStatusCode:403];
+            //return response;
+            return [GCDWebServerDataResponse responseWithHTML:content];
+        }];
         
         NSLog(@"Before Running server");
         // Use convenience method that runs server on port 8080 until SIGINT received
