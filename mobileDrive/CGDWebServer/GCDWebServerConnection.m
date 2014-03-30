@@ -45,6 +45,22 @@ static NSData* _continueData = nil;
 static NSDateFormatter* _dateFormatter = nil;
 static dispatch_queue_t _formatterQueue = NULL;
 
+@interface GCDWebServerConnection () {
+@private
+  GCDWebServer* _server;
+  NSData* _address;
+  CFSocketNativeHandle _socket;
+  NSUInteger _bytesRead;
+  NSUInteger _bytesWritten;
+  
+  CFHTTPMessageRef _requestMessage;
+  GCDWebServerRequest* _request;
+  GCDWebServerHandler* _handler;
+  CFHTTPMessageRef _responseMessage;
+  GCDWebServerResponse* _response;
+}
+@end
+
 @implementation GCDWebServerConnection (Read)
 
 - (void)_readBufferWithLength:(NSUInteger)length completionBlock:(ReadBufferCompletionBlock)block {
@@ -54,8 +70,9 @@ static dispatch_queue_t _formatterQueue = NULL;
       if (error == 0) {
         size_t size = dispatch_data_get_size(buffer);
         if (size > 0) {
-          LOG_DEBUG(@"Connection received %i bytes on socket %i", size, _socket);
+          LOG_DEBUG(@"Connection received %zu bytes on socket %i", size, _socket);
           _bytesRead += size;
+          [self didUpdateBytesRead];
           block(buffer);
         } else {
           if (_bytesRead > 0) {
@@ -140,7 +157,7 @@ static dispatch_queue_t _formatterQueue = NULL;
       if (remainingLength >= 0) {
         bool success = dispatch_data_apply(buffer, ^bool(dispatch_data_t region, size_t offset, const void* buffer, size_t size) {
           NSInteger result = [_request write:buffer maxLength:size];
-          if (result != size) {
+          if (result != (NSInteger)size) {
             LOG_ERROR(@"Failed writing request body on socket %i (error %i)", _socket, (int)result);
             return false;
           }
@@ -156,8 +173,8 @@ static dispatch_queue_t _formatterQueue = NULL;
           block(NO);
         }
       } else {
-        DNOT_REACHED();
         block(NO);
+        DNOT_REACHED();
       }
     } else {
       block(NO);
@@ -177,8 +194,9 @@ static dispatch_queue_t _formatterQueue = NULL;
     @autoreleasepool {
       if (error == 0) {
         DCHECK(data == NULL);
-        LOG_DEBUG(@"Connection sent %i bytes on socket %i", size, _socket);
+        LOG_DEBUG(@"Connection sent %zu bytes on socket %i", size, _socket);
         _bytesWritten += size;
+        [self didUpdateBytesWritten];
         block(YES);
       } else {
         LOG_ERROR(@"Error while writing to socket %i: %s (%i)", _socket, strerror(error), error);
@@ -289,7 +307,7 @@ static dispatch_queue_t _formatterQueue = NULL;
   [self _writeHeadersWithCompletionBlock:^(BOOL success) {
     ;  // Nothing more to do
   }];
-  LOG_DEBUG(@"Connection aborted with status code %i on socket %i", statusCode, _socket);
+  LOG_DEBUG(@"Connection aborted with status code %i on socket %i", (int)statusCode, _socket);
 }
 
 // http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
@@ -342,7 +360,7 @@ static dispatch_queue_t _formatterQueue = NULL;
     NSInteger length = _request.contentLength;
     if (initialData.length) {
       NSInteger result = [_request write:initialData.bytes maxLength:initialData.length];
-      if (result == initialData.length) {
+      if (result == (NSInteger)initialData.length) {
         length -= initialData.length;
         DCHECK(length >= 0);
       } else {
@@ -479,8 +497,16 @@ static dispatch_queue_t _formatterQueue = NULL;
   [self _readRequestHeaders];
 }
 
+- (void)didUpdateBytesRead {
+  ;
+}
+
+- (void)didUpdateBytesWritten {
+  ;
+}
+
 - (GCDWebServerResponse*)processRequest:(GCDWebServerRequest*)request withBlock:(GCDWebServerProcessBlock)block {
-  LOG_DEBUG(@"Connection on socket %i processing %@ request for \"%@\" (%i bytes body)", _socket, _request.method, _request.path, _request.contentLength);
+  LOG_DEBUG(@"Connection on socket %i processing %@ request for \"%@\" (%lu bytes body)", _socket, _request.method, _request.path, (unsigned long)_request.contentLength);
   GCDWebServerResponse* response = nil;
   @try {
     response = block(request);

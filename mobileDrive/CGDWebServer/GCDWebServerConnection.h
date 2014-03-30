@@ -29,20 +29,7 @@
 
 @class GCDWebServerHandler;
 
-@interface GCDWebServerConnection : NSObject {
-@private
-  GCDWebServer* _server;
-  NSData* _address;
-  CFSocketNativeHandle _socket;
-  NSUInteger _bytesRead;
-  NSUInteger _bytesWritten;
-  
-  CFHTTPMessageRef _requestMessage;
-  GCDWebServerRequest* _request;
-  GCDWebServerHandler* _handler;
-  CFHTTPMessageRef _responseMessage;
-  GCDWebServerResponse* _response;
-}
+@interface GCDWebServerConnection : NSObject
 @property(nonatomic, readonly) GCDWebServer* server;
 @property(nonatomic, readonly) NSData* address;  // struct sockaddr
 @property(nonatomic, readonly) NSUInteger totalBytesRead;
@@ -51,6 +38,8 @@
 
 @interface GCDWebServerConnection (Subclassing)
 - (void)open;
+- (void)didUpdateBytesRead;  // Called from arbitrary thread after @totalBytesRead is updated - Default implementation does nothing
+- (void)didUpdateBytesWritten;  // Called from arbitrary thread after @totalBytesWritten is updated - Default implementation does nothing
 - (GCDWebServerResponse*)processRequest:(GCDWebServerRequest*)request withBlock:(GCDWebServerProcessBlock)block;
 - (void)close;
 @end

@@ -17,7 +17,9 @@
 
 @end
 
-@implementation MobileDriveAppDelegate
+@implementation MobileDriveAppDelegate{
+   NSString * ipAddress;
+}
 
 -(void)switchChanged:(UISwitch *)sender {
 
@@ -46,12 +48,27 @@
     // intit global app properties
     self.isConnected = YES;
 
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.serverController = [[ServerViewController alloc] init];
+            
+            ipAddress = [ [NSString alloc] initWithString:[self.serverController getIPAddress] ];
+
+        });
+    });
+    NSLog(@"#%%-------%");
+    NSLog( ipAddress );
+    NSLog(@"#%%-------%");
+    
+    
 //  intit the model
     self.model = [[MobileDriveModel alloc] init];
 
+    
+    
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
-                                                                        ipAddress:@"12.123.123.12"
+                                                                        ipAddress: self.serverController.current_ip_address //@"12.123.123.12"
                                                                           target:self
                                                                     switchAction:@selector(switchChanged:)
                                                                        forEvents:UIControlEventValueChanged
@@ -69,13 +86,6 @@
     self.window.rootViewController = _iPadNavController;
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
-    
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.serverController = [[ServerViewController alloc] init];
-        });
-    });
-
 
     return YES;
 

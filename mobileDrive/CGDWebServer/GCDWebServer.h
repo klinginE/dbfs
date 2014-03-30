@@ -31,21 +31,26 @@
 typedef GCDWebServerRequest* (^GCDWebServerMatchBlock)(NSString* requestMethod, NSURL* requestURL, NSDictionary* requestHeaders, NSString* urlPath, NSDictionary* urlQuery);
 typedef GCDWebServerResponse* (^GCDWebServerProcessBlock)(GCDWebServerRequest* request);
 
-@interface GCDWebServer : NSObject {
-@private
-  NSMutableArray* _handlers;
-  
-  NSUInteger _port;
-  dispatch_source_t _source;
-  CFNetServiceRef _service;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+NSString* GCDWebServerGetMimeTypeForExtension(NSString* extension);
+NSString* GCDWebServerUnescapeURLString(NSString* string);
+NSDictionary* GCDWebServerParseURLEncodedForm(NSString* form);
+
+#ifdef __cplusplus
 }
+#endif
+
+@interface GCDWebServer : NSObject
 @property(nonatomic, readonly, getter=isRunning) BOOL running;
 @property(nonatomic, readonly) NSUInteger port;
 @property(nonatomic, readonly) NSString* bonjourName;  // Only non-nil if Bonjour registration is active
 - (void)addHandlerWithMatchBlock:(GCDWebServerMatchBlock)matchBlock processBlock:(GCDWebServerProcessBlock)processBlock;
 - (void)removeAllHandlers;
 
-- (BOOL)start;  // Default is 8080 port and computer name
+- (BOOL)start;  // Default is port 8080 (Mac & iOS Simulator) or 80 (iOS) and computer name
 - (BOOL)startWithPort:(NSUInteger)port bonjourName:(NSString*)name;  // Pass nil name to disable Bonjour or empty string to use computer name
 - (void)stop;
 @end
@@ -55,13 +60,22 @@ typedef GCDWebServerResponse* (^GCDWebServerProcessBlock)(GCDWebServerRequest* r
 + (NSString*)serverName;  // Default is class name
 @end
 
+#if !TARGET_OS_IPHONE
+
 @interface GCDWebServer (Extensions)
 - (BOOL)runWithPort:(NSUInteger)port;  // Starts then automatically stops on SIGINT i.e. Ctrl-C (use on main thread only)
 @end
 
+#endif
+
 @interface GCDWebServer (Handlers)
-- (void)addDefaultHandlerForMethod:(NSString*)method requestClass:(Class)class processBlock:(GCDWebServerProcessBlock)block;
-- (void)addHandlerForBasePath:(NSString*)basePath localPath:(NSString*)localPath indexFilename:(NSString*)indexFilename cacheAge:(NSUInteger)cacheAge;  // Base path is recursive and case-sensitive
-- (void)addHandlerForMethod:(NSString*)method path:(NSString*)path requestClass:(Class)class processBlock:(GCDWebServerProcessBlock)block;  // Path is case-insensitive
-- (void)addHandlerForMethod:(NSString*)method pathRegex:(NSString*)regex requestClass:(Class)class processBlock:(GCDWebServerProcessBlock)block;  // Regular expression is case-insensitive
+- (void)addDefaultHandlerForMethod:(NSString*)method requestClass:(Class)aClass processBlock:(GCDWebServerProcessBlock)block;
+- (void)addHandlerForMethod:(NSString*)method path:(NSString*)path requestClass:(Class)aClass processBlock:(GCDWebServerProcessBlock)block;  // Path is case-insensitive
+- (void)addHandlerForMethod:(NSString*)method pathRegex:(NSString*)regex requestClass:(Class)aClass processBlock:(GCDWebServerProcessBlock)block;  // Regular expression is case-insensitive
+@end
+
+@interface GCDWebServer (GETHandlers)
+- (void)addGETHandlerForPath:(NSString*)path staticData:(NSData*)staticData contentType:(NSString*)contentType cacheAge:(NSUInteger)cacheAge;  // Path is case-insensitive
+- (void)addGETHandlerForPath:(NSString*)path filePath:(NSString*)filePath isAttachment:(BOOL)isAttachment cacheAge:(NSUInteger)cacheAge allowRangeRequests:(BOOL)allowRangeRequests;  // Path is case-insensitive
+- (void)addGETHandlerForBasePath:(NSString*)basePath directoryPath:(NSString*)directoryPath indexFilename:(NSString*)indexFilename cacheAge:(NSUInteger)cacheAge allowRangeRequests:(BOOL)allowRangeRequests;  // Base path is recursive and case-sensitive
 @end

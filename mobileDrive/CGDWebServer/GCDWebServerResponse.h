@@ -27,14 +27,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface GCDWebServerResponse : NSObject {
-@private
-  NSString* _type;
-  NSUInteger _length;
-  NSInteger _status;
-  NSUInteger _maxAge;
-  NSMutableDictionary* _headers;
-}
+@interface GCDWebServerResponse : NSObject
 @property(nonatomic, readonly) NSString* contentType;
 @property(nonatomic, readonly) NSUInteger contentLength;
 @property(nonatomic) NSInteger statusCode;  // Default is 200
@@ -60,11 +53,7 @@
 - (id)initWithRedirect:(NSURL*)location permanent:(BOOL)permanent;
 @end
 
-@interface GCDWebServerDataResponse : GCDWebServerResponse {
-@private
-  NSData* _data;
-  NSInteger _offset;
-}
+@interface GCDWebServerDataResponse : GCDWebServerResponse
 + (GCDWebServerDataResponse*)responseWithData:(NSData*)data contentType:(NSString*)type;
 - (id)initWithData:(NSData*)data contentType:(NSString*)type;
 @end
@@ -78,13 +67,13 @@
 - (id)initWithHTMLTemplate:(NSString*)path variables:(NSDictionary*)variables;  // Simple template system that replaces all occurences of "%variable%" with corresponding value (encodes using UTF-8)
 @end
 
-@interface GCDWebServerFileResponse : GCDWebServerResponse {
-@private
-  NSString* _path;
-  int _file;
-}
+@interface GCDWebServerFileResponse : GCDWebServerResponse
 + (GCDWebServerFileResponse*)responseWithFile:(NSString*)path;
 + (GCDWebServerFileResponse*)responseWithFile:(NSString*)path isAttachment:(BOOL)attachment;
++ (GCDWebServerFileResponse*)responseWithFile:(NSString*)path byteRange:(NSRange)range;
++ (GCDWebServerFileResponse*)responseWithFile:(NSString*)path byteRange:(NSRange)range isAttachment:(BOOL)attachment;
 - (id)initWithFile:(NSString*)path;
 - (id)initWithFile:(NSString*)path isAttachment:(BOOL)attachment;
+- (id)initWithFile:(NSString*)path byteRange:(NSRange)range;  // Pass [NSNotFound, 0] to disable byte range entirely, [offset, length] to enable byte range from beginning of file or [NSNotFound, -bytes] from end of file
+- (id)initWithFile:(NSString*)path byteRange:(NSRange)range isAttachment:(BOOL)attachment;
 @end

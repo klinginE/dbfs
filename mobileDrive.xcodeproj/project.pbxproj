@@ -9,12 +9,13 @@
 /* Begin PBXBuildFile section */
 		8A014E8018CF8FF600C83490 /* MobileDriveModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */; };
 		8AFF3ECC18D24CB300FB8A21 /* files.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8AFF3ECB18D24CB300FB8A21 /* files.plist */; };
-		9564623818D0DAC400AA845A /* GCDWebServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623018D0DAC400AA845A /* GCDWebServer.m */; };
-		9564623918D0DAC400AA845A /* GCDWebServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623218D0DAC400AA845A /* GCDWebServerConnection.m */; };
-		9564623A18D0DAC400AA845A /* GCDWebServerRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623518D0DAC400AA845A /* GCDWebServerRequest.m */; };
-		9564623B18D0DAC400AA845A /* GCDWebServerResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623718D0DAC400AA845A /* GCDWebServerResponse.m */; };
 		9564623E18D0DEBC00AA845A /* ServerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623D18D0DEBC00AA845A /* ServerViewController.m */; };
+		CE40078918E546110025C0B0 /* GCDWebServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CE40078118E546110025C0B0 /* GCDWebServer.m */; };
+		CE40078A18E546110025C0B0 /* GCDWebServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = CE40078318E546110025C0B0 /* GCDWebServerConnection.m */; };
+		CE40078B18E546110025C0B0 /* GCDWebServerRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CE40078618E546110025C0B0 /* GCDWebServerRequest.m */; };
+		CE40078C18E546110025C0B0 /* GCDWebServerResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = CE40078818E546110025C0B0 /* GCDWebServerResponse.m */; };
 		CE9E605818E4C199008C6D2B /* WebServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CE9E605718E4C199008C6D2B /* WebServer.m */; };
+		CEF41B3918E79B5500073D0F /* Website in Resources */ = {isa = PBXBuildFile; fileRef = CEF41B3818E79B5500073D0F /* Website */; };
 		DE02776618DA9671003C8F60 /* CODialog.m in Sources */ = {isa = PBXBuildFile; fileRef = DE02776518DA9671003C8F60 /* CODialog.m */; };
 		DE0FDF6318C963CB00843686 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6218C963CB00843686 /* Foundation.framework */; };
 		DE0FDF6518C963CB00843686 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6418C963CB00843686 /* CoreGraphics.framework */; };
@@ -31,20 +32,6 @@
 		DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */ = {isa = PBXBuildFile; fileRef = DE96FBC118CE618B008553D8 /* helpPage.txt */; };
 		DE9833C718C96BA0003CEA5B /* dbfs in Resources */ = {isa = PBXBuildFile; fileRef = DE9833C618C96BA0003CEA5B /* dbfs */; };
 		DED6C4C118D2643900F50F97 /* IPadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DED6C4C018D2643900F50F97 /* IPadTableViewController.m */; };
-		DEF5A1E918E0F2BC0006D1AE /* arrow_down.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1D918E0F2BC0006D1AE /* arrow_down.png */; };
-		DEF5A1EA18E0F2BC0006D1AE /* arrow_up.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1DA18E0F2BC0006D1AE /* arrow_up.png */; };
-		DEF5A1EB18E0F2BC0006D1AE /* cross.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1DB18E0F2BC0006D1AE /* cross.png */; };
-		DEF5A1EC18E0F2BC0006D1AE /* gh-icons.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1DC18E0F2BC0006D1AE /* gh-icons.png */; };
-		DEF5A1ED18E0F2BC0006D1AE /* page_link.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1DD18E0F2BC0006D1AE /* page_link.png */; };
-		DEF5A1EE18E0F2BC0006D1AE /* type_directory.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1DE18E0F2BC0006D1AE /* type_directory.png */; };
-		DEF5A1EF18E0F2BC0006D1AE /* type_text.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1DF18E0F2BC0006D1AE /* type_text.png */; };
-		DEF5A1F018E0F2BC0006D1AE /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1E018E0F2BC0006D1AE /* index.html */; };
-		DEF5A1F118E0F2BC0006D1AE /* filesystem.js in Sources */ = {isa = PBXBuildFile; fileRef = DEF5A1E218E0F2BC0006D1AE /* filesystem.js */; };
-		DEF5A1F218E0F2BC0006D1AE /* jquery.min.js in Sources */ = {isa = PBXBuildFile; fileRef = DEF5A1E318E0F2BC0006D1AE /* jquery.min.js */; };
-		DEF5A1F318E0F2BC0006D1AE /* jquery.omniwindow.js in Sources */ = {isa = PBXBuildFile; fileRef = DEF5A1E418E0F2BC0006D1AE /* jquery.omniwindow.js */; };
-		DEF5A1F418E0F2BC0006D1AE /* ui.js in Sources */ = {isa = PBXBuildFile; fileRef = DEF5A1E518E0F2BC0006D1AE /* ui.js */; };
-		DEF5A1F518E0F2BC0006D1AE /* gh-buttons.css in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1E718E0F2BC0006D1AE /* gh-buttons.css */; };
-		DEF5A1F618E0F2BC0006D1AE /* style.css in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1E818E0F2BC0006D1AE /* style.css */; };
 		DEF84A6018E0FCF3009AC0CC /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DEF84A5F18E0FCF3009AC0CC /* README.md */; };
 /* End PBXBuildFile section */
 
@@ -63,19 +50,20 @@
 		8A014E7E18CF8FF600C83490 /* MobileDriveModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileDriveModel.h; sourceTree = "<group>"; };
 		8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileDriveModel.m; sourceTree = "<group>"; };
 		8AFF3ECB18D24CB300FB8A21 /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
-		9564622F18D0DAC400AA845A /* GCDWebServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServer.h; sourceTree = "<group>"; };
-		9564623018D0DAC400AA845A /* GCDWebServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServer.m; sourceTree = "<group>"; };
-		9564623118D0DAC400AA845A /* GCDWebServerConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerConnection.h; sourceTree = "<group>"; };
-		9564623218D0DAC400AA845A /* GCDWebServerConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerConnection.m; sourceTree = "<group>"; };
-		9564623318D0DAC400AA845A /* GCDWebServerPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerPrivate.h; sourceTree = "<group>"; };
-		9564623418D0DAC400AA845A /* GCDWebServerRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerRequest.h; sourceTree = "<group>"; };
-		9564623518D0DAC400AA845A /* GCDWebServerRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerRequest.m; sourceTree = "<group>"; };
-		9564623618D0DAC400AA845A /* GCDWebServerResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerResponse.h; sourceTree = "<group>"; };
-		9564623718D0DAC400AA845A /* GCDWebServerResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerResponse.m; sourceTree = "<group>"; };
 		9564623C18D0DEBC00AA845A /* ServerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ServerViewController.h; path = mobileDrive/ServerViewController.h; sourceTree = SOURCE_ROOT; };
 		9564623D18D0DEBC00AA845A /* ServerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ServerViewController.m; path = mobileDrive/ServerViewController.m; sourceTree = SOURCE_ROOT; };
+		CE40078018E546110025C0B0 /* GCDWebServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServer.h; sourceTree = "<group>"; };
+		CE40078118E546110025C0B0 /* GCDWebServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServer.m; sourceTree = "<group>"; };
+		CE40078218E546110025C0B0 /* GCDWebServerConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerConnection.h; sourceTree = "<group>"; };
+		CE40078318E546110025C0B0 /* GCDWebServerConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerConnection.m; sourceTree = "<group>"; };
+		CE40078418E546110025C0B0 /* GCDWebServerPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerPrivate.h; sourceTree = "<group>"; };
+		CE40078518E546110025C0B0 /* GCDWebServerRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerRequest.h; sourceTree = "<group>"; };
+		CE40078618E546110025C0B0 /* GCDWebServerRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerRequest.m; sourceTree = "<group>"; };
+		CE40078718E546110025C0B0 /* GCDWebServerResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerResponse.h; sourceTree = "<group>"; };
+		CE40078818E546110025C0B0 /* GCDWebServerResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerResponse.m; sourceTree = "<group>"; };
 		CE9E605618E4C199008C6D2B /* WebServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebServer.h; path = mobileDrive/WebServer.h; sourceTree = SOURCE_ROOT; };
 		CE9E605718E4C199008C6D2B /* WebServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WebServer.m; path = mobileDrive/WebServer.m; sourceTree = SOURCE_ROOT; };
+		CEF41B3818E79B5500073D0F /* Website */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Website; sourceTree = "<group>"; };
 		DE02776418DA9671003C8F60 /* CODialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CODialog.h; sourceTree = "<group>"; };
 		DE02776518DA9671003C8F60 /* CODialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CODialog.m; sourceTree = "<group>"; };
 		DE0FDF5F18C963CB00843686 /* mobileDrive.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mobileDrive.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -99,20 +87,6 @@
 		DE9833C818C96BBC003CEA5B /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		DED6C4BF18D2643900F50F97 /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
 		DED6C4C018D2643900F50F97 /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
-		DEF5A1D918E0F2BC0006D1AE /* arrow_down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_down.png; sourceTree = "<group>"; };
-		DEF5A1DA18E0F2BC0006D1AE /* arrow_up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = arrow_up.png; sourceTree = "<group>"; };
-		DEF5A1DB18E0F2BC0006D1AE /* cross.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cross.png; sourceTree = "<group>"; };
-		DEF5A1DC18E0F2BC0006D1AE /* gh-icons.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "gh-icons.png"; sourceTree = "<group>"; };
-		DEF5A1DD18E0F2BC0006D1AE /* page_link.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = page_link.png; sourceTree = "<group>"; };
-		DEF5A1DE18E0F2BC0006D1AE /* type_directory.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = type_directory.png; sourceTree = "<group>"; };
-		DEF5A1DF18E0F2BC0006D1AE /* type_text.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = type_text.png; sourceTree = "<group>"; };
-		DEF5A1E018E0F2BC0006D1AE /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
-		DEF5A1E218E0F2BC0006D1AE /* filesystem.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = filesystem.js; sourceTree = "<group>"; };
-		DEF5A1E318E0F2BC0006D1AE /* jquery.min.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jquery.min.js; sourceTree = "<group>"; };
-		DEF5A1E418E0F2BC0006D1AE /* jquery.omniwindow.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jquery.omniwindow.js; sourceTree = "<group>"; };
-		DEF5A1E518E0F2BC0006D1AE /* ui.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ui.js; sourceTree = "<group>"; };
-		DEF5A1E718E0F2BC0006D1AE /* gh-buttons.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = "gh-buttons.css"; sourceTree = "<group>"; };
-		DEF5A1E818E0F2BC0006D1AE /* style.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = style.css; sourceTree = "<group>"; };
 		DEF84A5F18E0FCF3009AC0CC /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -140,18 +114,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		9564622E18D0DAC400AA845A /* CGDWebServer */ = {
+		CE40077F18E546110025C0B0 /* CGDWebServer */ = {
 			isa = PBXGroup;
 			children = (
-				9564622F18D0DAC400AA845A /* GCDWebServer.h */,
-				9564623018D0DAC400AA845A /* GCDWebServer.m */,
-				9564623118D0DAC400AA845A /* GCDWebServerConnection.h */,
-				9564623218D0DAC400AA845A /* GCDWebServerConnection.m */,
-				9564623318D0DAC400AA845A /* GCDWebServerPrivate.h */,
-				9564623418D0DAC400AA845A /* GCDWebServerRequest.h */,
-				9564623518D0DAC400AA845A /* GCDWebServerRequest.m */,
-				9564623618D0DAC400AA845A /* GCDWebServerResponse.h */,
-				9564623718D0DAC400AA845A /* GCDWebServerResponse.m */,
+				CE40078018E546110025C0B0 /* GCDWebServer.h */,
+				CE40078118E546110025C0B0 /* GCDWebServer.m */,
+				CE40078218E546110025C0B0 /* GCDWebServerConnection.h */,
+				CE40078318E546110025C0B0 /* GCDWebServerConnection.m */,
+				CE40078418E546110025C0B0 /* GCDWebServerPrivate.h */,
+				CE40078518E546110025C0B0 /* GCDWebServerRequest.h */,
+				CE40078618E546110025C0B0 /* GCDWebServerRequest.m */,
+				CE40078718E546110025C0B0 /* GCDWebServerResponse.h */,
+				CE40078818E546110025C0B0 /* GCDWebServerResponse.m */,
 			);
 			path = CGDWebServer;
 			sourceTree = "<group>";
@@ -191,11 +165,11 @@
 		DE0FDF6818C963CB00843686 /* mobileDrive */ = {
 			isa = PBXGroup;
 			children = (
-				9564622E18D0DAC400AA845A /* CGDWebServer */,
-				DEF5A1D718E0F2BC0006D1AE /* web */,
+				CE40077F18E546110025C0B0 /* CGDWebServer */,
 				DE9833C618C96BA0003CEA5B /* dbfs */,
-				CE9E605618E4C199008C6D2B /* WebServer.h */,
 				CE9E605718E4C199008C6D2B /* WebServer.m */,
+				CE9E605618E4C199008C6D2B /* WebServer.h */,
+				CEF41B3818E79B5500073D0F /* Website */,
 				9564623C18D0DEBC00AA845A /* ServerViewController.h */,
 				9564623D18D0DEBC00AA845A /* ServerViewController.m */,
 				DE0FDF7118C963CB00843686 /* MobileDriveAppDelegate.h */,
@@ -242,51 +216,6 @@
 				DE0FDF8418C963CB00843686 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		DEF5A1D718E0F2BC0006D1AE /* web */ = {
-			isa = PBXGroup;
-			children = (
-				DEF5A1D818E0F2BC0006D1AE /* img */,
-				DEF5A1E018E0F2BC0006D1AE /* index.html */,
-				DEF5A1E118E0F2BC0006D1AE /* js */,
-				DEF5A1E618E0F2BC0006D1AE /* styles */,
-			);
-			path = web;
-			sourceTree = "<group>";
-		};
-		DEF5A1D818E0F2BC0006D1AE /* img */ = {
-			isa = PBXGroup;
-			children = (
-				DEF5A1D918E0F2BC0006D1AE /* arrow_down.png */,
-				DEF5A1DA18E0F2BC0006D1AE /* arrow_up.png */,
-				DEF5A1DB18E0F2BC0006D1AE /* cross.png */,
-				DEF5A1DC18E0F2BC0006D1AE /* gh-icons.png */,
-				DEF5A1DD18E0F2BC0006D1AE /* page_link.png */,
-				DEF5A1DE18E0F2BC0006D1AE /* type_directory.png */,
-				DEF5A1DF18E0F2BC0006D1AE /* type_text.png */,
-			);
-			path = img;
-			sourceTree = "<group>";
-		};
-		DEF5A1E118E0F2BC0006D1AE /* js */ = {
-			isa = PBXGroup;
-			children = (
-				DEF5A1E218E0F2BC0006D1AE /* filesystem.js */,
-				DEF5A1E318E0F2BC0006D1AE /* jquery.min.js */,
-				DEF5A1E418E0F2BC0006D1AE /* jquery.omniwindow.js */,
-				DEF5A1E518E0F2BC0006D1AE /* ui.js */,
-			);
-			path = js;
-			sourceTree = "<group>";
-		};
-		DEF5A1E618E0F2BC0006D1AE /* styles */ = {
-			isa = PBXGroup;
-			children = (
-				DEF5A1E718E0F2BC0006D1AE /* gh-buttons.css */,
-				DEF5A1E818E0F2BC0006D1AE /* style.css */,
-			);
-			path = styles;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -365,22 +294,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DEF5A1EB18E0F2BC0006D1AE /* cross.png in Resources */,
-				DEF5A1F618E0F2BC0006D1AE /* style.css in Resources */,
-				DEF5A1EC18E0F2BC0006D1AE /* gh-icons.png in Resources */,
-				DEF5A1ED18E0F2BC0006D1AE /* page_link.png in Resources */,
 				DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */,
-				DEF5A1E918E0F2BC0006D1AE /* arrow_down.png in Resources */,
 				DEF84A6018E0FCF3009AC0CC /* README.md in Resources */,
 				8AFF3ECC18D24CB300FB8A21 /* files.plist in Resources */,
-				DEF5A1F018E0F2BC0006D1AE /* index.html in Resources */,
 				DE0FDF6D18C963CB00843686 /* InfoPlist.strings in Resources */,
-				DEF5A1F518E0F2BC0006D1AE /* gh-buttons.css in Resources */,
 				DE9833C718C96BA0003CEA5B /* dbfs in Resources */,
-				DEF5A1EA18E0F2BC0006D1AE /* arrow_up.png in Resources */,
+				CEF41B3918E79B5500073D0F /* Website in Resources */,
 				DE0FDF7518C963CB00843686 /* Images.xcassets in Resources */,
-				DEF5A1EE18E0F2BC0006D1AE /* type_directory.png in Resources */,
-				DEF5A1EF18E0F2BC0006D1AE /* type_text.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,20 +319,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DEF5A1F318E0F2BC0006D1AE /* jquery.omniwindow.js in Sources */,
-				9564623818D0DAC400AA845A /* GCDWebServer.m in Sources */,
+				CE40078A18E546110025C0B0 /* GCDWebServerConnection.m in Sources */,
+				CE40078C18E546110025C0B0 /* GCDWebServerResponse.m in Sources */,
 				8A014E8018CF8FF600C83490 /* MobileDriveModel.m in Sources */,
-				DEF5A1F118E0F2BC0006D1AE /* filesystem.js in Sources */,
-				DEF5A1F218E0F2BC0006D1AE /* jquery.min.js in Sources */,
-				9564623918D0DAC400AA845A /* GCDWebServerConnection.m in Sources */,
 				DED6C4C118D2643900F50F97 /* IPadTableViewController.m in Sources */,
 				DE0FDF6F18C963CB00843686 /* main.m in Sources */,
 				CE9E605818E4C199008C6D2B /* WebServer.m in Sources */,
-				DEF5A1F418E0F2BC0006D1AE /* ui.js in Sources */,
-				9564623B18D0DAC400AA845A /* GCDWebServerResponse.m in Sources */,
-				9564623A18D0DAC400AA845A /* GCDWebServerRequest.m in Sources */,
+				CE40078918E546110025C0B0 /* GCDWebServer.m in Sources */,
 				DE0FDF7318C963CB00843686 /* MobileDriveAppDelegate.m in Sources */,
 				DE02776618DA9671003C8F60 /* CODialog.m in Sources */,
+				CE40078B18E546110025C0B0 /* GCDWebServerRequest.m in Sources */,
 				9564623E18D0DEBC00AA845A /* ServerViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

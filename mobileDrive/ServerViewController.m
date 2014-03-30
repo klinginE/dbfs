@@ -12,7 +12,8 @@
 #import <ifaddrs.h>
 #import <arpa/inet.h>
 
-#import "CGDWebServer/GCDWebServer.h"
+
+#define kTrialMaxUploads 50
 
 @interface ServerViewController ()
 
@@ -20,6 +21,7 @@
 
 @implementation ServerViewController{
     GCDWebServer* webServer;
+   // NSMutableString *current_ip_address;
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -33,11 +35,42 @@
 
 -(id) init{
     NSLog(@"viewDidLoad ServerViewController.m");
+    _current_ip_address = [NSMutableString stringWithString: @"test"];
+    
     @autoreleasepool {
         
         // Create server
         webServer = [[GCDWebServer alloc] init];
+
+        // Get the path to the website directory
+        NSString* websitePath = [[NSBundle mainBundle] pathForResource:@"Website" ofType:nil];
         
+        NSString* footer = [NSString stringWithFormat:NSLocalizedString(@"SERVER_FOOTER_FORMAT", nil),
+                            [[UIDevice currentDevice] name],
+                            [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+        NSDictionary* baseVariables = [NSDictionary dictionaryWithObjectsAndKeys:footer, @"footer", nil];
+        
+        //[webServer addGETHandlerForBasePath:@"/" directoryPath:NSHomeDirectory() indexFilename:nil cacheAge:3600 allowRangeRequests:YES];
+        [webServer addGETHandlerForBasePath:@"/" directoryPath:websitePath indexFilename:nil cacheAge:3600 allowRangeRequests:YES];
+
+        // Redirect root website to index.html
+        [webServer addHandlerForMethod:@"GET" path:@"/" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+            
+            // Called from GCD thread
+            return [GCDWebServerResponse responseWithRedirect:[NSURL URLWithString:@"index.html" relativeToURL:request.URL] permanent:NO];
+            
+        }];
+        /*
+        [webServer addHandlerForMethod:@"GET" path:@"/index.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+            
+            // Called from GCD thread
+            NSMutableDictionary* variables = [NSMutableDictionary dictionaryWithDictionary:baseVariables];
+            [variables setObject:[NSString stringWithFormat:@"%i", kTrialMaxUploads] forKey:@"max"];
+            return [GCDWebServerDataResponse responseWithHTMLTemplate:[websitePath stringByAppendingPathComponent:request.path] variables:variables];
+            
+        }];*/
+
+        /*
         // Add a handler to respond to requests on any URL
         [webServer addDefaultHandlerForMethod:@"GET"
                                  requestClass:[GCDWebServerRequest class]
@@ -45,16 +78,18 @@
                                      
                                      return [GCDWebServerDataResponse responseWithHTML:@"<html><body><p>Hello World</p></body></html>"];
                                      
-                                 }];
+                                 }]; */
+        
         
         NSLog(@"Before Running server");
         // Use convenience method that runs server on port 8080 until SIGINT received
         [webServer start];
-        NSLog( [self getIPAddress] );
-        // Destroy server
-        //   [webServer release];
         
+        NSLog(@"#####");
+        NSLog( [self getIPAddress] );
+        NSLog(@"#####");
     }
+    
     return self;
 }
 
@@ -75,23 +110,7 @@
 }
 
 -(void) turnOnServer{
-    @autoreleasepool {
-        // Add a handler to respond to requests on any URL
-        [webServer addDefaultHandlerForMethod:@"GET"
-                                 requestClass:[GCDWebServerRequest class]
-                                 processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
-                                     
-                                     return [GCDWebServerDataResponse responseWithHTML:@"<html><body><p>Hello World</p></body></html>"];
-                                     
-                                 }];
-
-        // Use convenience method that runs server on port 8080 until SIGINT received
-        [webServer runWithPort:8080];
-         NSLog( [self getIPAddress] );
-
-    }
-    
-    NSLog(@"End of turnOnServer");
+    [webServer start];
 }
 
 -(void) turnOffServer{
