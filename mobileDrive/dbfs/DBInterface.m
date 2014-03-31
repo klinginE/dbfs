@@ -129,6 +129,26 @@
     return 0;
 }
 
+-(void)createDirectory:(NSString *)dirName fromDB:(DBFS *)db {
+    char *name = [self nsStringToCString:dirName];
+    if(DBFS_OKAY != dbfs_mkd(dbfs, name)) {
+        NSLog(@"Error creating directory.");
+        return 1;
+    }
+    return 0;
+}
+
+-(void)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDB:(DBFS *)dbfs{
+    char *name = [self nsStringToCString:dirName];
+    char *dest = [self nsStringToCString:destName];
+    if (DBFS_OKAY != dbfs_mvd(dbfs, name, dest)) {
+        NSLog(@"Error moving directory.");
+        return 1;
+    }
+    return 0;
+}
+-(void)
+
 -(DBFS_FileList *)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs {
     
     if (!dirName) {
