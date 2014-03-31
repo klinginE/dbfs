@@ -52,6 +52,20 @@ void sql_check(sqlite3 *db, int err)
     sql_fatal(db, err);
 }
 
+static
+DBFS_Error sql_map(int err)
+{
+    switch (err)
+    {
+    case SQLITE_MISUSE:
+        dbfs_fatal("misuse!");
+    case SQLITE_CONSTRAINT:
+        return DBFS_INTRUDER;
+    default:
+        return DBFS_YOU_SUCK;
+    }
+}
+
 
 static
 sqlite3_stmt *compile_statement(sqlite3 *db, const char *stmt)
@@ -163,6 +177,7 @@ DBFS_Error query_id1(DBFS *db, int *in_dir, const char *name, size_t name_len)
     BIND_INT(indir);
     BIND_TEXT(name, name_len);
     int count = 0;
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -176,14 +191,14 @@ DBFS_Error query_id1(DBFS *db, int *in_dir, const char *name, size_t name_len)
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
     if (!count)
         return DBFS_LIGHTS_ON;
-    return DBFS_OKAY;
+    return rv;
 }
 
 DBFS_Error query_mkd1(DBFS *db, int indir, const char *name)
@@ -191,6 +206,7 @@ DBFS_Error query_mkd1(DBFS *db, int indir, const char *name)
     sqlite3_stmt *query = db->mkd1;
     BIND_INT(indir);
     BIND_TEXT(name, -1);
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -201,12 +217,12 @@ DBFS_Error query_mkd1(DBFS *db, int indir, const char *name)
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
-    return DBFS_OKAY;
+    return rv;
 }
 
 DBFS_Error query_rmd1(DBFS *db, int indir, const char *name)
@@ -214,6 +230,7 @@ DBFS_Error query_rmd1(DBFS *db, int indir, const char *name)
     sqlite3_stmt *query = db->rmd1;
     BIND_INT(indir);
     BIND_TEXT(name, -1);
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -224,12 +241,12 @@ DBFS_Error query_rmd1(DBFS *db, int indir, const char *name)
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
-    return DBFS_OKAY;
+    return rv;
 }
 
 DBFS_Error query_mvd1(DBFS *db, int from_dir, const char *from_name, int to_dir, const char *to_name)
@@ -239,6 +256,7 @@ DBFS_Error query_mvd1(DBFS *db, int from_dir, const char *from_name, int to_dir,
     BIND_TEXT(from_name, -1);
     BIND_INT(to_dir);
     BIND_TEXT(to_name, -1);
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -249,12 +267,12 @@ DBFS_Error query_mvd1(DBFS *db, int from_dir, const char *from_name, int to_dir,
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
-    return DBFS_OKAY;
+    return rv;
 }
 
 DBFS_Error query_lsd1(DBFS *db, int indir, DBFS_DirName **out_dirs, size_t *out_size)
@@ -264,6 +282,7 @@ DBFS_Error query_lsd1(DBFS *db, int indir, DBFS_DirName **out_dirs, size_t *out_
     size_t out_cap = 16;
     *out_dirs = malloc(out_cap * sizeof(**out_dirs));
     *out_size = 0;
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -280,12 +299,12 @@ DBFS_Error query_lsd1(DBFS *db, int indir, DBFS_DirName **out_dirs, size_t *out_
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
-    return DBFS_OKAY;
+    return rv;
 }
 
 DBFS_Error query_lsf1(DBFS *db, int indir, DBFS_FileName **out_files, size_t *out_size)
@@ -295,6 +314,7 @@ DBFS_Error query_lsf1(DBFS *db, int indir, DBFS_FileName **out_files, size_t *ou
     size_t out_cap = 16;
     *out_files = malloc(out_cap * sizeof(**out_files));
     *out_size = 0;
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -312,12 +332,12 @@ DBFS_Error query_lsf1(DBFS *db, int indir, DBFS_FileName **out_files, size_t *ou
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
-    return DBFS_OKAY;
+    return rv;
 }
 
 DBFS_Error query_get1(DBFS *db, int indir, const char *name, uint8_t **out_body, size_t *out_size)
@@ -326,6 +346,7 @@ DBFS_Error query_get1(DBFS *db, int indir, const char *name, uint8_t **out_body,
     BIND_INT(indir);
     BIND_TEXT(name, -1);
     int count = 0;
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -341,14 +362,14 @@ DBFS_Error query_get1(DBFS *db, int indir, const char *name, uint8_t **out_body,
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
     if (!count)
         return DBFS_LIGHTS_ON;
-    return DBFS_OKAY;
+    return rv;
 }
 
 DBFS_Error query_put1(DBFS *db, int indir, const char *name, const uint8_t *contents, size_t size)
@@ -357,6 +378,7 @@ DBFS_Error query_put1(DBFS *db, int indir, const char *name, const uint8_t *cont
     BIND_INT(indir);
     BIND_TEXT(name, -1);
     BIND_BLOB(contents, size);
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -367,12 +389,12 @@ DBFS_Error query_put1(DBFS *db, int indir, const char *name, const uint8_t *cont
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
-    return DBFS_OKAY;
+    return rv;
 }
 
 DBFS_Error query_ovr1(DBFS *db, int indir, const char *name, const uint8_t *contents, size_t size)
@@ -381,6 +403,7 @@ DBFS_Error query_ovr1(DBFS *db, int indir, const char *name, const uint8_t *cont
     BIND_INT(indir);
     BIND_TEXT(name, -1);
     BIND_BLOB(contents, size);
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -391,12 +414,12 @@ DBFS_Error query_ovr1(DBFS *db, int indir, const char *name, const uint8_t *cont
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
-    return DBFS_OKAY;
+    return rv;
 }
 
 DBFS_Error query_del1(DBFS *db, int indir, const char *name)
@@ -404,6 +427,7 @@ DBFS_Error query_del1(DBFS *db, int indir, const char *name)
     sqlite3_stmt *query = db->del1;
     BIND_INT(indir);
     BIND_TEXT(name, -1);
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -414,12 +438,12 @@ DBFS_Error query_del1(DBFS *db, int indir, const char *name)
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
-    return DBFS_OKAY;
+    return rv;
 }
 
 DBFS_Error query_mvf1(DBFS *db, int from_dir, const char *from_name, int to_dir, const char *to_name)
@@ -429,6 +453,7 @@ DBFS_Error query_mvf1(DBFS *db, int from_dir, const char *from_name, int to_dir,
     BIND_TEXT(from_name, -1);
     BIND_INT(to_dir);
     BIND_TEXT(to_name, -1);
+    DBFS_Error rv = DBFS_OKAY;
     while (true)
     {
         int status = sqlite3_step(query);
@@ -439,12 +464,12 @@ DBFS_Error query_mvf1(DBFS *db, int from_dir, const char *from_name, int to_dir,
             continue;
         }
         sqlite3_reset(query);
-        if (status == SQLITE_DONE)
-            break;
-        sql_fatal(db->db, status);
+        if (status != SQLITE_DONE)
+            rv = sql_map(status);
+        break;
     }
     sqlite3_clear_bindings(query);
-    return DBFS_OKAY;
+    return rv;
 }
 
 #pragma GCC diagnostic pop

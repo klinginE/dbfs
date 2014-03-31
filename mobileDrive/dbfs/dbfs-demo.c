@@ -35,12 +35,13 @@ int do_mkd(DBFS *dbfs, const char *dname)
 {
     if (!dname)
     {
-        puts("missing argument");
+        fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
-    if (DBFS_OKAY != dbfs_mkd(dbfs, (DBFS_DirName){dname}))
+    DBFS_Error err = dbfs_mkd(dbfs, (DBFS_DirName){dname});
+    if (err)
     {
-        puts("not okay");
+        fprintf(stderr, "%s\n", dbfs_err(err));
         return 2;
     }
     return 0;
@@ -51,12 +52,13 @@ int do_rmd(DBFS *dbfs, const char *dname)
 {
     if (!dname)
     {
-        puts("missing argument");
+        fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
-    if (DBFS_OKAY != dbfs_rmd(dbfs, (DBFS_DirName){dname}))
+    DBFS_Error err = dbfs_rmd(dbfs, (DBFS_DirName){dname});
+    if (err)
     {
-        puts("not okay");
+        fprintf(stderr, "%s\n", dbfs_err(err));
         return 2;
     }
     return 0;
@@ -67,12 +69,13 @@ int do_mvd(DBFS *dbfs, const char *from, const char *to)
 {
     if (!from || !to)
     {
-        puts("missing argument");
+        fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
-    if (DBFS_OKAY != dbfs_mvd(dbfs, (DBFS_DirName){from}, (DBFS_DirName){to}))
+    DBFS_Error err = dbfs_mvd(dbfs, (DBFS_DirName){from}, (DBFS_DirName){to});
+    if (err)
     {
-        puts("not okay");
+        fprintf(stderr, "%s\n", dbfs_err(err));
         return 2;
     }
     return 0;
@@ -85,12 +88,13 @@ int do_lsd(DBFS *dbfs, const char *fname, FILE *out)
     size_t i;
     if (!fname)
     {
-        puts("missing argument");
+        fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
-    if (DBFS_OKAY != dbfs_lsd(dbfs, (DBFS_DirName){fname}, &dlist))
+    DBFS_Error err = dbfs_lsd(dbfs, (DBFS_DirName){fname}, &dlist);
+    if (err)
     {
-        puts("not okay");
+        fprintf(stderr, "%s\n", dbfs_err(err));
         return 2;
     }
     fprintf(out, "%zu directories:\n", dlist.count);
@@ -107,12 +111,13 @@ int do_lsf(DBFS *dbfs, const char *fname, FILE *out)
     size_t i;
     if (!fname)
     {
-        puts("missing argument");
+        fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
-    if (DBFS_OKAY != dbfs_lsf(dbfs, (DBFS_DirName){fname}, &flist))
+    DBFS_Error err = dbfs_lsf(dbfs, (DBFS_DirName){fname}, &flist);
+    if (err)
     {
-        puts("not okay");
+        fprintf(stderr, "%s\n", dbfs_err(err));
         return 2;
     }
     fprintf(out, "%zu files:\n", flist.count);
@@ -128,12 +133,13 @@ int do_get(DBFS *dbfs, const char *fname, FILE *out)
     DBFS_Blob blob;
     if (!fname)
     {
-        puts("missing argument");
+        fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
-    if (DBFS_OKAY != dbfs_get(dbfs, (DBFS_FileName){fname}, &blob))
+    DBFS_Error err = dbfs_get(dbfs, (DBFS_FileName){fname}, &blob);
+    if (err)
     {
-        puts("not okay");
+        fprintf(stderr, "%s\n", dbfs_err(err));
         return 2;
     }
     fwrite(blob.data, 1, blob.size, out);
@@ -147,14 +153,15 @@ int do_put(DBFS *dbfs, const char *fname, FILE *in)
     DBFS_Blob blob;
     if (!fname)
     {
-        puts("missing argument");
+        fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
 
     blob = slurp(in);
-    if (DBFS_OKAY != dbfs_put(dbfs, (DBFS_FileName){fname}, blob))
+    DBFS_Error err = dbfs_put(dbfs, (DBFS_FileName){fname}, blob);
+    if (err)
     {
-        puts("not okay");
+        fprintf(stderr, "%s\n", dbfs_err(err));
         free((uint8_t *)blob.data);
         return 2;
     }
@@ -167,14 +174,15 @@ int do_ovr(DBFS *dbfs, const char *fname, FILE *in)
     DBFS_Blob blob;
     if (!fname)
     {
-        puts("missing argument");
+        fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
 
     blob = slurp(in);
-    if (DBFS_OKAY != dbfs_ovr(dbfs, (DBFS_FileName){fname}, blob))
+    DBFS_Error err = dbfs_ovr(dbfs, (DBFS_FileName){fname}, blob);
+    if (err)
     {
-        puts("not okay");
+        fprintf(stderr, "%s\n", dbfs_err(err));
         free((uint8_t *)blob.data);
         return 2;
     }
@@ -186,13 +194,14 @@ int do_del(DBFS *dbfs, const char *fname)
 {
     if (!fname)
     {
-        puts("missing argument");
+        fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
 
-    if (DBFS_OKAY != dbfs_del(dbfs, (DBFS_FileName){fname}))
+    DBFS_Error err = dbfs_del(dbfs, (DBFS_FileName){fname});
+    if (err)
     {
-        puts("not okay");
+        fprintf(stderr, "%s\n", dbfs_err(err));
         return 2;
     }
     return 0;
@@ -203,12 +212,13 @@ int do_mvf(DBFS *dbfs, const char *from, const char *to)
 {
     if (!from || !to)
     {
-        puts("missing argument");
+        fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
-    if (DBFS_OKAY != dbfs_mvf(dbfs, (DBFS_FileName){from}, (DBFS_FileName){to}))
+    DBFS_Error err = dbfs_mvf(dbfs, (DBFS_FileName){from}, (DBFS_FileName){to});
+    if (err)
     {
-        puts("not okay");
+        fprintf(stderr, "%s\n", dbfs_err(err));
         return 2;
     }
     return 0;
@@ -240,13 +250,13 @@ int main(int argc, char **argv)
     if (db_name == NULL)
     {
         // in the App, this will be hard-coded
-        puts("env DBFS unset, storing in memory (not persistent)");
+        fprintf(stderr, "%s\n", "env DBFS unset, storing in memory (not persistent)");
         db_name = ":memory:";
     }
     dbfs_handle = dbfs_open(db_name);
     if (dbfs_handle == NULL)
     {
-        puts("problem opening database");
+        fprintf(stderr, "%s\n", "problem opening database");
         return 3;
     }
 
@@ -294,7 +304,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        printf("unknown command '%s'\n", argv[1]);
+        fprintf(stderr, "unknown command '%s'\n", argv[1]);
         rv = 1;
     }
 
