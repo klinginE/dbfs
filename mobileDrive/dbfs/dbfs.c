@@ -25,10 +25,31 @@ struct DBFS
 };
 
 
-static
-void dbfs_fatal()
+static __attribute__((noreturn))
+void dbfs_fatal(const char *msg)
 {
+    fprintf(stderr, "%s\n", msg);
     abort();
+}
+
+static __attribute__((noreturn))
+void sql_fatal(sqlite3 *db, int err)
+{
+    if (err == SQLITE_OK)
+        dbfs_fatal("nothing is wrong");
+    if (err == SQLITE_MISUSE)
+        dbfs_fatal("sqlite misuse!");
+    fprintf(stderr, "error %d: %s\n", err, sqlite3_errstr(err));
+    fprintf(stderr, "message: %s\n", sqlite3_errmsg(db));
+    abort();
+}
+
+static
+void sql_check(sqlite3 *db, int err)
+{
+    if (err == SQLITE_OK)
+        return;
+    sql_fatal(db, err);
 }
 
 
@@ -38,18 +59,18 @@ sqlite3_stmt *compile_statement(sqlite3 *db, const char *stmt)
     sqlite3_stmt *rv;
     const char *rest;
 
-    if (SQLITE_OK != sqlite3_prepare_v2(db, stmt, strlen(stmt) + 1, &rv, &rest))
-        dbfs_fatal();
+    int err = sqlite3_prepare_v2(db, stmt, strlen(stmt) + 1, &rv, &rest);
+    sql_check(db, err);
     if (*rest)
-        dbfs_fatal();
+        dbfs_fatal("failed to consume input");
     return rv;
 }
 
 static
-void free_statement(sqlite3_stmt *s)
+void free_statement(sqlite3 *db, sqlite3_stmt *s)
 {
-    if (SQLITE_OK != sqlite3_finalize(s))
-        dbfs_fatal();
+    int err = sqlite3_finalize(s);
+    sql_check(db, err);
 }
 
 static
@@ -112,7 +133,7 @@ void debug_result(sqlite3_stmt *query)
             printf("null: NULL\n");
             break;
         default:
-            dbfs_fatal();
+            dbfs_fatal("unknown sql data type");
         }
         printf("\n");
     }
@@ -129,11 +150,11 @@ void *memdup(const void *mem, size_t sz)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#define BIND_INDEX(name) ({ int idx = sqlite3_bind_parameter_index(query, ":" #name); if (!idx) dbfs_fatal(); idx; })
+#define BIND_INDEX(name) ({ int idx = sqlite3_bind_parameter_index(query, ":" #name); if (!idx) dbfs_fatal("Unbound: " #name); idx; })
 
-#define BIND_INT(name) if (SQLITE_OK != sqlite3_bind_int(query, BIND_INDEX(name), name)) dbfs_fatal(); else (void)0
-#define BIND_TEXT(name, size) if (SQLITE_OK != sqlite3_bind_text(query, BIND_INDEX(name), name, size, SQLITE_TRANSIENT)) dbfs_fatal(); else (void)0
-#define BIND_BLOB(name, size) if (SQLITE_OK != sqlite3_bind_blob(query, BIND_INDEX(name), name, size, SQLITE_TRANSIENT)) dbfs_fatal(); else (void)0
+#define BIND_INT(name) do { int err = sqlite3_bind_int(query, BIND_INDEX(name), name); sql_check(db->db, err); } while (0)
+#define BIND_TEXT(name, size) do { int err = sqlite3_bind_text(query, BIND_INDEX(name), name, size, SQLITE_TRANSIENT); sql_check(db->db, err); } while (0)
+#define BIND_BLOB(name, size) do { int err = sqlite3_bind_blob(query, BIND_INDEX(name), name, size, SQLITE_TRANSIENT); sql_check(db->db, err); } while (0)
 
 DBFS_Error query_id1(DBFS *db, int *in_dir, const char *name, size_t name_len)
 {
@@ -149,7 +170,7 @@ DBFS_Error query_id1(DBFS *db, int *in_dir, const char *name, size_t name_len)
         {
             debug_result(query);
             if (count)
-                dbfs_fatal();
+                dbfs_fatal("too many results");
             count++;
             *in_dir = sqlite3_column_int(query, 0);
             continue;
@@ -157,7 +178,7 @@ DBFS_Error query_id1(DBFS *db, int *in_dir, const char *name, size_t name_len)
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     if (!count)
@@ -176,13 +197,13 @@ DBFS_Error query_mkd1(DBFS *db, int indir, const char *name)
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            dbfs_fatal();
+            dbfs_fatal("didn't expect any results");
             continue;
         }
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     return DBFS_OKAY;
@@ -199,13 +220,13 @@ DBFS_Error query_rmd1(DBFS *db, int indir, const char *name)
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            dbfs_fatal();
+            dbfs_fatal("didn't expect any results");
             continue;
         }
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     return DBFS_OKAY;
@@ -224,13 +245,13 @@ DBFS_Error query_mvd1(DBFS *db, int from_dir, const char *from_name, int to_dir,
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            dbfs_fatal();
+            dbfs_fatal("didn't expect any results");
             continue;
         }
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     return DBFS_OKAY;
@@ -261,7 +282,7 @@ DBFS_Error query_lsd1(DBFS *db, int indir, DBFS_DirName **out_dirs, size_t *out_
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     return DBFS_OKAY;
@@ -293,7 +314,7 @@ DBFS_Error query_lsf1(DBFS *db, int indir, DBFS_FileName **out_files, size_t *ou
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     return DBFS_OKAY;
@@ -312,7 +333,7 @@ DBFS_Error query_get1(DBFS *db, int indir, const char *name, uint8_t **out_body,
         {
             debug_result(query);
             if (count)
-                dbfs_fatal();
+                dbfs_fatal("too many results");
             count++;
             const uint8_t *blob = sqlite3_column_blob(query, 0);
             *out_size = sqlite3_column_bytes(query, 0);
@@ -322,7 +343,7 @@ DBFS_Error query_get1(DBFS *db, int indir, const char *name, uint8_t **out_body,
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     if (!count)
@@ -342,13 +363,13 @@ DBFS_Error query_put1(DBFS *db, int indir, const char *name, const uint8_t *cont
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            dbfs_fatal();
+            dbfs_fatal("didn't expect any results");
             continue;
         }
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     return DBFS_OKAY;
@@ -366,13 +387,13 @@ DBFS_Error query_ovr1(DBFS *db, int indir, const char *name, const uint8_t *cont
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            dbfs_fatal();
+            dbfs_fatal("didn't expect any results");
             continue;
         }
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     return DBFS_OKAY;
@@ -389,13 +410,13 @@ DBFS_Error query_del1(DBFS *db, int indir, const char *name)
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            dbfs_fatal();
+            dbfs_fatal("didn't expect any results");
             continue;
         }
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     return DBFS_OKAY;
@@ -414,13 +435,13 @@ DBFS_Error query_mvf1(DBFS *db, int from_dir, const char *from_name, int to_dir,
         if (status == SQLITE_ROW)
         {
             debug_result(query);
-            dbfs_fatal();
+            dbfs_fatal("didn't expect any results");
             continue;
         }
         sqlite3_reset(query);
         if (status == SQLITE_DONE)
             break;
-        dbfs_fatal();
+        sql_fatal(db->db, status);
     }
     sqlite3_clear_bindings(query);
     return DBFS_OKAY;
@@ -434,10 +455,11 @@ DBFS *dbfs_open(const char *name)
     DBFS *rv;
     sqlite3 *db;
 
-    if (SQLITE_OK != sqlite3_open(name, &db))
-        return NULL;
-    if (SQLITE_OK != sqlite3_exec(db, sql_fs2_init, NULL, NULL, NULL))
-        dbfs_fatal();
+    int err;
+    err = sqlite3_open(name, &db);
+    sql_check(NULL, err);
+    err = sqlite3_exec(db, sql_fs2_init, NULL, NULL, NULL);
+    sql_check(db, err);
 
     rv = malloc(sizeof(DBFS));
     rv->db = db;
@@ -457,19 +479,19 @@ DBFS *dbfs_open(const char *name)
 
 void dbfs_close(DBFS *dbfs)
 {
-    free_statement(dbfs->indir);
-    free_statement(dbfs->mkd1);
-    free_statement(dbfs->rmd1);
-    free_statement(dbfs->mvd1);
-    free_statement(dbfs->lsd1);
-    free_statement(dbfs->lsf1);
-    free_statement(dbfs->get1);
-    free_statement(dbfs->put1);
-    free_statement(dbfs->ovr1);
-    free_statement(dbfs->del1);
-    free_statement(dbfs->mvf1);
-    if (SQLITE_OK != sqlite3_close(dbfs->db))
-        dbfs_fatal();
+    free_statement(dbfs->db, dbfs->indir);
+    free_statement(dbfs->db, dbfs->mkd1);
+    free_statement(dbfs->db, dbfs->rmd1);
+    free_statement(dbfs->db, dbfs->mvd1);
+    free_statement(dbfs->db, dbfs->lsd1);
+    free_statement(dbfs->db, dbfs->lsf1);
+    free_statement(dbfs->db, dbfs->get1);
+    free_statement(dbfs->db, dbfs->put1);
+    free_statement(dbfs->db, dbfs->ovr1);
+    free_statement(dbfs->db, dbfs->del1);
+    free_statement(dbfs->db, dbfs->mvf1);
+    int err = sqlite3_close(dbfs->db);
+    sql_check(dbfs->db, err);
     free(dbfs);
 }
 
@@ -664,4 +686,30 @@ void dbfs_free_file_list(DBFS_FileList fl)
         free((char *)fl.files[fl.count].name);
     }
     free((DBFS_FileName *)fl.files);
+}
+
+
+const char *dbfs_err(DBFS_Error err)
+{
+    switch (err)
+    {
+        case DBFS_OKAY:
+            return "Everything is Ok.";
+        case DBFS_NOT_ABSOLUTE:
+            return "Argument was not absolute.";
+        case DBFS_NOT_DIRNAME:
+            return "Argument was not a valid directory name.";
+        case DBFS_NOT_FILENAME:
+            return "Argument was not a valid file name.";
+        case DBFS_COMPONENT_TOO_LONG:
+            return "A pathname component was too long.";
+        case DBFS_LIGHTS_ON:
+            return "Nobody's home.";
+        case DBFS_INTRUDER:
+            return "Somebody's home.";
+        case DBFS_YOU_SUCK:
+            return "The database doesn't like you. I don't like you either.";
+        default:
+            dbfs_fatal("unknown error");
+    }
 }

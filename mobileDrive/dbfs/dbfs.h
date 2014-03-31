@@ -89,4 +89,6 @@ void dbfs_free_dir_list(DBFS_DirList dl);
 // free the result of lsf
 void dbfs_free_file_list(DBFS_FileList fl);
 
+const char *dbfs_err(DBFS_Error err);
+
 #endif //DBFS_H
