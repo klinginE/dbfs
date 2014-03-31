@@ -43,7 +43,6 @@
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
                                                                         ipAddress:@"12.123.123.12"
-                                                                          target:self
                                                                     switchAction:@selector(switchChanged:)
                                                                        forEvents:UIControlEventValueChanged
                                                                       pathAction:@selector(pathButtonPressed:) pathEvents:UIControlEventTouchUpInside];

@@ -33,10 +33,6 @@
 		DEF5A1EE18E0F2BC0006D1AE /* type_directory.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1DE18E0F2BC0006D1AE /* type_directory.png */; };
 		DEF5A1EF18E0F2BC0006D1AE /* type_text.png in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1DF18E0F2BC0006D1AE /* type_text.png */; };
 		DEF5A1F018E0F2BC0006D1AE /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1E018E0F2BC0006D1AE /* index.html */; };
-		DEF5A1F118E0F2BC0006D1AE /* filesystem.js in Sources */ = {isa = PBXBuildFile; fileRef = DEF5A1E218E0F2BC0006D1AE /* filesystem.js */; };
-		DEF5A1F218E0F2BC0006D1AE /* jquery.min.js in Sources */ = {isa = PBXBuildFile; fileRef = DEF5A1E318E0F2BC0006D1AE /* jquery.min.js */; };
-		DEF5A1F318E0F2BC0006D1AE /* jquery.omniwindow.js in Sources */ = {isa = PBXBuildFile; fileRef = DEF5A1E418E0F2BC0006D1AE /* jquery.omniwindow.js */; };
-		DEF5A1F418E0F2BC0006D1AE /* ui.js in Sources */ = {isa = PBXBuildFile; fileRef = DEF5A1E518E0F2BC0006D1AE /* ui.js */; };
 		DEF5A1F518E0F2BC0006D1AE /* gh-buttons.css in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1E718E0F2BC0006D1AE /* gh-buttons.css */; };
 		DEF5A1F618E0F2BC0006D1AE /* style.css in Resources */ = {isa = PBXBuildFile; fileRef = DEF5A1E818E0F2BC0006D1AE /* style.css */; };
 		DEF84A6018E0FCF3009AC0CC /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DEF84A5F18E0FCF3009AC0CC /* README.md */; };
@@ -296,7 +292,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = MobileDrive;
-				LastUpgradeCheck = 0500;
+				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "Eric Klinginsmith";
 				TargetAttributes = {
 					DE0FDF7918C963CB00843686 = {
@@ -361,13 +357,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DEF5A1F318E0F2BC0006D1AE /* jquery.omniwindow.js in Sources */,
 				8A014E8018CF8FF600C83490 /* MobileDriveModel.m in Sources */,
-				DEF5A1F118E0F2BC0006D1AE /* filesystem.js in Sources */,
-				DEF5A1F218E0F2BC0006D1AE /* jquery.min.js in Sources */,
 				DED6C4C118D2643900F50F97 /* IPadTableViewController.m in Sources */,
 				DE0FDF6F18C963CB00843686 /* main.m in Sources */,
-				DEF5A1F418E0F2BC0006D1AE /* ui.js in Sources */,
 				DE0FDF7318C963CB00843686 /* MobileDriveAppDelegate.m in Sources */,
 				DE02776618DA9671003C8F60 /* CODialog.m in Sources */,
 			);
@@ -415,7 +407,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -455,7 +446,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -514,7 +504,6 @@
 		DE0FDF8F18C963CB00843686 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/mobileDrive.app/mobileDrive";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
@@ -537,7 +526,6 @@
 		DE0FDF9018C963CB00843686 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_INCLUDING_64_BIT)";
 				BUNDLE_LOADER = "$(BUILT_PRODUCTS_DIR)/mobileDrive.app/mobileDrive";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
