@@ -7,7 +7,6 @@
 //
 
 #import "MobileDriveModel.h"
-#import "dbfs/DBInterface.h"
 
 @implementation MobileDriveModel {
     NSDictionary *_directoryContents;

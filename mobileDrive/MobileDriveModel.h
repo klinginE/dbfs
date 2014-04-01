@@ -8,11 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "dbfs/DBInterface.h"
-#import "dbfs/dbfs.h"
 
 @interface MobileDriveModel : NSObject
 
 -(DBFS_Blob)slurp:(FILE *)in;
+
+-(id)init;
+
+-(void)closeDatabase;
 
 // Retrieve contents of absolute path "fname" through file stream "out"
 -(int)getFile:(NSString *)fname to:(FILE *)out withSize:(int *)size;
@@ -35,6 +38,9 @@
 
 -(NSDictionary *)getFileListIn:(NSString *)dirName;
 -(NSDictionary *)getDirectoryListIn:(NSString *)dirName;
+
+// Returns a dictionary containing the contents of dirName.
+// Organization: directories first followed by files, both are alphabetical.
 -(NSDictionary *)getContentsIn:(NSString *)dirName;
 
 @end
