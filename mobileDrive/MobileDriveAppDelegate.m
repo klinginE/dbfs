@@ -9,7 +9,7 @@
 #import "IPadTableViewController.h"
 #import <string.h>
 
-@interface MobileDriveAppDelegate()
+@interface MobileDriveAppDelegate() <IPadTableViewControllerDelegate>
 
 @property (strong, nonatomic) IPadTableViewController *iPadTableViewController;
 

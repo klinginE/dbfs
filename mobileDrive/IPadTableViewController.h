@@ -19,6 +19,17 @@
 #define PATH_VIEW_HEIGHT (MEDIAN_FONT_SIZE * 3)
 #define IP_TAG 512
 
+// Protocol
+@protocol IPadTableViewControllerDelegate <NSObject>
+
+@required
+@property (atomic) BOOL isConnected;
+
+-(void)switchChanged:(UISwitch *)sender;
+-(void)pathButtonPressed:(UIButton *)sender;
+
+@end
+
 @interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
 
 // Enums
