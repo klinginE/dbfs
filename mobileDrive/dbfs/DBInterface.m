@@ -10,6 +10,13 @@
 
 @implementation DBInterface
 
+-(id)init {
+
+    self = [super init];
+    return self;
+
+}
+
 -(char *)nsStringToCString:(NSString *)s {
     
     int len = [s length];
@@ -50,16 +57,13 @@
 }
 
 -(DBFS *)openDatabase:(NSString *)name {
-    char *dbName = nsStringToCString(name);
-    
+    char *dbName = [self nsStringToCString:name];
     DBFS *dbfs = dbfs_open(dbName);
-    
     return dbfs;
 }
 
--(void)closeDatabase:(NSString *)name {
-    char *dbName = nsStringToCString(name);
-    DBFS *dbfs = dbfs_close(dbName);
+-(void)closeDatabase:(DBFS *)dbfs {
+    dbfs_close(dbfs);
 }
 
 -(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out withSize:(int *)size {
@@ -69,7 +73,7 @@
     int result = dbfs_get(dbfs, (DBFS_FileName){name}, &blob);
     
     if(result == DBFS_OKAY) {
-        *size = blog.size;
+        *size = blob.size;
         fwrite(blob.data, 1, blob.size, out);
     }
     return result;
@@ -102,20 +106,25 @@
 // First checks to see if newName already exists.
 // Asks to overwrite?
 -(int)renameFile:(NSString *)fname to:(NSString *)newName fromDatabase:(DBFS *)dbfs {
-	char *oldName = [self nsStringToCString:fname];
-	char *name = [self nsStringToCString:newName];
+	DBFS_FileName oldName;
+    oldName.name = [self nsStringToCString:fname];
+	DBFS_FileName name;
+    name.name = [self nsStringToCString:newName];
     
     return dbfs_mvf(dbfs, oldName, name);
 }
 
--(int)createDirectory:(NSString *)dirName fromDatabase:(DBFS *)db {
-    char *name = [self nsStringToCString:dirName];
+-(int)createDirectory:(NSString *)dirName fromDatabase:(DBFS *)dbfs {
+    DBFS_DirName name;
+    name.name = [self nsStringToCString:dirName];
     return dbfs_mkd(dbfs, name);
 }
 
 -(int)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDatabase:(DBFS *)dbfs{
-    char *name = [self nsStringToCString:dirName];
-    char *dest = [self nsStringToCString:destName];
+    DBFS_DirName name;
+    name.name = [self nsStringToCString:dirName];
+    DBFS_DirName dest;
+    dest.name = [self nsStringToCString:destName];
     return dbfs_mvd(dbfs, name, dest);
 }
 

@@ -8,22 +8,28 @@
 
 #import "MobileDriveModel.h"
 
+
 @implementation MobileDriveModel {
     NSDictionary *_directoryContents;
     NSArray *_directoryKeys;
-    DBInterface *dbInterface;
     DBFS *dbfs;
 }
 
 -(id)init {
     self = [super init];
-    dbfs = [dbInterface openDatabase:@"database"];
-    
+    if (self) {
+
+        self.dbInterface = [[DBInterface alloc] init];
+        //NSLog(@"%@", self.dbInterface);
+        dbfs = [self.dbInterface openDatabase:@"database"];
+
+    }
+
     return self;
 }
 
 -(void)closeDatabase {
-    [dbInterface closeDatabase:@"database"];
+    [self.dbInterface closeDatabase:dbfs];
 }
 
 
@@ -40,7 +46,7 @@
     else if ([fname isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    int result = [dbInterface getFile:fname fromDatabase:self->dbfs to:out withSize:size];
+    int result = [self.dbInterface getFile:fname fromDatabase:self->dbfs to:out withSize:size];
     
     return result;
 }
@@ -52,7 +58,7 @@
     else if ([fname isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [dbInterface putFile:fname fromDatabase:self->dbfs from:in withSize:size];
+    return [self.dbInterface putFile:fname fromDatabase:self->dbfs from:in withSize:size];
     
 }
 
@@ -63,7 +69,7 @@
     else if ([oldName isEqualToString:@""] || [newName isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [self->dbInterface renameFile:oldName to:newName fromDatabase:self->dbfs];
+    return [self.dbInterface renameFile:oldName to:newName fromDatabase:self->dbfs];
 }
 
 -(int)moveFile:(NSString *)oldName to:(NSString *)newName {
@@ -73,7 +79,7 @@
     else if ([oldName isEqualToString:@""] || [newName isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [self->dbInterface renameFile:oldName to:newName fromDatabase:self->dbfs];
+    return [self.dbInterface renameFile:oldName to:newName fromDatabase:self->dbfs];
 }
 
 -(int)overwriteFile:(NSString *)fname from:(FILE *)in {
@@ -83,7 +89,7 @@
     else if ([fname isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return[dbInterface overwriteFile:fname inDatabase:self->dbfs from:in];
+    return[self.dbInterface overwriteFile:fname inDatabase:self->dbfs from:in];
 }
 
 -(int)deleteFile:(NSString *)fname {
@@ -93,7 +99,7 @@
     else if ([fname isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [dbInterface deleteFile:fname fromDatabase:self->dbfs];
+    return [self.dbInterface deleteFile:fname fromDatabase:self->dbfs];
 }
 
 -(int)moveDirectory:(NSString *)dirName to:(NSString *)destName {
@@ -103,7 +109,7 @@
     else if ([dirName isEqualToString:@""] || [destName isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [dbInterface moveDirectory:dirName to:destName fromDatabase:self->dbfs];
+    return [self.dbInterface moveDirectory:dirName to:destName fromDatabase:self->dbfs];
 }
 
 -(int)renameDirectory:(NSString *)dirName to:(NSString *)newName {
@@ -113,12 +119,12 @@
     else if ([dirName isEqualToString:@""] || [newName isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [dbInterface moveDirectory:dirName to:newName fromDatabase:self->dbfs];
+    return [self.dbInterface moveDirectory:dirName to:newName fromDatabase:self->dbfs];
 }
 
 -(NSDictionary *)getFileListIn:(NSString *)dirName {
     DBFS_FileList *fileList = nil;
-    fileList = [dbInterface getFileListIn:dirName fromDatabase:self->dbfs];
+    fileList = [self.dbInterface getFileListIn:dirName fromDatabase:self->dbfs];
     
     NSMutableDictionary *fileDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
@@ -141,7 +147,7 @@
 
 -(NSDictionary *)getDirectoryListIn:(NSString *)dirName {
     DBFS_DirList *dirList = nil;
-    dirList = [dbInterface getDirectoryListIn:dirName inDatabase:dbfs];
+    dirList = [self.dbInterface getDirectoryListIn:dirName inDatabase:dbfs];
     
     NSMutableDictionary *dirDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];

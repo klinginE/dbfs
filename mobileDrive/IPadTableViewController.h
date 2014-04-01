@@ -24,6 +24,7 @@
 
 @required
 @property (atomic) BOOL isConnected;
+@property (strong, atomic) MobileDriveModel *model;
 
 -(void)switchChanged:(UISwitch *)sender;
 -(void)pathButtonPressed:(UIButton *)sender;

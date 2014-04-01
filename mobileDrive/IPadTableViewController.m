@@ -718,10 +718,12 @@
     if(_filesDictionary == nil) {
 
         //FIXME change for grabing info from plist and instead grab data from model
-        NSString *path = [[NSBundle mainBundle] pathForResource:@"files" ofType:@"plist"];
-        _filesDictionary = [[NSDictionary alloc] initWithContentsOfFile:path];
-        _fileKeys = [[_filesDictionary allKeys] sortedArrayUsingSelector:@selector(compare:)];
-        //[self.appDelegate.model getDirectoryListIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+        //NSString *path = [[NSBundle mainBundle] pathForResource:@"files" ofType:@"plist"];
+        //_filesDictionary = [[NSDictionary alloc] initWithContentsOfFile:path];
+        //_fileKeys = [[_filesDictionary allKeys] sortedArrayUsingSelector:@selector(compare:)];
+
+        _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+        _fileKeys = [_filesDictionary allKeys];
 
     }
 
