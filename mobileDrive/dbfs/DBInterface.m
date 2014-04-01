@@ -129,7 +129,14 @@
     return 0;
 }
 
--(void)createDirectory:(NSString *)dirName fromDB:(DBFS *)db {
+// First checks to see if newName already exists.
+// Asks to overwrite?
+-(void)renameFile:(NSString *)fname to:(NSString *)newName fromDatabase:(DBFS *)dbfs {
+	char *oldName = [self nsStringToCString:fname];
+	char *name = [self nsStringToCString:newName];
+}
+
+-(void)createDirectory:(NSString *)dirName fromDatabase:(DBFS *)db {
     char *name = [self nsStringToCString:dirName];
     if(DBFS_OKAY != dbfs_mkd(dbfs, name)) {
         NSLog(@"Error creating directory.");
@@ -138,7 +145,7 @@
     return 0;
 }
 
--(void)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDB:(DBFS *)dbfs{
+-(void)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDatabase:(DBFS *)dbfs{
     char *name = [self nsStringToCString:dirName];
     char *dest = [self nsStringToCString:destName];
     if (DBFS_OKAY != dbfs_mvd(dbfs, name, dest)) {

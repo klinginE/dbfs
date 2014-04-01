@@ -29,6 +29,10 @@
 // Remove file with absolute path "fname" from database
 -(void)deleteFile:(NSString *)fname;
 
+-(void)moveDirectory:(NSString *)dirName to:(NSString *)destName;
+
+-(void)renameDirectory:(NSString *)dirName to:(NSString *)destName;
+
 -(DBFS_FileList *)getFileListIn:(NSString *)dirName;
 -(DBFS_DirList *)getDirectoryListIn:(NSString *)dirName;
 

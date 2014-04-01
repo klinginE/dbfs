@@ -43,7 +43,7 @@
 }
 
 -(void)renameFile:(NSString *)oldName to:(NSString *)newName {
-    
+    [dbInterface 
 }
 
 -(void)overwriteFile:(NSString *)fname from:(FILE *)in {
@@ -52,6 +52,14 @@
 
 -(void)deleteFile:(NSString *)fname {
     [dbInterface deleteFile:fname fromDatabase:dbfs];
+}
+
+-(void)moveDirectory:(NSString *)dirName to:(NSString *)destName {
+	[dbInterface moveDirectory:dirName to:destName fromDatabase:self.dbfs];
+}
+
+-(void)renameDirectory:(NSString *)dirName to:(NSString *newName {
+	[dbInterface moveDirectory:dirName to:newName fromDatabase:self.dbfs];
 }
 
 -(DBFS_FileList *)getFileListIn:(NSString *)dirName {
