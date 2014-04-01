@@ -20,8 +20,7 @@
     if (self) {
 
         self.dbInterface = [[DBInterface alloc] init];
-        //NSLog(@"%@", self.dbInterface);
-        dbfs = [self.dbInterface openDatabase:@"database"];
+        dbfs = [self.dbInterface openDatabase:@"database.sqlite"];
 
     }
 
