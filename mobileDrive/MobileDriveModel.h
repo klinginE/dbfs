@@ -15,25 +15,26 @@
 -(DBFS_Blob)slurp:(FILE *)in;
 
 // Retrieve contents of absolute path "fname" through file stream "out"
--(void)getFile:(NSString *)fname to:(FILE *)out withSize:(int *)size;
+-(int)getFile:(NSString *)fname to:(FILE *)out withSize:(int *)size;
 
 // Upload contents of file to absolute path "fname" through file stream "in"
--(void)putFile:(NSString *)fname from:(FILE *)in withSize:(int)size;
+-(int)putFile:(NSString *)fname from:(FILE *)in withSize:(int)size;
 
 // Renames the original file "oldName" the new file "newName"
 // Both names are absolute paths
--(void)renameFile:(NSString *)oldName to:(NSString *)newName;
-
--(void)overwriteFile:(NSString *)fname from:(FILE *)in;
+-(int)renameFile:(NSString *)oldName to:(NSString *)newName;
+-(int)moveFile:(NSString *)oldName to:(NSString *)newName;
+-(int)overwriteFile:(NSString *)fname from:(FILE *)in;
 
 // Remove file with absolute path "fname" from database
--(void)deleteFile:(NSString *)fname;
+-(int)deleteFile:(NSString *)fname;
 
--(void)moveDirectory:(NSString *)dirName to:(NSString *)destName;
+-(int)moveDirectory:(NSString *)dirName to:(NSString *)destName;
 
--(void)renameDirectory:(NSString *)dirName to:(NSString *)destName;
+-(int)renameDirectory:(NSString *)dirName to:(NSString *)destName;
 
--(DBFS_FileList *)getFileListIn:(NSString *)dirName;
--(DBFS_DirList *)getDirectoryListIn:(NSString *)dirName;
+-(NSDictionary *)getFileListIn:(NSString *)dirName;
+-(NSDictionary *)getDirectoryListIn:(NSString *)dirName;
+-(NSDictionary *)getContentsIn:(NSString *)dirName;
 
 @end

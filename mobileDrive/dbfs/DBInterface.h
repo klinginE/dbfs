@@ -18,8 +18,9 @@
 -(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in withSize:(int)size;
 -(int)overwriteFile:(NSString *)fname inDatabase:(DBFS *)dbfs from:(FILE *)in;
 -(int)deleteFile:(NSString *)fname fromDatabase:(DBFS *)dbfs;
--(void)createDirectory:(NSString *)dirName fromDatabase:(DBFS *)db;
--(void)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDatabase:(DBFS *)dbfs;
+-(int)renameFile:(NSString *)oldName to:(NSString *)newName fromDatabase:(DBFS *)dbfs;
+-(int)createDirectory:(NSString *)dirName fromDatabase:(DBFS *)db;
+-(int)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDatabase:(DBFS *)dbfs;
 -(DBFS_FileList *)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs;
 -(DBFS_DirList *)getDirectoryListIn:(NSString *)dirName inDatabase:(DBFS *)dbfs;
 
