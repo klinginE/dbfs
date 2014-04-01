@@ -441,6 +441,10 @@
     _pathLabelView.numberOfLines = 1;
     [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
 
+    _detailView = [[CODialog alloc] initWithWindow:[[[UIApplication sharedApplication] delegate] window]];
+    [_detailView setTitle:@"File/Directory details:"];
+    _detailView.dialogStyle = CODialogStyleCustomView;
+
     // Set up back button
     [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:self.title
                                                                        Tag:BACK_BUTTON_TAG
@@ -704,7 +708,6 @@
 -(void)viewDidLoad {
 
     [super viewDidLoad];
-
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(orientationChanged:)
@@ -817,14 +820,6 @@
 }
 
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
-
-    if (_detailView == nil) {
-
-        _detailView = [[CODialog alloc] initWithWindow:[[UIApplication sharedApplication] keyWindow]];
-        [_detailView setTitle:@"File/Directory details:"];
-        _detailView.dialogStyle = CODialogStyleCustomView;
-
-    }
 
     UILabel *nameLabel = [[UILabel alloc] init];
     nameLabel.text = [NSString stringWithFormat:@"Name: %@", key];
