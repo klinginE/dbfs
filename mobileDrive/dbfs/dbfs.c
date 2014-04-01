@@ -39,7 +39,7 @@ void sql_fatal(sqlite3 *db, int err)
         dbfs_fatal("nothing is wrong");
     if (err == SQLITE_MISUSE)
         dbfs_fatal("sqlite misuse!");
-    fprintf(stderr, "error %d: %s\n", err, sqlite3_errstr(err));
+    fprintf(stderr, "error %d\n", err);//: %s\n", err, sqlite3_errstr(err));
     fprintf(stderr, "message: %s\n", sqlite3_errmsg(db));
     abort();
 }
