@@ -57,84 +57,69 @@
     return dbfs;
 }
 
+-(void)closeDatabase:(NSString *)name {
+    char *dbName = nsStringToCString(name);
+    DBFS *dbfs = dbfs_close(dbName);
+}
+
 -(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out withSize:(int *)size {
     
     DBFS_Blob blob;
-    if(!fname) {
-        NSLog(@"fname missing");
-        return 1;
-    }
     char *name = [self nsStringToCString:fname];
-    if(DBFS_OKAY != dbfs_get(dbfs, (DBFS_FileName){name}, &blob)) {
-        NSLog(@"Error getting file");
-        dbfs_free_blob(blob);
-        return 2;
-    }
-    *size = blog.size;
-    fwrite(blob.data, 1, blob.size, out);
-    dbfs_free_blob(blob);
-    free(name);
+    int result = dbfs_get(dbfs, (DBFS_FileName){name}, &blob);
     
-    return 0;
+    if(result == DBFS_OKAY) {
+        *size = blog.size;
+        fwrite(blob.data, 1, blob.size, out);
+    }
+    return result;
 }
 
 -(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in withSize:(int)size {
     DBFS_Blob blob;
-    if (!fname) {
-        NSLog(@"fname missing");
-        return 1;
-    }
     char *name = [self nsStringToCString:fname];
    
     blob = [self slurp:in];
-    if(DBFS_OKAY != dbfs_put(dbfs, (DBFS_FileName){name}, blob)) {
-        NSLog(@"Error putting to Database");
-        free((uint8_t*)blob.data);
-        return 2;
-    }
-    return 0;
+    return dbfs_put(dbfs, (DBFS_FileName){name}, blob);
 }
 
 -(int)overwriteFile:(NSString *)fname inDatabase:(DBFS *)dbfs from:(FILE *)in {
     
     DBFS_Blob blob;
-    if(!fname) {
-        NSLog(@"Error: No name");
-        return 1;
-    }
-     char *name = [self nsStringToCString:fname];
+    char *name = [self nsStringToCString:fname];
    
     blob = [self slurp:in];
-    if (DBFS_OKAY != dbfs_ovr(dbfs, (DBFS_FileName){name}, blob)) {
-        NSLog(@"Error overwriting file in database");
-        free((uint8_t *)blob.data);
-        return 2;
-    }
-    
-    return 0;
+    return dbfs_ovr(dbfs, (DBFS_FileName){name}, blob);
 }
 
 -(int)deleteFile:(NSString *)fname fromDatabase:(DBFS *)dbfs {
     
-    if (!fname) {
-        NSLog(@"Error: No name");
-        return 1;
-    }
     char *name = [self nsStringToCString:fname];
-    if (DBFS_OKAY != dbfs_del(dbfs, (DBFS_FileName){name})) {
-        NSLog(@"Error deleting file from Database");
-        return 2;
-    }
-        
-    return 0;
+    return dbfs_del(dbfs, (DBFS_FileName){name});
+
+}
+
+// First checks to see if newName already exists.
+// Asks to overwrite?
+-(int)renameFile:(NSString *)fname to:(NSString *)newName fromDatabase:(DBFS *)dbfs {
+	char *oldName = [self nsStringToCString:fname];
+	char *name = [self nsStringToCString:newName];
+    
+    return dbfs_mvf(dbfs, oldName, name);
+}
+
+-(int)createDirectory:(NSString *)dirName fromDatabase:(DBFS *)db {
+    char *name = [self nsStringToCString:dirName];
+    return dbfs_mkd(dbfs, name);
+}
+
+-(int)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDatabase:(DBFS *)dbfs{
+    char *name = [self nsStringToCString:dirName];
+    char *dest = [self nsStringToCString:destName];
+    return dbfs_mvd(dbfs, name, dest);
 }
 
 -(DBFS_FileList *)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs {
-    
-    if (!dirName) {
-        NSLog(@"Error: No name");
-        return nil;
-    }
     
     char *dname = [self nsStringToCString:dirName];
     DBFS_FileList *flist = nil;
