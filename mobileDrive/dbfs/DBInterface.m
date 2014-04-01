@@ -57,6 +57,11 @@
     return dbfs;
 }
 
+-(void)closeDatabase:(NSString *)name {
+    char *dbName = nsStringToCString(name);
+    DBFS *dbfs = dbfs_close(dbName);
+}
+
 -(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out withSize:(int *)size {
     
     DBFS_Blob blob;

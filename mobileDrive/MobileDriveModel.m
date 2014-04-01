@@ -23,8 +23,8 @@
     return self;
 }
 
--(NSDictionary *)getCurrentContents {
-    return _directoryContents;
+-(void)closeDatabase {
+    [dbInterface closeDatabase:@"database"];
 }
 
 
