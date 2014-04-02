@@ -20,7 +20,11 @@
     if (self) {
 
         self.dbInterface = [[DBInterface alloc] init];
-        dbfs = [self.dbInterface openDatabase:@"database.sqlite"];
+        
+        NSArray *dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *docsDir = [dirPaths objectAtIndex:0];
+        NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"database.sqlite"]];
+        dbfs = [self.dbInterface openDatabase:dbPath];
 
     }
 

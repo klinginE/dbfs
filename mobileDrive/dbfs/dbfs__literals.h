@@ -12,18 +12,18 @@ const char *sql_fs2_init = QUOTE(
     CREATE TABLE IF NOT EXISTS dirs_v2
     (
         in_dir INTEGER REFERENCES dirs_v2(dir_handle) ON DELETE CASCADE ON UPDATE RESTRICT,
-        dir_name TEXT NOT NULL CHECK(instr(dir_name, '/') == length(dir_name)),
+        dir_name TEXT NOT NULL, //CHECK(instr(dir_name, '/') == length(dir_name)),
         dir_handle INTEGER PRIMARY KEY,
 
-        CHECK(in_dir IS NOT NULL OR dir_name == '/'),
-        CHECK(dir_name != '/' OR dir_handle == 0),
+        //CHECK(in_dir IS NOT NULL OR dir_name == '/'),
+        //CHECK(dir_name != '/' OR dir_handle == 0),
         UNIQUE(in_dir, dir_name)
     );
 
     CREATE TABLE IF NOT EXISTS files_v2
     (
         in_dir INTEGER NOT NULL REFERENCES dirs_v2(dir_handle) ON DELETE CASCADE ON UPDATE RESTRICT,
-        file_name TEXT NOT NULL CHECK(instr(file_name, '/') == 0),
+        file_name TEXT NOT NULL, //CHECK(instr(file_name, '/') == 0),
         file_timestamp INTEGER,
         file_contents BLOB,
 
