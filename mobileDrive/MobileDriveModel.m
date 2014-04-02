@@ -105,6 +105,26 @@
     return [self.dbInterface deleteFile:fname fromDatabase:self->dbfs];
 }
 
+-(int)createDirectory:(NSString *)dirName {
+    if (dirName == nil) {
+        return DBFS_NOT_DIRNAME;
+    }
+    else if ([dirName isEqualToString:@""]) {
+        return DBFS_NOT_DIRNAME;
+    }
+    return [self.dbInterface createDirectory:dirName fromDatabase:self->dbfs];
+}
+
+-(int)deleteDirectory:(NSString *)dirName {
+    if (dirName == nil) {
+        return DBFS_NOT_DIRNAME;
+    }
+    else if ([dirName isEqualToString:@""]) {
+        return DBFS_NOT_DIRNAME;
+    }
+    return [self.dbInterface deleteDirectory:dirName fromDatabase:self->dbfs];
+}
+
 -(int)moveDirectory:(NSString *)dirName to:(NSString *)destName {
     if (dirName == nil || destName == nil) {
         return DBFS_NOT_FILENAME;
@@ -126,22 +146,22 @@
 }
 
 -(NSDictionary *)getFileListIn:(NSString *)dirName {
-    DBFS_FileList *fileList = nil;
+    DBFS_FileList fileList;
     fileList = [self.dbInterface getFileListIn:dirName fromDatabase:self->dbfs];
     
     NSMutableDictionary *fileDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
 
-    for (int i = 0; i < fileList->count; i++) {
+    for (int i = 0; i < fileList.count; i++) {
         NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:[[NSNumber alloc] initWithBool:NO], @"Type", nil];
         
-        [keys addObject:[[NSString alloc] initWithUTF8String:((fileList->files)+i)->name]];
+        [keys addObject:[[NSString alloc] initWithUTF8String:((fileList.files)+i)->name]];
         [fileDict setObject:d forKey:[keys objectAtIndex:i]];
     }
     
     /* Alphabetize the file list */
     NSArray *alphabeticalKeys = [[fileDict allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    NSArray *objects = [fileDict objectsForKeys:alphabeticalKeys notFoundMarker:nil];
+    NSArray *objects = [fileDict objectsForKeys:alphabeticalKeys notFoundMarker:[NSNull null]];
     
     NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects forKeys:alphabeticalKeys];
     
@@ -149,22 +169,22 @@
 }
 
 -(NSDictionary *)getDirectoryListIn:(NSString *)dirName {
-    DBFS_DirList *dirList = nil;
+    DBFS_DirList dirList;
     dirList = [self.dbInterface getDirectoryListIn:dirName inDatabase:dbfs];
     
     NSMutableDictionary *dirDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
  
-    for (int i = 0; i < dirList->count; i++) {
+    for (int i = 0; i < dirList.count; i++) {
         NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:[[NSNumber alloc] initWithBool:YES], @"Type", nil];
         
-        [keys addObject:[[NSString alloc] initWithUTF8String:((dirList->dirs)+i)->name]];
+        [keys addObject:[[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name]];
         [dirDict setObject:d forKey:[keys objectAtIndex:i]];
     }
     
     /* Alphabetize the directory list */
     NSArray *alphabeticalKeys = [[dirDict allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    NSArray *objects = [dirDict objectsForKeys:alphabeticalKeys notFoundMarker:nil];
+    NSArray *objects = [dirDict objectsForKeys:alphabeticalKeys notFoundMarker:[NSNull null]];
     
     NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects forKeys:alphabeticalKeys];
     

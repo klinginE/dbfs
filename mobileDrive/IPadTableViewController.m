@@ -77,7 +77,12 @@
 
 @end
 
-@implementation IPadTableViewController
+@implementation IPadTableViewController {
+
+    NSDictionary *selectedDict;
+    NSString *selectedKey;
+
+}
 
 #pragma mark - Initers
 
@@ -95,6 +100,8 @@
         [self initState:&_iPadState WithPath:currentPath Address:ip];
         _appDelegate = (MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate;
         self.title = [NSString stringWithUTF8String:_iPadState.currentDir];
+        selectedDict = nil;
+        selectedKey = @"";
 
         // init Actions
         _switchAction = sAction;
@@ -441,10 +448,6 @@
     _pathLabelView.numberOfLines = 1;
     [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
 
-    _detailView = [[CODialog alloc] initWithWindow:[[[UIApplication sharedApplication] delegate] window]];
-    [_detailView setTitle:@"File/Directory details:"];
-    _detailView.dialogStyle = CODialogStyleCustomView;
-
     // Set up back button
     [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:self.title
                                                                        Tag:BACK_BUTTON_TAG
@@ -610,6 +613,8 @@
 
         static NSString *text = @"";
         static alertTag previousTag = NONE;
+        if (selectedDict)
+            NSLog(@"%@", selectedDict);
 
         switch (alertView.tag) {
 
@@ -619,7 +624,14 @@
                 [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
                 break;
             case DELETE_ALERT_TAG:
+            {
                 //FIXME add code here to delete
+                NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+                [self.appDelegate.model deleteDirectory:path];
+                _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                _fileKeys = [_filesDictionary allKeys];
+                [self.mainTableView reloadData];
+            }
                 break;
             case MOVE_ALERT_TAG:
                 previousTag = MOVE_ALERT_TAG;
@@ -636,13 +648,29 @@
                 switch (previousTag) {
 
                     case ADD_ALERT_TAG:
+                    {
                         //FIXME add code here to add a directory
+                        NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+                        [self.appDelegate.model createDirectory:path];
+                        _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                        _fileKeys = [_filesDictionary allKeys];
+                        [self.mainTableView reloadData];
+                        //self.
+                    }
                         break;
                     case MOVE_ALERT_TAG:
                         //FIXME add code here to move a file/directory
                         break;
                     case RENAME_ALERT_TAG:
+                    {
                         //FIXME add code here to rename a file/directory
+                        NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+                        NSString *newPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+                        [self.appDelegate.model renameDirectory:oldPath to:newPath];
+                        _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                        _fileKeys = [_filesDictionary allKeys];
+                        [self.mainTableView reloadData];
+                    }
                         break;
                     default:
                         break;
@@ -683,7 +711,6 @@
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
     [self.detailView hideAnimated:NO];
-    self.detailView = nil;
     if ([sender.titleLabel.text isEqualToString:@"Move"])
         [[self objectInArray:self.alertViews WithTag:MOVE_ALERT_TAG] show];
     else if ([sender.titleLabel.text isEqualToString:@"Rename"])
@@ -823,22 +850,22 @@
 
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
+    UIScrollView *custom = [[UIScrollView alloc] initWithFrame:CGRectZero];
+    int i = 1;
+    CGFloat maxWidth = 0;
     UILabel *nameLabel = [[UILabel alloc] init];
     nameLabel.text = [NSString stringWithFormat:@"Name: %@", key];
     nameLabel.frame = CGRectMake(0, 0, [self sizeOfString:nameLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
     [nameLabel setTextColor:[UIColor whiteColor]];
     [nameLabel setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
-
-    UIScrollView *custom = [[UIScrollView alloc] initWithFrame:CGRectZero];
+    
     [custom setBackgroundColor:[UIColor clearColor]];
     [custom setBounces:NO];
-
+    
     [custom addSubview:nameLabel];
-
-    int i = 1;
-    CGFloat maxWidth = 0;
+    
     for (NSString *k in [dict keyEnumerator]) {
-
+        
         UILabel *l = [[UILabel alloc] init];
         l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
         [l setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
@@ -847,19 +874,29 @@
         l.frame = CGRectMake(0, SMALL_FONT_SIZE * i, width, SMALL_FONT_SIZE);
         [l setTextColor:[UIColor whiteColor]];
         [custom addSubview:l];
-
+        
         if (width > maxWidth)
             maxWidth = width;
         i++;
-
+        
     }
 
+    if (!self.detailView) {
+
+        _detailView = [[CODialog alloc] initWithWindow:[[[UIApplication sharedApplication] delegate] window]];
+        [_detailView setTitle:@"File/Directory details:"];
+        _detailView.dialogStyle = CODialogStyleCustomView;
+
+        for (NSString *b in self.actionSheetButtons)
+            [self.detailView addButtonWithTitle:b
+                                         target:self
+                                       selector:@selector(detailedVeiwButtonPressed:)];
+
+    }
     self.detailView.customView = custom;
-    for (NSString *b in self.actionSheetButtons)
-        [self.detailView addButtonWithTitle:b
-                                     target:self
-                                   selector:@selector(detailedVeiwButtonPressed:)];
-    
+
+    selectedDict = dict;
+    selectedKey = key;
     [self.detailView showOrUpdateAnimated:NO];
     custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, (i + 1) * SMALL_FONT_SIZE);
     custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);

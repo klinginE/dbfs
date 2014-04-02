@@ -120,6 +120,12 @@
     return dbfs_mkd(dbfs, name);
 }
 
+-(int)deleteDirectory:(NSString *)dirName fromDatabase:(DBFS *)dbfs {
+    DBFS_DirName name;
+    name.name = [self nsStringToCString:dirName];
+    return dbfs_rmd(dbfs, name);
+}
+
 -(int)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDatabase:(DBFS *)dbfs{
     DBFS_DirName name;
     name.name = [self nsStringToCString:dirName];
@@ -128,30 +134,32 @@
     return dbfs_mvd(dbfs, name, dest);
 }
 
--(DBFS_FileList *)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs {
+-(DBFS_FileList)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs {
     
     char *dname = [self nsStringToCString:dirName];
-    DBFS_FileList *flist = nil;
-    if (DBFS_OKAY != dbfs_lsf(dbfs, (DBFS_DirName){dname}, flist)) {
+    DBFS_FileList flist;
+    flist.count = 0;
+    flist.files = NULL;
+    if (DBFS_OKAY != dbfs_lsf(dbfs, (DBFS_DirName){dname}, &flist)) {
         NSLog(@"Error getting file list");
-        return nil;
     }
     
     return flist;
 }
 
--(DBFS_DirList *)getDirectoryListIn:(NSString *)dirName inDatabase:(DBFS *)dbfs {
+-(DBFS_DirList)getDirectoryListIn:(NSString *)dirName inDatabase:(DBFS *)dbfs {
     
-    DBFS_DirList *dlist = nil;
+    DBFS_DirList dlist;
+    dlist.count = 0;
+    dlist.dirs = NULL;
     
     if (!dirName) {
         NSLog(@"Error: No name");
-        return nil;
+        return dlist;
     }
     char *dName = [self nsStringToCString:dirName];
-    if (DBFS_OKAY != dbfs_lsd(dbfs, (DBFS_DirName){dName}, dlist)) {
+    if (DBFS_OKAY != dbfs_lsd(dbfs, (DBFS_DirName){dName}, &dlist)) {
         NSLog(@"Error listing directories");
-        return nil;
     }
     
     return dlist;

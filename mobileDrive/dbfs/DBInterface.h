@@ -21,8 +21,9 @@
 -(int)deleteFile:(NSString *)fname fromDatabase:(DBFS *)dbfs;
 -(int)renameFile:(NSString *)oldName to:(NSString *)newName fromDatabase:(DBFS *)dbfs;
 -(int)createDirectory:(NSString *)dirName fromDatabase:(DBFS *)db;
+-(int)deleteDirectory:(NSString *)dirName fromDatabase:(DBFS *)dbfs;
 -(int)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDatabase:(DBFS *)dbfs;
--(DBFS_FileList *)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs;
--(DBFS_DirList *)getDirectoryListIn:(NSString *)dirName inDatabase:(DBFS *)dbfs;
+-(DBFS_FileList)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs;
+-(DBFS_DirList)getDirectoryListIn:(NSString *)dirName inDatabase:(DBFS *)dbfs;
 
 @end
