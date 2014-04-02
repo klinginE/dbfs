@@ -101,7 +101,7 @@
         _appDelegate = (MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate;
         self.title = [NSString stringWithUTF8String:_iPadState.currentDir];
         selectedDict = nil;
-        selectedKey = @"";
+        selectedKey = nil;
 
         // init Actions
         _switchAction = sAction;
@@ -205,6 +205,13 @@
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
                 alert.tag = CONFIRM_ALERT_TAG;
+                break;
+            case ERROR_ALERT_TAG:
+                [alert setDelegate:self];
+                [alert setTitle:@"Error!"];
+                [alert setMessage:@""];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = ERROR_ALERT_TAG;
                 break;
             default:
                 break;
@@ -613,64 +620,170 @@
 
         static NSString *text = @"";
         static alertTag previousTag = NONE;
-        if (selectedDict)
-            NSLog(@"%@", selectedDict);
 
         switch (alertView.tag) {
 
             case ADD_ALERT_TAG:
                 previousTag = ADD_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                if (text && [text length])
+                    [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                else {
+
+                    UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                    [alert setMessage:@"You must provide a name."];
+                    [alert show];
+
+                }
                 break;
             case DELETE_ALERT_TAG:
-            {
-                //FIXME add code here to delete
-                NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
-                [self.appDelegate.model deleteDirectory:path];
-                _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                _fileKeys = [_filesDictionary allKeys];
-                [self.mainTableView reloadData];
-            }
+                if (selectedDict && selectedKey) {
+
+                    NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+                    
+                    DBFS_Error err = DBFS_OKAY;
+                    if ([[selectedDict objectForKey:@"Type"] boolValue])
+                        err = [self.appDelegate.model deleteDirectory:path];
+                    else
+                        err = [self.appDelegate.model deleteFile:path];
+                    if (err == DBFS_OKAY) {
+
+                        self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:
+                                                                                  self.iPadState.currentPath]];
+                        self.fileKeys = [self.filesDictionary allKeys];
+                        [self.mainTableView reloadData];
+
+                    }
+                    else {
+                        NSLog(@"DBFS Not OK with DELETE");
+                        //FIXME add code here to deal with DBFS_Error
+                    }
+
+                    selectedDict = nil;
+                    selectedKey = nil;
+
+                }
                 break;
             case MOVE_ALERT_TAG:
                 previousTag = MOVE_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                if (text && [text length])
+                    [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                else {
+                    
+                    UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                    [alert setMessage:@"You must provide a path."];
+                    [alert show];
+                    
+                }
                 break;
             case RENAME_ALERT_TAG:
                 previousTag = RENAME_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                if (text && [text length])
+                    [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                else {
+                    
+                    UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                    [alert setMessage:@"You must provide a name."];
+                    [alert show];
+                    
+                }
                 break;
             case CONFIRM_ALERT_TAG:
-                NSLog(@"Entered= %@", text);
                 switch (previousTag) {
 
                     case ADD_ALERT_TAG:
-                    {
-                        //FIXME add code here to add a directory
-                        NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
-                        [self.appDelegate.model createDirectory:path];
-                        _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                        _fileKeys = [_filesDictionary allKeys];
-                        [self.mainTableView reloadData];
-                        //self.
-                    }
+                        if (selectedKey && selectedDict) {
+
+                            NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+
+                            if ([path characterAtIndex:([path length] - 1)] != '/')
+                                path = [NSString stringWithFormat:@"%@/", path];
+
+                            DBFS_Error err = [self.appDelegate.model createDirectory:path];
+                            if (err == DBFS_OKAY) {
+
+                                self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                                self.fileKeys = [self.filesDictionary allKeys];
+                                [self.mainTableView reloadData];
+
+                            }
+                            else {
+                                NSLog(@"DBFS Not OK with ADD");
+                                //FIXME add code here to deal with DBFS_Error
+                            }
+
+                            selectedDict = nil;
+                            selectedKey = nil;
+
+                        }
                         break;
                     case MOVE_ALERT_TAG:
-                        //FIXME add code here to move a file/directory
+                        if (selectedDict && selectedKey) {
+                            
+                            NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+                            NSString *newPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+
+                            DBFS_Error err = DBFS_OKAY;
+                            if ([[selectedDict objectForKey:@"Type"] boolValue]) {
+
+                                if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
+                                    newPath = [NSString stringWithFormat:@"%@/", newPath];
+                                err = [self.appDelegate.model moveDirectory:oldPath to:newPath];
+
+                            }
+                            else
+                                err = [self.appDelegate.model moveFile:oldPath to:newPath];
+                            if (err == DBFS_OKAY) {
+                                
+                                self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                                self.fileKeys = [self.filesDictionary allKeys];
+                                [self.mainTableView reloadData];
+                                
+                            }
+                            else {
+                                NSLog(@"DBFS Not OK with MOVE");
+                                //FIXME add code here to deal with DBFS_Error
+                            }
+                            
+                            selectedDict = nil;
+                            selectedKey = nil;
+                            
+                        }
                         break;
                     case RENAME_ALERT_TAG:
-                    {
-                        //FIXME add code here to rename a file/directory
-                        NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
-                        NSString *newPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
-                        [self.appDelegate.model renameDirectory:oldPath to:newPath];
-                        _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                        _fileKeys = [_filesDictionary allKeys];
-                        [self.mainTableView reloadData];
-                    }
+                        if (selectedDict && selectedKey) {
+
+                            NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+                            NSString *newPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+
+                            DBFS_Error err = DBFS_OKAY;
+                            if ([[selectedDict objectForKey:@"Type"] boolValue]) {
+
+                                if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
+                                    newPath = [NSString stringWithFormat:@"%@/", newPath];
+                                err = [self.appDelegate.model renameDirectory:oldPath to:newPath];
+
+                            }
+                            else
+                                err = [self.appDelegate.model renameFile:oldPath to:newPath];
+                            if (err == DBFS_OKAY) {
+
+                                self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                                self.fileKeys = [self.filesDictionary allKeys];
+                                [self.mainTableView reloadData];
+
+                            }
+                            else {
+                                NSLog(@"DBFS Not OK With RENAME");
+                                //FIXME add code here to deal with DBFS_Error
+                            }
+
+                            selectedDict = nil;
+                            selectedKey = nil;
+
+                        }
                         break;
                     default:
                         break;
@@ -744,7 +857,6 @@
     // Set up directory Contents
     if(_filesDictionary == nil) {
 
-        //FIXME change for grabing info from plist and instead grab data from model
         //NSString *path = [[NSBundle mainBundle] pathForResource:@"files" ofType:@"plist"];
         //_filesDictionary = [[NSDictionary alloc] initWithContentsOfFile:path];
         //_fileKeys = [[_filesDictionary allKeys] sortedArrayUsingSelector:@selector(compare:)];
