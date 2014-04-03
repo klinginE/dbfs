@@ -56,6 +56,7 @@
 // Private Event Handelers
 -(void)viewWillAppear:(BOOL)animated;
 -(void)orientationChanged:(NSNotification *)note;
+-(BOOL)strOkay:(NSString *)str ForTag:(alertTag)tag IsDir:(BOOL)dir;
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex;
 -(void)buttonPressed:(UIBarButtonItem *)sender;
 -(void)detailedVeiwButtonPressed:(UIButton *)sender;
@@ -101,7 +102,7 @@
         _appDelegate = (MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate;
         self.title = [NSString stringWithUTF8String:_iPadState.currentDir];
         selectedDict = nil;
-        selectedKey = @"";
+        selectedKey = nil;
 
         // init Actions
         _switchAction = sAction;
@@ -205,6 +206,13 @@
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
                 alert.tag = CONFIRM_ALERT_TAG;
+                break;
+            case ERROR_ALERT_TAG:
+                [alert setDelegate:self];
+                [alert setTitle:@"Error!"];
+                [alert setMessage:@""];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = ERROR_ALERT_TAG;
                 break;
             default:
                 break;
@@ -598,6 +606,14 @@
 
     [super viewWillAppear:animated];
     self.conectSwitchView.on = self.appDelegate.isConnected;
+    
+    if (self.filesDictionary && self.fileKeys && self.mainTableView) {
+
+        self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+        self.fileKeys = [self.filesDictionary allKeys];
+        [self.mainTableView reloadData];
+
+    }
 
 }
 
@@ -607,70 +623,296 @@
 
 }
 
+-(BOOL)strOkay:(NSString *)str ForTag:(alertTag)tag IsDir:(BOOL)dir {
+
+    NSInteger len = 0;
+    if (str)
+        len = [str length];
+    BOOL passed = NO;
+    switch (tag) {
+
+        case DELETE_ALERT_TAG:
+        case RENAME_ALERT_TAG:
+            if (dir) {
+                if (str && len > 1 && [str characterAtIndex:(len - 1)] == '/') {
+                    passed = YES;
+                    for (int i = 0; i < (len - 1); i++)
+                        if ([str characterAtIndex:i] == '/')
+                            passed = NO;
+                }
+            }
+            else {
+                if (str && len) {
+                    passed = YES;
+                    for (int i = 0; i < len; i++)
+                        if ([str characterAtIndex:i] == '/')
+                            passed = NO;
+                }
+            }
+            break;
+        case ADD_ALERT_TAG:
+        case MOVE_ALERT_TAG:
+            if (dir) {
+                if (str && len > 1 && [str characterAtIndex:(len - 1)] == '/')
+                    passed = YES;
+            }
+            else {
+                if (str && len)
+                    passed = YES;
+            }
+            break;
+        default:
+            passed = NO;
+            break;
+
+    }
+    return passed;
+
+}
+
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 
     if (buttonIndex != 0) {
 
         static NSString *text = @"";
         static alertTag previousTag = NONE;
-        if (selectedDict)
-            NSLog(@"%@", selectedDict);
 
         switch (alertView.tag) {
 
             case ADD_ALERT_TAG:
                 previousTag = ADD_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                if (text && [text length])
+                    [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                else {
+
+                    UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                    [alert setMessage:@"You must provide a name."];
+                    [alert show];
+
+                }
                 break;
             case DELETE_ALERT_TAG:
-            {
-                //FIXME add code here to delete
-                NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
-                [self.appDelegate.model deleteDirectory:path];
-                _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                _fileKeys = [_filesDictionary allKeys];
-                [self.mainTableView reloadData];
-            }
+                if (selectedDict && selectedKey) {
+
+                    NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+                    BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
+
+                    if ([self strOkay:selectedKey ForTag:DELETE_ALERT_TAG IsDir:isDir]) {
+
+                        DBFS_Error err = DBFS_OKAY;
+                        if (isDir)
+                            err = [self.appDelegate.model deleteDirectory:path];
+                        else
+                            err = [self.appDelegate.model deleteFile:path];
+                        if (err == DBFS_OKAY) {
+
+                            self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String: self.iPadState.currentPath]];
+                            self.fileKeys = [self.filesDictionary allKeys];
+                            [self.mainTableView reloadData];
+
+                        }
+                        else {
+                            NSLog(@"DBFS Not OK with DELETE");
+                            //FIXME add code here to deal with DBFS_Error
+                        }
+
+                    }
+                    else {
+
+                        UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                        [alert setMessage:@"Name invalid: Name cannot contain '/'"];
+                        [alert show];
+
+                    }
+
+                    selectedDict = nil;
+                    selectedKey = nil;
+
+                }
+                else {
+
+                    NSLog(@"Fatal error in alertView:clickedButtonAtIndex:, selectedDict or selectedKey are NULL.");
+                    abort();
+
+                }
                 break;
             case MOVE_ALERT_TAG:
                 previousTag = MOVE_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                if (text && [text length])
+                    [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                else {
+                    
+                    UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                    [alert setMessage:@"You must provide a path."];
+                    [alert show];
+                    
+                }
                 break;
             case RENAME_ALERT_TAG:
                 previousTag = RENAME_ALERT_TAG;
                 text = [alertView textFieldAtIndex:0].text;
-                [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                if (text && [text length])
+                    [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
+                else {
+                    
+                    UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                    [alert setMessage:@"You must provide a name."];
+                    [alert show];
+                    
+                }
                 break;
             case CONFIRM_ALERT_TAG:
-                NSLog(@"Entered= %@", text);
                 switch (previousTag) {
 
                     case ADD_ALERT_TAG:
                     {
-                        //FIXME add code here to add a directory
+
                         NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
-                        [self.appDelegate.model createDirectory:path];
-                        _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                        _fileKeys = [_filesDictionary allKeys];
-                        [self.mainTableView reloadData];
-                        //self.
+
+                        if ([text characterAtIndex:0] != '/')
+                            path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+                        else
+                            path = text;
+                        if ([path characterAtIndex:([path length] - 1)] != '/')
+                            path = [NSString stringWithFormat:@"%@/", path];
+
+                        if ([self strOkay:path ForTag:ADD_ALERT_TAG IsDir:YES]) {
+
+                            DBFS_Error err = [self.appDelegate.model createDirectory:path];
+                            if (err == DBFS_OKAY) {
+
+                                self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                                self.fileKeys = [self.filesDictionary allKeys];
+                                [self.mainTableView reloadData];
+
+                            }
+                            else {
+                                NSLog(@"DBFS Not OK with ADD");
+                                //FIXME add code here to deal with DBFS_Error
+                            }
+
+                        }
+                        else {
+
+                            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                            [alert setMessage:@"Name invalid"];
+                            [alert show];
+
+                        }
                     }
                         break;
                     case MOVE_ALERT_TAG:
-                        //FIXME add code here to move a file/directory
+                        if (selectedDict && selectedKey) {
+
+                            NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+                            NSString *newPath = @"";
+                            if ([text characterAtIndex:0] != '/')
+                                newPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+                            else
+                                newPath = text;
+                            BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
+                            if (isDir && [newPath characterAtIndex:([newPath length] - 1)] != '/')
+                                newPath = [NSString stringWithFormat:@"%@/", newPath];
+
+                            NSInteger index = [newPath length] - [selectedKey length];
+                            if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
+                                newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+
+                            NSInteger oldLen = [oldPath length];
+                            NSInteger newLen = [newPath length];
+
+                            if ([self strOkay:oldPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
+                                [self strOkay:newPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
+                                (newLen < oldLen || ![oldPath isEqualToString:[newPath substringToIndex:oldLen]])) {
+
+                                DBFS_Error err = DBFS_OKAY;
+                                if (isDir)
+                                    err = [self.appDelegate.model moveDirectory:oldPath to:newPath];
+                                else
+                                    err = [self.appDelegate.model moveFile:oldPath to:newPath];
+                                if (err == DBFS_OKAY) {
+
+                                    self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                                    self.fileKeys = [self.filesDictionary allKeys];
+                                    [self.mainTableView reloadData];
+
+                                }
+                                else {
+                                    NSLog(@"DBFS Not OK with MOVE");
+                                    //FIXME add code here to deal with DBFS_Error
+                                }
+
+                            }
+                            else {
+
+                                UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                                [alert setMessage:@"Path invalid."];
+                                [alert show];
+
+                            }
+
+                            selectedDict = nil;
+                            selectedKey = nil;
+                            
+                        }
+                        else {
+
+                            NSLog(@"Fatal error in alertView:clickedButtonAtIndex:, selectedDict or selectedKey are NULL.");
+                            abort();
+
+                        }
                         break;
                     case RENAME_ALERT_TAG:
-                    {
-                        //FIXME add code here to rename a file/directory
-                        NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
-                        NSString *newPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
-                        [self.appDelegate.model renameDirectory:oldPath to:newPath];
-                        _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                        _fileKeys = [_filesDictionary allKeys];
-                        [self.mainTableView reloadData];
-                    }
+                        if (selectedDict && selectedKey) {
+
+                            BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
+                            if (isDir && [text characterAtIndex:([text length] - 1)] != '/')
+                                text = [NSString stringWithFormat:@"%@/", text];
+
+                            NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+                            NSString *newPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+
+                            if ([self strOkay:selectedKey ForTag:RENAME_ALERT_TAG IsDir:isDir] &&
+                                [self strOkay:text ForTag:RENAME_ALERT_TAG IsDir:isDir]) {
+
+                                DBFS_Error err = DBFS_OKAY;
+                                if (isDir)
+                                    err = [self.appDelegate.model renameDirectory:oldPath to:newPath];
+                                else
+                                    err = [self.appDelegate.model renameFile:oldPath to:newPath];
+                                if (err == DBFS_OKAY) {
+
+                                    self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                                    self.fileKeys = [self.filesDictionary allKeys];
+                                    [self.mainTableView reloadData];
+
+                                }
+                                else {
+                                    NSLog(@"DBFS Not OK With RENAME");
+                                    //FIXME add code here to deal with DBFS_Error
+                                }
+
+                            }
+                            else {
+
+                                UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                                [alert setMessage:@"Name invalid: Name cannot contain '/'"];
+                                [alert show];
+
+                            }
+
+                            selectedDict = nil;
+                            selectedKey = nil;
+
+                        }
+                        else {
+
+                            NSLog(@"Fatal error in alertView:clickedButtonAtIndex:, selectedDict or selectedKey are NULL.");
+                            abort();
+
+                        }
                         break;
                     default:
                         break;
@@ -744,7 +986,6 @@
     // Set up directory Contents
     if(_filesDictionary == nil) {
 
-        //FIXME change for grabing info from plist and instead grab data from model
         //NSString *path = [[NSBundle mainBundle] pathForResource:@"files" ofType:@"plist"];
         //_filesDictionary = [[NSDictionary alloc] initWithContentsOfFile:path];
         //_fileKeys = [[_filesDictionary allKeys] sortedArrayUsingSelector:@selector(compare:)];
