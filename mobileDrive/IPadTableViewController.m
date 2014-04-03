@@ -634,7 +634,7 @@
         case DELETE_ALERT_TAG:
         case RENAME_ALERT_TAG:
             if (dir) {
-                if (str && len && [str characterAtIndex:(len - 1)] == '/') {
+                if (str && len > 1 && [str characterAtIndex:(len - 1)] == '/') {
                     passed = YES;
                     for (int i = 0; i < (len - 1); i++)
                         if ([str characterAtIndex:i] == '/')
@@ -653,7 +653,7 @@
         case ADD_ALERT_TAG:
         case MOVE_ALERT_TAG:
             if (dir) {
-                if (str && len && [str characterAtIndex:(len - 1)] == '/')
+                if (str && len > 1 && [str characterAtIndex:(len - 1)] == '/')
                     passed = YES;
             }
             else {
@@ -820,8 +820,12 @@
                             if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
                                 newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
 
+                            NSInteger oldLen = [oldPath length];
+                            NSInteger newLen = [newPath length];
+
                             if ([self strOkay:oldPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
-                                [self strOkay:newPath ForTag:MOVE_ALERT_TAG IsDir:isDir]) {
+                                [self strOkay:newPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
+                                (newLen < oldLen || ![oldPath isEqualToString:[newPath substringToIndex:oldLen]])) {
 
                                 DBFS_Error err = DBFS_OKAY;
                                 if (isDir)
