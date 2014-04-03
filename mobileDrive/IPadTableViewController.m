@@ -987,6 +987,18 @@
 
 }
 
+-(void)refresh:(NSString *)path {
+
+    if (self.filesDictionary && self.fileKeys && self.mainTableView &&[path isEqualToString:[NSString stringWithUTF8String:self.iPadState.currentPath]]) {
+
+        self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+        self.fileKeys = [self.filesDictionary allKeys];
+        [self.mainTableView reloadData];
+
+    }
+
+}
+
 -(void)viewDidLoad {
 
     [super viewDidLoad];
