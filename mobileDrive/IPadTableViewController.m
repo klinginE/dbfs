@@ -715,6 +715,9 @@
                         else {
                             NSLog(@"DBFS Not OK with DELETE");
                             //FIXME add code here to deal with DBFS_Error
+                            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                            [alert setMessage:[self.appDelegate.model dbError:err]];
+                            [alert show];
                         }
 
                     }
@@ -791,6 +794,9 @@
                             else {
                                 NSLog(@"DBFS Not OK with ADD");
                                 //FIXME add code here to deal with DBFS_Error
+                                UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                                [alert setMessage:[self.appDelegate.model dbError:err]];
+                                [alert show];
                             }
 
                         }
@@ -842,6 +848,9 @@
                                 else {
                                     NSLog(@"DBFS Not OK with MOVE");
                                     //FIXME add code here to deal with DBFS_Error
+                                    UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                                    [alert setMessage:[self.appDelegate.model dbError:err]];
+                                    [alert show];
                                 }
 
                             }
@@ -892,6 +901,9 @@
                                 else {
                                     NSLog(@"DBFS Not OK With RENAME");
                                     //FIXME add code here to deal with DBFS_Error
+                                    UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                                    [alert setMessage:[self.appDelegate.model dbError:err]];
+                                    [alert show];
                                 }
 
                             }
