@@ -32,9 +32,9 @@
 
 }
 
--(void)refreshIpad:(NSString *)path {
+-(void)refreshIpadForTag:(alertTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
 
-    [self.iPadTableViewController refresh:path];
+    [self.iPadTableViewController refreshForTag:tag From:oldPath To:newPath];
 
 }
 

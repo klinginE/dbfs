@@ -987,15 +987,56 @@
 
 }
 
--(void)refresh:(NSString *)path {
+-(void)refreshForTag:(alertTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
 
-    if (self.filesDictionary && self.fileKeys && self.mainTableView &&[path isEqualToString:[NSString stringWithUTF8String:self.iPadState.currentPath]]) {
+    assert(oldPath);
+    NSInteger oldLen = [oldPath length];
+    assert(oldLen >= 2);
+    NSInteger newLen = [newPath length];
+    NSString *currentPath = [NSString stringWithUTF8String:self.iPadState.currentPath];
+    NSInteger currentLen = [currentPath length];
 
-        self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-        self.fileKeys = [self.filesDictionary allKeys];
-        [self.mainTableView reloadData];
+    NSInteger index = oldLen - 2;
+    for (;index >= 0; index--)
+        if ([oldPath characterAtIndex:index] == '/')
+            break;
+    NSString *serverPath = [oldPath substringToIndex:(index + 1)];
+    NSInteger serverLen = [serverPath length];
 
-    }
+    if (self.filesDictionary && self.fileKeys && self.mainTableView && serverLen <= currentLen)
+        switch (tag) {
+            case ADD_ALERT_TAG:
+                if ([serverPath isEqualToString:currentPath]) {
+
+                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
+                    self.fileKeys = [self.filesDictionary allKeys];
+                    [self.mainTableView reloadData];
+
+                }
+                break;
+            case RENAME_ALERT_TAG:
+                if ([serverPath isEqualToString:currentPath]) {
+
+                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
+                    self.fileKeys = [self.filesDictionary allKeys];
+                    [self.mainTableView reloadData];
+
+                }
+                else if ([serverPath isEqualToString:[currentPath substringToIndex:serverLen]]) {
+
+                    [self freeState:self.iPadState];
+                    if ([oldPath isEqualToString:currentPath]) {
+
+                        //self.iPadState.
+                        
+
+                    }
+
+                }
+                break;
+            default:
+                break;
+        }
 
 }
 

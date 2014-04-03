@@ -19,6 +19,10 @@
 #define PATH_VIEW_HEIGHT (MEDIAN_FONT_SIZE * 3)
 #define IP_TAG 512
 
+// Enums
+typedef enum {HELP_BUTTON_TAG, ADD_DIR_BUTTON_TAG, BACK_BUTTON_TAG, MOVE_BUTTON_TAG, RENAME_BUTTON_TAG, DELETE_BUTTON_TAG, CANCEL_BUTTON_TAG} buttonTag;
+typedef enum {ADD_ALERT_TAG=512, DELETE_ALERT_TAG, MOVE_ALERT_TAG, RENAME_ALERT_TAG, CONFIRM_ALERT_TAG, ERROR_ALERT_TAG, NONE} alertTag;
+
 // Protocol
 @protocol IPadTableViewControllerDelegate <NSObject>
 
@@ -28,15 +32,11 @@
 
 -(void)switchChanged:(UISwitch *)sender;
 -(void)pathButtonPressed:(UIButton *)sender;
--(void)refreshIpad:(NSString *)path;
+-(void)refreshIpadForTag:(alertTag)tag From:(NSString *)oldPath To:(NSString *)newPath;
 
 @end
 
 @interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
-
-// Enums
-typedef enum {HELP_BUTTON_TAG, ADD_DIR_BUTTON_TAG, BACK_BUTTON_TAG, MOVE_BUTTON_TAG, RENAME_BUTTON_TAG, DELETE_BUTTON_TAG, CANCEL_BUTTON_TAG} buttonTag;
-typedef enum {ADD_ALERT_TAG=512, DELETE_ALERT_TAG, MOVE_ALERT_TAG, RENAME_ALERT_TAG, CONFIRM_ALERT_TAG, ERROR_ALERT_TAG, NONE} alertTag;
 
 // Structs
 typedef struct {
@@ -88,6 +88,6 @@ typedef struct {
 -(char *)nsStringToCString:(NSString *)str;
 
 // Events
--(void)refresh:(NSString *)path;
+-(void)refreshForTag:(alertTag)tag From:(NSString *)oldPath To:(NSString *)newPath;
 
 @end
