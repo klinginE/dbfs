@@ -733,9 +733,9 @@ const char *dbfs_err(DBFS_Error err)
         case DBFS_COMPONENT_TOO_LONG:
             return "A pathname component was too long.";
         case DBFS_LIGHTS_ON:
-            return "Nobody's home.";
+            return "File/Directory does not exists";
         case DBFS_INTRUDER:
-            return "Somebody's home.";
+            return "File/Directory already exists";
         case DBFS_YOU_SUCK:
             return "The database doesn't like you. I don't like you either.";
         default:
