@@ -51,4 +51,6 @@
 // Organization: directories first followed by files, both are alphabetical.
 -(NSDictionary *)getContentsIn:(NSString *)dirName;
 
+// Returns NSString containing the list of current contents in JSON format.
+-(NSString *)getJsonContentsIn:(NSString *)dirName;
 @end
