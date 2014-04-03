@@ -32,6 +32,12 @@
 
 }
 
+-(void)refreshIpad:(NSString *)path {
+
+    [self.iPadTableViewController refresh:path];
+
+}
+
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
@@ -47,7 +53,8 @@
                                                                         ipAddress:@"12.123.123.12"
                                                                     switchAction:@selector(switchChanged:)
                                                                        forEvents:UIControlEventValueChanged
-                                                                      pathAction:@selector(pathButtonPressed:) pathEvents:UIControlEventTouchUpInside];
+                                                                      pathAction:@selector(pathButtonPressed:)
+                                                                      pathEvents:UIControlEventTouchUpInside];
 
     // init nav controller
     _iPadNavController = [[UINavigationController alloc] initWithRootViewController:self.iPadTableViewController];

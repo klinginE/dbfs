@@ -789,8 +789,8 @@
                                 self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
                                 self.fileKeys = [self.filesDictionary allKeys];
                                 [self.mainTableView reloadData];
-                                NSString *s = [self.appDelegate.model getJsonContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                                NSLog(s);
+                                //NSString *s = [self.appDelegate.model getJsonContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                                //NSLog(s);
                             }
                             else {
                                 NSLog(@"DBFS Not OK with ADD");
@@ -984,6 +984,18 @@
 
     if (sender.state == UIGestureRecognizerStateBegan)
         [self displayDetailedViwForItem:dict WithKey:key];
+
+}
+
+-(void)refresh:(NSString *)path {
+
+    if (self.filesDictionary && self.fileKeys && self.mainTableView &&[path isEqualToString:[NSString stringWithUTF8String:self.iPadState.currentPath]]) {
+
+        self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+        self.fileKeys = [self.filesDictionary allKeys];
+        [self.mainTableView reloadData];
+
+    }
 
 }
 

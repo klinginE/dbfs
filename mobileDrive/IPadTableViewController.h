@@ -28,6 +28,7 @@
 
 -(void)switchChanged:(UISwitch *)sender;
 -(void)pathButtonPressed:(UIButton *)sender;
+-(void)refreshIpad:(NSString *)path;
 
 @end
 
@@ -85,5 +86,8 @@ typedef struct {
 
 // Public converter
 -(char *)nsStringToCString:(NSString *)str;
+
+// Events
+-(void)refresh:(NSString *)path;
 
 @end
