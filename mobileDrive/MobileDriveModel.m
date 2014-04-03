@@ -206,11 +206,8 @@
 }
 
 -(NSString *)getJsonContentsIn:(NSString *)dirName {
-//    NSString *intro = @"var files =\n\t{\n\t\t\"name\": \"";
-//    NSString *temp = [NSString stringWithFormat:@"%@", dirName];
     NSString *temp = @"[";
-    NSString *json = [[NSString alloc] initWithString:temp];//[intro stringByAppendingString:temp];
-//    json = [json stringByAppendingString:@"\",\n\t\t\"type\": \"Directory\",\n\t\t\"icon\": \"directory\",\n\t\t\"contents\": ["];
+    NSString *json = [[NSString alloc] initWithString:temp];
     NSDictionary *dict = [self getContentsIn:dirName];
     NSArray *keys = [dict allKeys];
     for (NSUInteger i = 0; i < [dict count]; ++i) {
