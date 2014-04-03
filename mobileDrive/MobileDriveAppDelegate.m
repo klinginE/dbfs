@@ -11,7 +11,7 @@
 #import "IPadTableViewController.h"
 
 
-@interface MobileDriveAppDelegate()
+@interface MobileDriveAppDelegate() <IPadTableViewControllerDelegate>
 
 @property (strong, nonatomic) IPadTableViewController *iPadTableViewController;
 
@@ -45,6 +45,8 @@
 
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    
     // intit global app properties
     self.isConnected = YES;
 
@@ -68,7 +70,7 @@
     
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
-                                                                        ipAddress: self.serverController.current_ip_address //@"12.123.123.12"
+                                                                        ipAddress:@"12.123.123.12"
                                                                           target:self
                                                                     switchAction:@selector(switchChanged:)
                                                                        forEvents:UIControlEventValueChanged
@@ -82,7 +84,7 @@
                                                             nil]];
 
     // set up window
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    
     self.window.rootViewController = _iPadNavController;
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
