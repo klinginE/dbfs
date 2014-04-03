@@ -1,3 +1,9 @@
+var path = ["/root/"];
+var cwd = files[0].contents;
+var sort = 'sort-type';
+var sortFunc = null;
+var sortReverse = false;
+
 $(function() {
   // Load file list
   rebuildFileList();
