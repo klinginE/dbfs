@@ -13,6 +13,7 @@
 
 -(char *)nsStringToCString:(NSString *)s;
 -(DBFS_Blob)slurp:(FILE *)in;
+-(NSString *)dbError:(int)err;
 -(DBFS *)openDatabase:(NSString *)name;
 -(void)closeDatabase:(DBFS *)dbfs;
 -(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out withSize:(int *)size;

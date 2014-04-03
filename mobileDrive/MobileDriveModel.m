@@ -31,6 +31,10 @@
     return self;
 }
 
+-(NSString *)dbError:(int)err {
+    return [self.dbInterface dbError:err];
+}
+
 -(void)closeDatabase {
     [self.dbInterface closeDatabase:dbfs];
 }
@@ -199,6 +203,29 @@
     [contentDict addEntriesFromDictionary:tempDict];
     
     return contentDict;
+}
+
+-(NSString *)getJsonContentsIn:(NSString *)dirName {
+    NSString *intro = @"var files = [\n\t{\n\t\t\"name\": ";
+    NSString *temp = [NSString stringWithFormat:@"%@", dirName];
+    NSString *json = [intro stringByAppendingString:temp];
+    json = [json stringByAppendingString:@"\",\n\t\t\"type\": \"Directory\",\n\t\t\"icon\": \"directory\",\n\t\t\"contents\": ["];
+    NSDictionary *dict = [self getContentsIn:dirName];
+    NSArray *keys = [dict allKeys];
+    for (NSUInteger i = 0; i < [dict count]; ++i) {
+        NSString *s = [keys objectAtIndex:i];
+        json = [json stringByAppendingString:@"\n\t\t\t{\n\t\t\t\t\"name\": \""];
+        json = [json stringByAppendingString:s];
+        json = [json stringByAppendingString:@"\",\n\t\t\t\t\"size\": '',\n\t\t\t\t\"modified\": \"\",\n\t\t\t\t\t\"type\": \""];
+        NSDictionary *f = [dict objectForKey:s];
+        if ([[f objectForKey:@"Type"] isEqualToValue:@""]) {
+            
+        }
+    }
+    
+    json = [json stringByAppendingString:@"\n\t\t]\n\t}\n];"];
+    return json;
+//    json << @"var files = [\n\t{\n\t\t\"";
 }
 
 

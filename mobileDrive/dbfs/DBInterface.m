@@ -56,6 +56,13 @@
     return (DBFS_Blob){buf, size};
 }
 
+-(NSString *)dbError:(int)err {
+    NSString *error;
+    const char *c = dbfs_err(err);
+    error = [NSString stringWithUTF8String:c];
+    return error;
+}
+
 -(DBFS *)openDatabase:(NSString *)name {
     char *dbName = [self nsStringToCString:name];
     DBFS *dbfs = dbfs_open(dbName);
