@@ -631,7 +631,6 @@
     BOOL passed = NO;
     switch (tag) {
 
-        case ADD_ALERT_TAG:
         case DELETE_ALERT_TAG:
         case RENAME_ALERT_TAG:
             if (dir) {
@@ -651,6 +650,7 @@
                 }
             }
             break;
+        case ADD_ALERT_TAG:
         case MOVE_ALERT_TAG:
             if (dir) {
                 if (str && len && [str characterAtIndex:(len - 1)] == '/')
@@ -731,8 +731,10 @@
 
                 }
                 else {
-                    NSLog(@"Error selectedDict or selectedKey NULL dict= %@ key= %@", selectedDict, selectedKey);
-                    //FIXME add code to display error alert
+
+                    NSLog(@"Fatal error in alertView:clickedButtonAtIndex:, selectedDict or selectedKey are NULL.");
+                    abort();
+
                 }
                 break;
             case MOVE_ALERT_TAG:
@@ -766,12 +768,17 @@
 
                     case ADD_ALERT_TAG:
                     {
-                        if ([text characterAtIndex:([text length] - 1)] != '/')
-                            text = [NSString stringWithFormat:@"%@/", text];
 
                         NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
 
-                        if ([self strOkay:text ForTag:ADD_ALERT_TAG IsDir:YES]) {
+                        if ([text characterAtIndex:0] != '/')
+                            path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+                        else
+                            path = text;
+                        if ([path characterAtIndex:([path length] - 1)] != '/')
+                            path = [NSString stringWithFormat:@"%@/", path];
+
+                        if ([self strOkay:path ForTag:ADD_ALERT_TAG IsDir:YES]) {
 
                             DBFS_Error err = [self.appDelegate.model createDirectory:path];
                             if (err == DBFS_OKAY) {
@@ -790,7 +797,7 @@
                         else {
 
                             UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
-                            [alert setMessage:@"Name invalid: Name cannot contain '/'"];
+                            [alert setMessage:@"Name invalid"];
                             [alert show];
 
                         }
@@ -847,8 +854,10 @@
                             
                         }
                         else {
-                            NSLog(@"Error selectedDict or selectedKey NULL dict= %@ key= %@", selectedDict, selectedKey);
-                            //FIXME add code to display error alert
+
+                            NSLog(@"Fatal error in alertView:clickedButtonAtIndex:, selectedDict or selectedKey are NULL.");
+                            abort();
+
                         }
                         break;
                     case RENAME_ALERT_TAG:
@@ -895,8 +904,10 @@
 
                         }
                         else {
-                            NSLog(@"Error selectedDict or selectedKey NULL dict= %@ key= %@", selectedDict, selectedKey);
-                            //FIXME add code here to display error alert
+
+                            NSLog(@"Fatal error in alertView:clickedButtonAtIndex:, selectedDict or selectedKey are NULL.");
+                            abort();
+
                         }
                         break;
                     default:
