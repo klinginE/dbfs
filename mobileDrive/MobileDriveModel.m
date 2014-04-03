@@ -218,14 +218,21 @@
         json = [json stringByAppendingString:s];
         json = [json stringByAppendingString:@"\",\n\t\t\t\t\"size\": '',\n\t\t\t\t\"modified\": \"\",\n\t\t\t\t\t\"type\": \""];
         NSDictionary *f = [dict objectForKey:s];
-        if ([[f objectForKey:@"Type"] isEqualToValue:@""]) {
-            
+        NSString *type = [f valueForKey:s];
+        if ([type isEqualToString:@"1"]) {
+            json = [json stringByAppendingString:@"Directory\",\n\t\t\t\t\"icon\": \"directory\""];
+        }
+        else {
+            json = [json stringByAppendingString:@"Text File\",\n\t\t\t\t\"icon\": \"text\""];
+        }
+        json = [json stringByAppendingString:@"\n\t\t\t}"];
+        if (i < [dict count] - 1) {
+            json = [json stringByAppendingString:@","];
         }
     }
     
     json = [json stringByAppendingString:@"\n\t\t]\n\t}\n];"];
     return json;
-//    json << @"var files = [\n\t{\n\t\t\"";
 }
 
 
