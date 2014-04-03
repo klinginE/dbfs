@@ -17,6 +17,8 @@
 
 -(id)init;
 
+-(NSString *)dbError:(int)err;
+
 -(void)closeDatabase;
 
 // Retrieve contents of absolute path "fname" through file stream "out"
