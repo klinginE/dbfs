@@ -966,6 +966,7 @@
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
     [self.detailView hideAnimated:NO];
+    self.detailView = nil;
     if ([sender.titleLabel.text isEqualToString:@"Move"])
         [[self objectInArray:self.alertViews WithTag:MOVE_ALERT_TAG] show];
     else if ([sender.titleLabel.text isEqualToString:@"Rename"])
@@ -987,7 +988,7 @@
 
 }
 
--(void)refreshForTag:(alertTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
+-(void)refreshForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
 
     assert(oldPath);
     NSInteger oldLen = [oldPath length];
@@ -996,7 +997,9 @@
     NSString *currentPath = [NSString stringWithUTF8String:self.iPadState.currentPath];
     NSInteger currentLen = [currentPath length];
 
-    NSInteger index = oldLen - 2;
+    NSInteger index = oldLen - 1;
+    if ([oldPath characterAtIndex:index] == '/')
+        index--;
     for (;index >= 0; index--)
         if ([oldPath characterAtIndex:index] == '/')
             break;
@@ -1005,7 +1008,7 @@
 
     if (self.filesDictionary && self.fileKeys && self.mainTableView && serverLen <= currentLen)
         switch (tag) {
-            case ADD_ALERT_TAG:
+            case ADD_MODEL_TAG:
                 if ([serverPath isEqualToString:currentPath]) {
 
                     self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
@@ -1014,7 +1017,8 @@
 
                 }
                 break;
-            case RENAME_ALERT_TAG:
+            case MOVE_MODEL_TAG:
+            case RENAME_MODEL_TAG:
                 if ([serverPath isEqualToString:currentPath]) {
 
                     self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
@@ -1022,15 +1026,58 @@
                     [self.mainTableView reloadData];
 
                 }
-                else if ([serverPath isEqualToString:[currentPath substringToIndex:serverLen]]) {
+                else if ([serverPath isEqualToString:[currentPath substringToIndex:serverLen]] &&
+                         [newPath characterAtIndex:(newLen - 1)] == '/') {
 
+                    NSString *newIpadPath = newPath;
+                    if (newLen < currentLen)
+                        newIpadPath = [NSString stringWithFormat:@"%@%@", newIpadPath, [currentPath substringFromIndex:newLen]];
+                    NSString *newAddress = [NSString stringWithUTF8String:self.iPadState.ipAddress];
                     [self freeState:self.iPadState];
-                    if ([oldPath isEqualToString:currentPath]) {
+                    [self initState:&_iPadState WithPath:newIpadPath Address:newAddress];
+                    if ([oldPath isEqualToString:currentPath])
+                        self.title = [NSString stringWithUTF8String:self.iPadState.currentDir];
 
-                        //self.iPadState.
-                        
+                    self.pathScrollView = nil;
+                    self.pathLabelView = nil;
+                    _pathScrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
+                    [self.pathScrollView setBackgroundColor:self.barColor];
+                    [self.pathScrollView setBounces:NO];
+                    [self.pathScrollView setScrollEnabled:YES];
+                    self.automaticallyAdjustsScrollViewInsets = NO;
+                    
+                    _pathLabelView = [[UILabel alloc] initWithFrame:CGRectZero];
+                    _pathLabelView.text = @"";
+                    _pathLabelView.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
+                    _pathLabelView.numberOfLines = 1;
+                    [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
+                    [self makeFrameForViews];
 
-                    }
+                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
+                    self.fileKeys = [self.filesDictionary allKeys];
+                    [self.mainTableView reloadData];
+
+                    for (int d = (self.iPadState.depth - 1); d >= 0; d--)
+                        [self.navigationController.viewControllers[d] refreshForTag:tag From:oldPath To:newPath];
+
+                }
+                break;
+            case DELETE_MODEL_TAG:
+                if ([serverPath isEqualToString:currentPath]) {
+                    
+                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
+                    self.fileKeys = [self.filesDictionary allKeys];
+                    [self.mainTableView reloadData];
+                    
+                }
+                else if ([oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
+                         [oldPath characterAtIndex:(newLen - 1)] == '/') {
+
+                    NSInteger depth = -1;
+                    for (int i = 0; i < serverLen; i++)
+                        if ([serverPath characterAtIndex:i] == '/')
+                            depth++;
+                    [self.appDelegate popToViewWithDepth:depth Anamated:NO WithMessage:@"Sub directory of current path was deleted."];
 
                 }
                 break;

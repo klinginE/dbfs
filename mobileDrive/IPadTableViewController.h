@@ -32,7 +32,8 @@ typedef enum {ADD_ALERT_TAG=512, DELETE_ALERT_TAG, MOVE_ALERT_TAG, RENAME_ALERT_
 
 -(void)switchChanged:(UISwitch *)sender;
 -(void)pathButtonPressed:(UIButton *)sender;
--(void)refreshIpadForTag:(alertTag)tag From:(NSString *)oldPath To:(NSString *)newPath;
+-(void)refreshIpadForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath;
+-(void)popToViewWithDepth:(NSInteger)depth Anamated:(BOOL)animate WithMessage:(NSString *)message;
 
 @end
 
@@ -88,6 +89,6 @@ typedef struct {
 -(char *)nsStringToCString:(NSString *)str;
 
 // Events
--(void)refreshForTag:(alertTag)tag From:(NSString *)oldPath To:(NSString *)newPath;
+-(void)refreshForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath;
 
 @end
