@@ -966,7 +966,6 @@
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
     [self.detailView hideAnimated:NO];
-    self.detailView = nil;
     if ([sender.titleLabel.text isEqualToString:@"Move"])
         [[self objectInArray:self.alertViews WithTag:MOVE_ALERT_TAG] show];
     else if ([sender.titleLabel.text isEqualToString:@"Rename"])
@@ -1000,13 +999,13 @@
     NSInteger index = oldLen - 1;
     if ([oldPath characterAtIndex:index] == '/')
         index--;
-    for (;index >= 0; index--)
+    for (; index >= 0; index--)
         if ([oldPath characterAtIndex:index] == '/')
             break;
     NSString *serverPath = [oldPath substringToIndex:(index + 1)];
     NSInteger serverLen = [serverPath length];
 
-    if (self.filesDictionary && self.fileKeys && self.mainTableView && serverLen <= currentLen)
+    if (self.filesDictionary && self.fileKeys && self.mainTableView && oldLen <= currentLen)
         switch (tag) {
             case ADD_MODEL_TAG:
                 if ([serverPath isEqualToString:currentPath]) {
@@ -1026,12 +1025,12 @@
                     [self.mainTableView reloadData];
 
                 }
-                else if ([serverPath isEqualToString:[currentPath substringToIndex:serverLen]] &&
+                else if ([oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [newPath characterAtIndex:(newLen - 1)] == '/') {
 
                     NSString *newIpadPath = newPath;
-                    if (newLen < currentLen)
-                        newIpadPath = [NSString stringWithFormat:@"%@%@", newIpadPath, [currentPath substringFromIndex:newLen]];
+                    if (oldLen < currentLen)
+                        newIpadPath = [NSString stringWithFormat:@"%@%@", newIpadPath, [currentPath substringFromIndex:oldLen]];
                     NSString *newAddress = [NSString stringWithUTF8String:self.iPadState.ipAddress];
                     [self freeState:self.iPadState];
                     [self initState:&_iPadState WithPath:newIpadPath Address:newAddress];
@@ -1071,7 +1070,7 @@
                     
                 }
                 else if ([oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
-                         [oldPath characterAtIndex:(newLen - 1)] == '/') {
+                         [oldPath characterAtIndex:(oldLen - 1)] == '/') {
 
                     NSInteger depth = -1;
                     for (int i = 0; i < serverLen; i++)
