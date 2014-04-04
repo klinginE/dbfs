@@ -966,10 +966,21 @@
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
     [self.detailView hideAnimated:NO];
-    if ([sender.titleLabel.text isEqualToString:@"Move"])
-        [[self objectInArray:self.alertViews WithTag:MOVE_ALERT_TAG] show];
-    else if ([sender.titleLabel.text isEqualToString:@"Rename"])
-        [[self objectInArray:self.alertViews WithTag:RENAME_ALERT_TAG] show];
+    if ([sender.titleLabel.text isEqualToString:@"Move"]) {
+
+        UIAlertView *alert = [self objectInArray:self.alertViews WithTag:MOVE_ALERT_TAG];
+        [[alert textFieldAtIndex:0] setPlaceholder:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+        [alert show];
+
+    }
+    else if ([sender.titleLabel.text isEqualToString:@"Rename"]) {
+
+        UIAlertView *alert = [self objectInArray:self.alertViews WithTag:RENAME_ALERT_TAG];
+        [[alert textFieldAtIndex:0] setPlaceholder:selectedKey];
+        [alert show];
+
+
+    }
     else if ([sender.titleLabel.text isEqualToString:@"Delete"])
         [[self objectInArray:self.alertViews WithTag:DELETE_ALERT_TAG] show];
 
@@ -1197,6 +1208,7 @@
 -(void)displayAddDirPage {
 
     UIAlertView *addDirAlert = [self objectInArray:self.alertViews WithTag:ADD_ALERT_TAG];
+    [[addDirAlert textFieldAtIndex:0] setPlaceholder:@"My Dir"];
     [addDirAlert show];
 
 }
@@ -1204,8 +1216,6 @@
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
     UIScrollView *custom = [[UIScrollView alloc] initWithFrame:CGRectZero];
-    int i = 1;
-    CGFloat maxWidth = 0;
     UILabel *nameLabel = [[UILabel alloc] init];
     nameLabel.text = [NSString stringWithFormat:@"Name: %@", key];
     nameLabel.frame = CGRectMake(0, 0, [self sizeOfString:nameLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
@@ -1214,9 +1224,11 @@
     
     [custom setBackgroundColor:[UIColor clearColor]];
     [custom setBounces:NO];
-    
+
     [custom addSubview:nameLabel];
-    
+
+    int i = 1;
+    CGFloat maxWidth = [self sizeOfString:nameLabel.text withFont:nameLabel.font].width;
     for (NSString *k in [dict keyEnumerator]) {
         
         UILabel *l = [[UILabel alloc] init];
@@ -1246,13 +1258,13 @@
                                        selector:@selector(detailedVeiwButtonPressed:)];
 
     }
+    custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, (i + 1) * SMALL_FONT_SIZE);
+    custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);
     self.detailView.customView = custom;
 
     selectedDict = dict;
     selectedKey = key;
     [self.detailView showOrUpdateAnimated:NO];
-    custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, (i + 1) * SMALL_FONT_SIZE);
-    custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);
 
 }
 
