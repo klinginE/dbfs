@@ -206,37 +206,22 @@
 }
 
 -(NSString *)getJsonContentsIn:(NSString *)dirName {
-    NSString *temp = @"[";
+    NSString *temp = @"{\n\t\"contents\": [";
     NSString *json = [[NSString alloc] initWithString:temp];
     NSDictionary *dict = [self getContentsIn:dirName];
     NSArray *keys = [dict allKeys];
     for (NSUInteger i = 0; i < [dict count]; ++i) {
-        NSString *s = [keys objectAtIndex:i];
-        NSString *slash = [s substringFromIndex:[s length]-1];
-        BOOL b;
-        if ([slash isEqualToString:@"/"]) {
-            s = [s substringToIndex:[s length]-1];
-            b = YES;
-        }
-        else {
-            b = NO;
-        }
-        json = [json stringByAppendingString:@"\n\t{\n\t\t\"name\": \""];
-        json = [json stringByAppendingString:s];
-        json = [json stringByAppendingString:@"\",\n\t\t\"size\": '',\n\t\t\"modified\": \"\",\n\t\t\"type\": "];
-        if (b) {
-            json = [json stringByAppendingString:@"\"Directory\",\n\t\t\"icon\": \"directory\""];
-        }
-        else {
-            json = [json stringByAppendingString:@"\"Text File\",\n\t\t\"icon\": \"text\""];
-        }
-        json = [json stringByAppendingString:@"\n\t}"];
+        NSString *name = [keys objectAtIndex:i];
+        json = [json stringByAppendingString:@"\n\t\t{\n\t\t\t\"name\": \""];
+        json = [json stringByAppendingString:name];
+        json = [json stringByAppendingString:@"\",\n\t\t\t\"size\": \"\",\n\t\t\t\"modified\": \"\""];
+        json = [json stringByAppendingString:@"\n\t\t}"];
         if (i < [dict count] - 1) {
             json = [json stringByAppendingString:@","];
         }
     }
     
-    json = [json stringByAppendingString:@"\n]"];
+    json = [json stringByAppendingString:@"\n\t]\n}"];
     return json;
 }
 
