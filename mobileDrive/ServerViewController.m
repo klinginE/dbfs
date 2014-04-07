@@ -97,7 +97,7 @@
                                 [content appendFormat:@"<html><body><p>Folder %@ was created.</p></body></html>",
                                   pathArg
                                 ];
-                    
+                    //sleep(1);
                     // Calling Refresh Function
                     [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: ADD_MODEL_TAG
                                                                                                        From: pathArg To: nil];
