@@ -16,13 +16,11 @@
 #define kTrialMaxUploads 50
 
 @interface ServerViewController ()
-
+    @property (strong, atomic) MobileDriveAppDelegate* appDelegate;
 @end
 
 @implementation ServerViewController{
-    GCDWebServer* webServer;
-    MobileDriveAppDelegate * _appDelegate;
-   // NSMutableString *current_ip_address;
+    __block GCDWebServer* webServer;
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -38,10 +36,13 @@
     NSLog(@"viewDidLoad ServerViewController.m");
     _current_ip_address = [NSMutableString stringWithString: @"test"];
     _appDelegate = (MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate;
+    __weak MobileDriveModel *w_model = [_appDelegate model];
+    //mySelf = self;
+    
     @autoreleasepool {
         
         // Create server
-        webServer = [[GCDWebServer alloc] init];
+         webServer = [[GCDWebServer alloc] init];
 
         // Get the path to the website directory
         NSString* websitePath = [[NSBundle mainBundle] pathForResource:@"Website" ofType:nil];
@@ -84,7 +85,7 @@
             if ( pathArg == NULL){
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }else{
-                NSData * json_in_NSData =[ [_appDelegate.model getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
+                NSData * json_in_NSData =[[ w_model getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
                 return [GCDWebServerDataResponse responseWithData: json_in_NSData contentType: @"application/json"];
             }
         }];
@@ -97,12 +98,12 @@
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }else{
                 NSMutableString* content = [[NSMutableString alloc] init];
-                if ( ![_appDelegate.model createDirectory:pathArg] ){
+                if ( ![w_model createDirectory:pathArg] ){
                                 [content appendFormat:@"<html><body><p>Folder %@ was created.</p></body></html>",
                                   pathArg
                                 ];
                 }else{
-                    [content appendFormat:@"<html><body><p>Folder @% was not created.</p></body></html>",
+                    [content appendFormat:@"<html><body><p>Folder %@ was not created.</p></body></html>",
                      pathArg];
                 }
                 return [GCDWebServerDataResponse responseWithHTML:content];
@@ -118,7 +119,7 @@
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }else{
                 NSMutableString* content = [[NSMutableString alloc] init];
-                if ( ![_appDelegate.model renameDirectory:oldPath to:newPath] ){
+                if ( ![w_model renameDirectory:oldPath to:newPath] ){
                     [content appendFormat:@"<html><body><p>Path %@ was renamed to %@.</p></body></html>",
                      oldPath, newPath];
                 }else{
@@ -129,13 +130,8 @@
             }
         }];
         
-        NSLog(@"Before Running server");
-        // Use convenience method that runs server on port 8080 until SIGINT received
         [webServer start];
         
-        NSLog(@"#####");
-        NSLog( [self getIPAddress] );
-        NSLog(@"#####");
     }
     
     return self;

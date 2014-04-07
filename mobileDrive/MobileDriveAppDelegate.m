@@ -18,7 +18,8 @@
 @end
 
 @implementation MobileDriveAppDelegate{
-   NSString * ipAddress;
+   __block NSString * ipAddress;
+    id lockIpAddress;
 }
 
 -(void)switchChanged:(UISwitch *)sender {
@@ -52,31 +53,15 @@
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    
-    // intit global app properties
     self.isConnected = YES;
-
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.serverController = [[ServerViewController alloc] init];
-            
-            ipAddress = [ [NSString alloc] initWithString:[self.serverController getIPAddress] ];
-
-        });
-    });
-    NSLog(@"#%%-------%");
-    NSLog( ipAddress );
-    NSLog(@"#%%-------%");
-    
-    
-//  intit the model
+    self.serverController = [[ServerViewController alloc] init];
     self.model = [[MobileDriveModel alloc] init];
 
-    
+    ipAddress = [self.serverController getIPAddress];
     
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
-                                                                        ipAddress:@"12.123.123.12"
+                                                                        ipAddress:ipAddress
                                                                     switchAction:@selector(switchChanged:)
                                                                        forEvents:UIControlEventValueChanged
                                                                       pathAction:@selector(pathButtonPressed:)
