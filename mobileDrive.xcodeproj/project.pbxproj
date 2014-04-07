@@ -174,11 +174,9 @@
 		DE0FDF6818C963CB00843686 /* mobileDrive */ = {
 			isa = PBXGroup;
 			children = (
-				CE40077F18E546110025C0B0 /* CGDWebServer */,
-				CEF41B3818E79B5500073D0F /* Website */,
-				9564623C18D0DEBC00AA845A /* ServerViewController.h */,
-				9564623D18D0DEBC00AA845A /* ServerViewController.m */,
 				8AFF3ECB18D24CB300FB8A21 /* files.plist */,
+				CEF41B3818E79B5500073D0F /* Website */,
+				CE40077F18E546110025C0B0 /* CGDWebServer */,
 				DE7F71D118EB6AC3002CC799 /* dbfs */,
 				DE0FDF7118C963CB00843686 /* MobileDriveAppDelegate.h */,
 				DE0FDF7218C963CB00843686 /* MobileDriveAppDelegate.m */,
@@ -186,6 +184,8 @@
 				DE02776518DA9671003C8F60 /* CODialog.m */,
 				DED6C4BF18D2643900F50F97 /* IPadTableViewController.h */,
 				DED6C4C018D2643900F50F97 /* IPadTableViewController.m */,
+				9564623C18D0DEBC00AA845A /* ServerViewController.h */,
+				9564623D18D0DEBC00AA845A /* ServerViewController.m */,
 				8A014E7E18CF8FF600C83490 /* MobileDriveModel.h */,
 				8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */,
 				8AFF3ECB18D24CB300FB8A21 /* files.plist */,

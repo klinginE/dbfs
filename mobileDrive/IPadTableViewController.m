@@ -1014,6 +1014,12 @@
     NSString *serverPath = [oldPath substringToIndex:(index + 1)];
     NSInteger serverLen = [serverPath length];
 
+    NSLog(@"refresh currentPath= %@", currentPath);
+    NSLog(@"refresh oldPath= %@", oldPath);
+    NSLog(@"refresh newPath= %@", newPath);
+    NSLog(@"refresh serverPath= %@", serverPath);
+    NSLog(@"refresh tag= %u", tag);
+
     if (self.filesDictionary && self.fileKeys && self.mainTableView && oldLen <= currentLen)
         switch (tag) {
             case ADD_MODEL_TAG:
