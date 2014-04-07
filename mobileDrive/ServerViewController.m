@@ -16,7 +16,6 @@
 #define kTrialMaxUploads 50
 
 @interface ServerViewController ()
-    @property (strong, atomic) MobileDriveAppDelegate* appDelegate;
 @end
 
 @implementation ServerViewController{
@@ -35,12 +34,8 @@
 -(id) init{
     NSLog(@"viewDidLoad ServerViewController.m");
     _current_ip_address = [NSMutableString stringWithString: @"test"];
-    _appDelegate = (MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate;
-    __weak MobileDriveModel *w_model = [_appDelegate model];
-    //mySelf = self;
     
     @autoreleasepool {
-        
         // Create server
          webServer = [[GCDWebServer alloc] init];
 
@@ -82,10 +77,12 @@
             
             // Called from GCD thread
             NSString * pathArg = [request.query objectForKey:@"path"];
+            NSLog(@">>>>>>>>");
+            NSLog(pathArg);
             if ( pathArg == NULL){
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }else{
-                NSData * json_in_NSData =[[ w_model getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
+                NSData * json_in_NSData =[[ [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
                 return [GCDWebServerDataResponse responseWithData: json_in_NSData contentType: @"application/json"];
             }
         }];
@@ -98,7 +95,7 @@
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }else{
                 NSMutableString* content = [[NSMutableString alloc] init];
-                if ( ![w_model createDirectory:pathArg] ){
+                if ( ![[(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] createDirectory:pathArg] ){
                                 [content appendFormat:@"<html><body><p>Folder %@ was created.</p></body></html>",
                                   pathArg
                                 ];
@@ -119,7 +116,7 @@
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }else{
                 NSMutableString* content = [[NSMutableString alloc] init];
-                if ( ![w_model renameDirectory:oldPath to:newPath] ){
+                if ( ![[(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] renameDirectory:oldPath to:newPath] ){
                     [content appendFormat:@"<html><body><p>Path %@ was renamed to %@.</p></body></html>",
                      oldPath, newPath];
                 }else{
