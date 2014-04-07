@@ -9,9 +9,6 @@
     <link rel="stylesheet" href="styles/gh-buttons.css" />
     <script src="js/jquery.min.js" type="text/javascript"></script>
     <script src="js/jquery.omniwindow.js" type="text/javascript"></script>
-    <!-- <script src="js/filesystem.js" type="text/javascript"></script> -->
-    <!-- test -->
-    <script src="http://localhost:8080/directory.json?path=/root/" type="text/javascript"></script>
     <script src="js/ui.js" type="text/javascript"></script>
   </head>
   <body>
@@ -19,11 +16,11 @@
     <div id="create-directory-window" class="modal ow-closed">
       <h1 class="title">Create Directory</h1>
       <a class="close-button" href="#"><img src="img/cross.png" /></a>
-      <form id="create-directory-form">
+      <div id="create-directory-form">
         <label for="dir-name">Name</label>
         <input type="text" id="dir-name" name="dir-name" />
         <a href="#" class="button icon log">Create</a>
-      </form>
+      </div>
     </div>
     <div id="content">
       <div id="breadcrumbs">
