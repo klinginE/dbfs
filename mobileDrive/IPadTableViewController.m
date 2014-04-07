@@ -1019,8 +1019,6 @@
     NSLog(@"refresh newPath= %@", newPath);
     NSLog(@"refresh serverPath= %@", serverPath);
     NSLog(@"refresh tag= %u", tag);
-    
-    
 
     if (self.filesDictionary && self.fileKeys && self.mainTableView && oldLen <= currentLen)
         switch (tag) {
