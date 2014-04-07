@@ -48,9 +48,9 @@
 
 -(void)refreshIpadForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
 
-    NSLog(@"Tag: %u", tag);
-    NSLog(oldPath);
-    NSLog(newPath);
+//    NSLog(@"Tag: %u", tag);
+//    NSLog(oldPath);
+//    NSLog(newPath);
     
     [self.iPadTableViewController refreshForTag:tag From:oldPath To:newPath];
 
@@ -75,13 +75,12 @@
 
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.isConnected = YES;
     self.serverController = [[ServerViewController alloc] init];
     self.model = [[MobileDriveModel alloc] init];
 
     ipAddress = [self.serverController getIPAddress];
-    
+
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
                                                                         ipAddress:ipAddress
@@ -92,13 +91,12 @@
 
     // init nav controller
     _iPadNavController = [[UINavigationController alloc] initWithRootViewController:self.iPadTableViewController];
-    _iPadNavController.title = @"NavController";
     [_iPadNavController.navigationBar setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
                                                             NSFontAttributeName,
                                                             nil]];
 
     // set up window
-    
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = _iPadNavController;
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];

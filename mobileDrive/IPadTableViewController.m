@@ -520,7 +520,7 @@
             if (bi.tag == IP_TAG) {
 
                 UILabel *newLabel = [[UILabel alloc] init];
-                newLabel.text = [NSString stringWithFormat:@"IP Address: %@", ip];
+                newLabel.text = [NSString stringWithFormat:@"IP: %@", ip];
                 newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
                 newLabel.frame = CGRectMake(0,
                                             0,
@@ -1014,13 +1014,13 @@
     NSString *serverPath = [oldPath substringToIndex:(index + 1)];
     NSInteger serverLen = [serverPath length];
 
-    NSLog(@"refresh currentPath= %@", currentPath);
-    NSLog(@"refresh oldPath= %@", oldPath);
-    NSLog(@"refresh newPath= %@", newPath);
-    NSLog(@"refresh serverPath= %@", serverPath);
-    NSLog(@"refresh tag= %u", tag);
+//    NSLog(@"refresh currentPath= %@", currentPath);
+//    NSLog(@"refresh oldPath= %@", oldPath);
+//    NSLog(@"refresh newPath= %@", newPath);
+//    NSLog(@"refresh serverPath= %@", serverPath);
+//    NSLog(@"refresh tag= %u", tag);
 
-    if (self.filesDictionary && self.fileKeys && self.mainTableView && oldLen <= currentLen)
+    if (self.filesDictionary && self.fileKeys && self.mainTableView && serverLen <= currentLen)
         switch (tag) {
             case ADD_MODEL_TAG:
                 if ([serverPath isEqualToString:currentPath]) {
@@ -1040,7 +1040,7 @@
                     [self.mainTableView reloadData];
 
                 }
-                else if ([oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
+                else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [newPath characterAtIndex:(newLen - 1)] == '/') {
 
                     NSString *newIpadPath = newPath;
@@ -1084,7 +1084,7 @@
                     [self.mainTableView reloadData];
                     
                 }
-                else if ([oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
+                else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [oldPath characterAtIndex:(oldLen - 1)] == '/') {
 
                     NSInteger depth = -1;
@@ -1144,7 +1144,7 @@
                                                                            action:nil];
 
     UILabel *ipLabel = [[UILabel alloc] init];
-    ipLabel.text = [NSString stringWithFormat:@"IP Address: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
+    ipLabel.text = [NSString stringWithFormat:@"IP: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
     ipLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     ipLabel.frame = CGRectMake(0,
                                0,
