@@ -39,14 +39,33 @@
 
 -(void)pathButtonPressed:(UIButton *)sender {
 
- [self.iPadNavController popToViewController:[self.iPadNavController.viewControllers objectAtIndex:sender.tag]
-                                    animated:YES];
+    assert(sender.tag >= 0);
+    assert([self.iPadNavController.viewControllers count] - 1 >= sender.tag);
+    [self.iPadNavController popToViewController:[self.iPadNavController.viewControllers objectAtIndex:sender.tag]
+                                       animated:YES];
 
 }
 
--(void)refreshIpad:(NSString *)path {
+-(void)refreshIpadForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
 
-    [self.iPadTableViewController refresh:path];
+    [self.iPadTableViewController refreshForTag:tag From:oldPath To:newPath];
+
+}
+
+-(void)popToViewWithDepth:(NSInteger)depth Anamated:(BOOL)animate WithMessage:(NSString *)message {
+
+    assert(depth >= 0);
+    assert([self.iPadNavController.viewControllers count] - 1 >= depth);
+    [self.iPadNavController popToViewController:self.iPadNavController.viewControllers[depth] animated:animate];
+    if (message) {
+
+        UIAlertView *alert = [[UIAlertView alloc] init];
+        [alert setTitle:@"Had to redirect to new current directory because:"];
+        [alert setMessage:message];
+        [alert addButtonWithTitle:@"OK"];
+        [alert show];
+
+    }
 
 }
 

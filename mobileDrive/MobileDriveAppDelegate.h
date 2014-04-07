@@ -24,5 +24,6 @@
 
 -(void)switchChanged:(UISwitch *)sender;
 -(void)pathButtonPressed:(UIButton *)sender;
+-(void)popToViewWithDepth:(NSInteger)depth Anamated:(BOOL)animate WithMessage:(NSString *)message;
 
 @end
