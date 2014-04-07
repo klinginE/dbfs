@@ -77,8 +77,6 @@
             
             // Called from GCD thread
             NSString * pathArg = [request.query objectForKey:@"path"];
-            NSLog(@">>>>>>>>");
-            NSLog(pathArg);
             if ( pathArg == NULL){
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }else{
@@ -99,6 +97,11 @@
                                 [content appendFormat:@"<html><body><p>Folder %@ was created.</p></body></html>",
                                   pathArg
                                 ];
+                    
+                    // Calling Refresh Function
+                    [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: ADD_MODEL_TAG
+                                                                                                       From: pathArg To: nil];
+                    
                 }else{
                     [content appendFormat:@"<html><body><p>Folder %@ was not created.</p></body></html>",
                      pathArg];
@@ -119,6 +122,10 @@
                 if ( ![[(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] renameDirectory:oldPath to:newPath] ){
                     [content appendFormat:@"<html><body><p>Path %@ was renamed to %@.</p></body></html>",
                      oldPath, newPath];
+                    
+                    // Calling Refresh Function
+                    [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: RENAME_MODEL_TAG
+                                                                                                       From: oldPath To: newPath];
                 }else{
                     [content appendFormat:@"<html><body><p>Path %@ was NOT renamed to %@.</p></body></html>",
                      oldPath, newPath];

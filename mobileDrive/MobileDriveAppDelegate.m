@@ -48,6 +48,10 @@
 
 -(void)refreshIpadForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
 
+    NSLog(@"Tag: %u", tag);
+    NSLog(oldPath);
+    NSLog(newPath);
+    
     [self.iPadTableViewController refreshForTag:tag From:oldPath To:newPath];
 
 }
