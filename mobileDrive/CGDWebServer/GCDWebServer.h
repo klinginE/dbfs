@@ -25,6 +25,12 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
+#define kDefaultPort 80
+#else
+#define kDefaultPort 8080
+#endif
+
 #import "GCDWebServerRequest.h"
 #import "GCDWebServerResponse.h"
 

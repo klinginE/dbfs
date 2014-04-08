@@ -9,6 +9,7 @@
 #import "MobileDriveAppDelegate.h"
 #import "ServerViewController.h"
 #import "IPadTableViewController.h"
+#import "CGDWebServer/GCDWebServer.h"
 
 
 @interface MobileDriveAppDelegate() <IPadTableViewControllerDelegate>
@@ -84,7 +85,7 @@
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
                                                                         ipAddress:ipAddress
-                                                                            port:@"8080"
+                                                                            port:[NSString stringWithFormat:@"%d", kDefaultPort]
                                                                     switchAction:@selector(switchChanged:)
                                                                        forEvents:UIControlEventValueChanged
                                                                       pathAction:@selector(pathButtonPressed:)
