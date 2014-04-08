@@ -84,6 +84,7 @@
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
                                                                         ipAddress:ipAddress
+                                                                            port:@"8080"
                                                                     switchAction:@selector(switchChanged:)
                                                                        forEvents:UIControlEventValueChanged
                                                                       pathAction:@selector(pathButtonPressed:)

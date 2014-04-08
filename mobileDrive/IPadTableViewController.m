@@ -88,7 +88,8 @@
 #pragma mark - Initers
 
 -(id)initWithPath:(NSString *)currentPath
-         ipAddress:(NSString *)ip
+        ipAddress:(NSString *)ip
+             port:(NSString *)port
      switchAction:(SEL)sAction
         forEvents:(UIControlEvents)sEvents
        pathAction:(SEL)pAction
@@ -98,7 +99,7 @@
     if (self) {
 
         // init State
-        [self initState:&_iPadState WithPath:currentPath Address:ip];
+        [self initState:&_iPadState WithPath:currentPath Address:ip Port:port];
         _appDelegate = (MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate;
         self.title = [NSString stringWithUTF8String:_iPadState.currentDir];
         selectedDict = nil;
@@ -132,10 +133,14 @@
 
 }
 
--(void)initState:(State *)state WithPath:(NSString *)path Address:(NSString *)ip {
+-(void)initState:(State *)state
+        WithPath:(NSString *)path
+         Address:(NSString *)ip
+            Port:(NSString *)port {
 
     state->currentPath = [self nsStringToCString:path];
     state->ipAddress = [self nsStringToCString:ip];
+    state->port = [self nsStringToCString:port];
     NSUInteger len = [path length];
     NSUInteger index = len - 1;
 
@@ -511,16 +516,18 @@
 
 #pragma mark - Setters
 
--(void)setIPAdress:(NSString *)ip {
+-(void)setIPAdress:(NSString *)ip WithPort:(NSString *)port{
 
     free(_iPadState.ipAddress);
+    free(_iPadState.port);
     _iPadState.ipAddress = [self nsStringToCString:ip];
+    _iPadState.port = [self nsStringToCString:port];
     for (UIViewController *vc in [self.navigationController viewControllers])
         for (UIBarButtonItem *bi in vc.toolbarItems)
             if (bi.tag == IP_TAG) {
 
                 UILabel *newLabel = [[UILabel alloc] init];
-                newLabel.text = [NSString stringWithFormat:@"IP: %@", ip];
+                newLabel.text = [NSString stringWithFormat:@"IP: %@:%@", ip, port];
                 newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
                 newLabel.frame = CGRectMake(0,
                                             0,
@@ -611,7 +618,9 @@
 
         self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
         self.fileKeys = [self.filesDictionary allKeys];
-        [self.mainTableView reloadData];
+        [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
+                                             withObject:nil
+                                          waitUntilDone:YES];
 
     }
 
@@ -709,7 +718,9 @@
 
                             self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String: self.iPadState.currentPath]];
                             self.fileKeys = [self.filesDictionary allKeys];
-                            [self.mainTableView reloadData];
+                            [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
+                                                                 withObject:nil
+                                                              waitUntilDone:YES];
 
                         }
                         else {
@@ -788,7 +799,9 @@
 
                                 self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
                                 self.fileKeys = [self.filesDictionary allKeys];
-                                [self.mainTableView reloadData];
+                                [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
+                                                                     withObject:nil
+                                                                  waitUntilDone:YES];
                             }
                             else {
                                 NSLog(@"DBFS Not OK with ADD");
@@ -841,7 +854,9 @@
 
                                     self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
                                     self.fileKeys = [self.filesDictionary allKeys];
-                                    [self.mainTableView reloadData];
+                                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
+                                                                         withObject:nil
+                                                                      waitUntilDone:YES];
 
                                 }
                                 else {
@@ -894,7 +909,9 @@
 
                                     self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
                                     self.fileKeys = [self.filesDictionary allKeys];
-                                    [self.mainTableView reloadData];
+                                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
+                                                                         withObject:nil
+                                                                      waitUntilDone:YES];
 
                                 }
                                 else {
@@ -1027,7 +1044,12 @@
 
                     self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
                     self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView reloadData];
+                    NSLog(@"reloading data");
+                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
+                                                         withObject:nil
+                                                      waitUntilDone:YES];
+                    //[self.mainTableView reloadData];
+                    NSLog(@"done reloading data");
 
                 }
                 break;
@@ -1037,7 +1059,9 @@
 
                     self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
                     self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView reloadData];
+                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
+                                                         withObject:nil
+                                                      waitUntilDone:YES];
 
                 }
                 else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
@@ -1047,8 +1071,9 @@
                     if (oldLen < currentLen)
                         newIpadPath = [NSString stringWithFormat:@"%@%@", newIpadPath, [currentPath substringFromIndex:oldLen]];
                     NSString *newAddress = [NSString stringWithUTF8String:self.iPadState.ipAddress];
+                    NSString *newPort = [NSString stringWithUTF8String:self.iPadState.port];
                     [self freeState:self.iPadState];
-                    [self initState:&_iPadState WithPath:newIpadPath Address:newAddress];
+                    [self initState:&_iPadState WithPath:newIpadPath Address:newAddress Port:newPort];
                     if ([oldPath isEqualToString:currentPath])
                         self.title = [NSString stringWithUTF8String:self.iPadState.currentDir];
 
@@ -1069,7 +1094,9 @@
 
                     self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
                     self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView reloadData];
+                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
+                                                         withObject:nil
+                                                      waitUntilDone:YES];
 
                     for (int d = (self.iPadState.depth - 1); d >= 0; d--)
                         [self.navigationController.viewControllers[d] refreshForTag:tag From:oldPath To:newPath];
@@ -1081,7 +1108,9 @@
                     
                     self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
                     self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView reloadData];
+                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
+                                                         withObject:nil
+                                                      waitUntilDone:YES];
                     
                 }
                 else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
@@ -1144,7 +1173,7 @@
                                                                            action:nil];
 
     UILabel *ipLabel = [[UILabel alloc] init];
-    ipLabel.text = [NSString stringWithFormat:@"IP: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
+    ipLabel.text = [NSString stringWithFormat:@"IP: %@:%@", [NSString stringWithUTF8String:self.iPadState.ipAddress], [NSString stringWithUTF8String:self.iPadState.port]];
     ipLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     ipLabel.frame = CGRectMake(0,
                                0,
@@ -1183,7 +1212,7 @@
     self.navigationController.navigationBar.tintColor = self.buttonColor;
     [self.navigationController setToolbarHidden:NO animated:YES];
 
-    [self.tableView reloadData];
+    [self.mainTableView reloadData];
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
 
@@ -1340,6 +1369,7 @@
         // Make subTableviewcontroller to push onto nav stack
         IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithPath:subPath
                                                                                                ipAddress:[NSString stringWithUTF8String:self.iPadState.ipAddress]
+                                                                                                   port:[NSString stringWithUTF8String:self.iPadState.port]
                                                                                             switchAction:self.switchAction
                                                                                               forEvents:self.switchEvents pathAction:self.pathAction pathEvents:self.pathEvents];
 

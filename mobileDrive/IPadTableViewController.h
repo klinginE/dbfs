@@ -45,6 +45,7 @@ typedef struct {
     char *currentDir;
     char *currentPath;
     char *ipAddress;
+    char *port;
     int depth;
 
 }State;
@@ -56,11 +57,12 @@ typedef struct {
 // Public inits
 -(id)initWithPath:(NSString *)currentPath
         ipAddress:(NSString *)ip
+             port:(NSString *)port
      switchAction:(SEL)sAction
         forEvents:(UIControlEvents)sEvents
        pathAction:(SEL)pAction
        pathEvents:(UIControlEvents)pEvents;
--(void)initState:(State *)state WithPath:(NSString *)path Address:(NSString *)ip;
+-(void)initState:(State *)state WithPath:(NSString *)path Address:(NSString *)ip Port:(NSString *)port;
 
 // Public allocs
 -(UIBarButtonItem *)makeBarButtonWithTitle:(NSString *)title
@@ -78,7 +80,7 @@ typedef struct {
 -(void)dealloc;
 
 // Public setter
--(void)setIPAdress:(NSString *)ip;
+-(void)setIPAdress:(NSString *)ip WithPort:(NSString *)port;
 
 // Public getters
 -(NSString *)dirAtDepth:(NSInteger)depth InPath:(NSString *)path;

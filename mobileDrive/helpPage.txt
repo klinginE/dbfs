@@ -1,3 +1,8 @@
+To start using the web interface:
+    1) Open a web browser
+    2) Type in the iPad IP address, as it appears in the "IP" field at
+        the bottom of the screen, into the address bar.
+
 To change directories:
     1) Tap once on any directory
 
