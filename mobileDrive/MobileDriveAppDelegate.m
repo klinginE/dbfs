@@ -25,7 +25,11 @@
 
 -(void)switchChanged:(UISwitch *)sender {
 
-    self.isConnected = [sender isOn];
+    BOOL switchState = [sender isOn];
+    if (self.isConnected != switchState)
+        self.isConnected = switchState;
+    else
+        return;
 
     NSLog(@"switchChanged %d", self.isConnected);
     if(self.isConnected){
