@@ -40,10 +40,10 @@
         <div id="file-actions" class="button-group">
           <a href="#" class="button danger icon remove disable">Delete</a>
           <a href="#" class="button icon edit disable">Rename</a>
-          <a href="#" class="button icon arrowdown disable">Download</a>
+          <a href="#" id="open-button" class="button icon arrowdown disable">Open</a>
         </div>
         <div class="button-group">
-          <form id="upload-form">
+          <form id="upload-form" enctype="multipart/form-data">
             <input type="file" id="upload-file" name="upload-file" />
             <a href="#" id="select-file-button" class="button icon tag">Select File...</a>
             <a href="#" id="upload-button" class="button icon arrowup disable">Upload</a>

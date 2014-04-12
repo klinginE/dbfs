@@ -17,7 +17,7 @@ $(function() {
       if (row.attr('id') == 'header-row') {
         $('#actions #file-actions .button').addClass('disable');
       } else {
-        row.children('td').toggleClass('selected');
+        row.children('td').addClass('selected');
         $('#actions #file-actions .button').removeClass('disable');
       }
   });
@@ -64,11 +64,7 @@ $(function() {
     var row = $(e.target).closest('tr');
     var file = row.find("td:first-child").text().trim();
     if (row.hasClass("directory")) {
-      $('#actions #file-actions .button').addClass('disable');
-      path.push(file);
-      getDir();
-      rebuildFileList();
-      rebuildBreadCrumbs();
+      openDir(file);
     }
   });
 
@@ -102,6 +98,45 @@ $(function() {
     }
     $('#select-file-button').text(path);
     $('#upload-button').removeClass('disable');
+  });
+  
+  // Upload file button
+  $('#upload-button').click(function() {
+    var dirPath = "/";
+    for (var i = 1; i < path.length; i++) {
+      dirPath += path[i] + "/";
+    }
+    
+    var formData = new FormData($('#upload-form')[0]);
+    formData.append('upload-dir', dirPath);
+    $.ajax({
+      url: 'upload.html',
+      type: 'POST',
+      success: function(data, textStatus, hqXHR) {
+        getDir();
+      },
+      data: formData,
+      cache: false,
+      contentType: false,
+      processData: false
+    });
+  });
+  
+  // Open/download file button
+  $('#open-button').click(function() {
+    var fileName = $('td.selected.file-name').text().trim();
+    var fileType = $('td.selected.file-type').text().trim();
+    
+    if (fileType === 'Directory') {
+      openDir(fileName);
+    } else {
+      var filePath = "/";
+      for (var i = 1; i < path.length; i++) {
+        filePath += path[i] + "/";
+      }
+      filePath += fileName;
+      window.location.href = 'download.html?path=' + filePath;
+    }
   });
 
   // Create new directory window
@@ -155,14 +190,22 @@ $(function() {
       }
 
       var row = '<tr class="' + rowClass + '">'
-              + '  <td><img src="img/type_' + entry.icon + '.png" /> ' + entry.name + '</td>'
-              + '  <td>' + entry.modified + '</td>'
-              + '  <td>' + entry.type + '</td>'
-              + '  <td>' + size + '</td>'
+              + '  <td class="file-name"><img src="img/type_' + entry.icon + '.png" /> ' + entry.name + '</td>'
+              + '  <td class="file-modified">' + entry.modified + '</td>'
+              + '  <td class="file-type">' + entry.type + '</td>'
+              + '  <td class="file-size">' + size + '</td>'
               + '</tr>';
 
       $('#file-list').contents().append(row);
     }
+  }
+  
+  function openDir(dirName) {
+    $('#actions #file-actions .button').addClass('disable');
+    path.push(dirName);
+    getDir();
+    rebuildFileList();
+    rebuildBreadCrumbs();
   }
   
   function createDir(dirName) {
