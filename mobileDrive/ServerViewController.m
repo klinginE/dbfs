@@ -177,7 +177,7 @@
 
             // Refresh the iPad view
             [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: ADD_MODEL_TAG
-                                                                                               From: uploadDir To: nil];
+                                                                                               From: filePath To: nil];
 
             // Respond with success JSON
             NSString *response = @"{\n\t\"type\": \"success\",\n\t\"msg\": \"Upload succeeded\"\n}";
@@ -215,7 +215,6 @@
 
         [webServer addHandlerForMethod:@"GET" path:@"/delete.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
             NSString *path = [request.query objectForKey:@"path"];
-            NSString *dir = [[path stringByDeletingLastPathComponent] stringByAppendingString:@"/"];
             MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
 
             int dbResponse = 0;
@@ -234,7 +233,7 @@
 
             // Refresh the iPad view
             [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: DELETE_MODEL_TAG
-                                                                                               From: dir To: nil];
+                                                                                               From: path To: nil];
 
             // Respond with success JSON
             NSString *response = @"{\n\t\"type\": \"success\",\n\t\"msg\": \"Delete succeeded\"\n}";
