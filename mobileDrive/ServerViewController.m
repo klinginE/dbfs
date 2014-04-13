@@ -111,28 +111,37 @@
         }];
 
         [webServer addHandlerForMethod:@"GET" path:@"/rename.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
-            
+
+            MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
+
             // Called from GCD thread
             NSString * oldPath = [request.query objectForKey:@"old"];
             NSString * newPath = [request.query objectForKey:@"new"];
             
             if ( oldPath == NULL || newPath == NULL ){
                 return [GCDWebServerResponse responseWithStatusCode:403];
-            }else{
-                NSMutableString* content = [[NSMutableString alloc] init];
-                if ( ![[(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] renameDirectory:oldPath to:newPath] ){
-                    [content appendFormat:@"<html><body><p>Path %@ was renamed to %@.</p></body></html>",
-                     oldPath, newPath];
-                    
-                    // Calling Refresh Function
-                    [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: RENAME_MODEL_TAG
-                                                                                                       From: oldPath To: newPath];
-                }else{
-                    [content appendFormat:@"<html><body><p>Path %@ was NOT renamed to %@.</p></body></html>",
-                     oldPath, newPath];
-                }
-                return [GCDWebServerDataResponse responseWithHTML:content];
             }
+            NSMutableString* content = [[NSMutableString alloc] init];
+
+            int dbResponse = 0;
+            if ([oldPath hasSuffix:@"/"]) {
+                dbResponse = [model renameDirectory:oldPath to:newPath];
+            } else {
+                dbResponse = [model renameFile:oldPath to:newPath];
+            }
+
+            if (dbResponse == DBFS_OKAY){
+                [content appendFormat:@"<html><body><p>Path %@ was renamed to %@.</p></body></html>", oldPath, newPath];
+                    
+                // Calling Refresh Function
+                [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: RENAME_MODEL_TAG
+                                                                                                       From: oldPath To: newPath];
+            } else {
+                [content appendFormat:@"<html><body><p>Path %@ was NOT renamed to %@.</p></body></html>", oldPath, newPath];
+            }
+
+            return [GCDWebServerDataResponse responseWithHTML:content];
+
         }];
 
         [webServer addHandlerForMethod:@"POST" path:@"/upload.html" requestClass:[GCDWebServerMultiPartFormRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest * request) {

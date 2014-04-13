@@ -142,13 +142,12 @@ body {
 }
 
 
-#create-directory-window {
-
+.modal-window {
     border: #c0c0c0 1px solid;
 }
 
 
-#create-directory-form {
+.modal-window div {
   clear:both;
   display: block;
   width: 100%;

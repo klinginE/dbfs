@@ -156,6 +156,21 @@ $(function() {
     });
   });
   
+  // Rename button
+  $('#rename-button').click(function() {
+    modal = $('#rename-file-window').omniWindow();
+    modal.trigger('show');
+    
+    var val = $('td.selected.file-name').text().trim();
+    $('#rename-file-form #new-name').val(val).focus();
+
+    $('.close-button').click(function(e){
+      e.preventDefault();
+      modal.trigger('hide');
+    });
+  });
+    
+  
   // Open/download file button
   $('#open-button').click(function() {
     if ($('#open-button').hasClass('disable')) return;
@@ -177,7 +192,7 @@ $(function() {
 
   // Create new directory window
   $('#create-directory-button').click(function(e) {
-    modal = $('div.modal').omniWindow();
+    modal = $('#create-directory-window').omniWindow();
     modal.trigger('show');
     
     $('#create-directory-form #dir-name').focus();
@@ -187,6 +202,28 @@ $(function() {
       modal.trigger('hide');
     });
   });
+  
+  // Rename file button
+  $('#rename-file-form .button').click(renameFileFromForm);
+  $('#rename-file-form input').keyup(renameFileFromForm);
+  
+  function renameFileFromForm(e) {
+    if (e.type === 'keyup' && e.which != 13) return;
+    
+    var fileName = $('#rename-file-form #new-name').val();
+    var old = $('td.selected.file-name').text().trim();
+    var type = $('td.selected.file-type').text().trim();
+    
+    if (type === 'Directory') {
+      old += '/';
+      fileName += '/';
+    }
+    
+    $('#rename-file-form #new-name').val("");
+
+    renameFile(old, fileName);
+    modal.trigger('hide');
+  }
   
   // Create new directory button
   $('#create-directory-form .button').click(createDirFromForm);
@@ -236,12 +273,28 @@ $(function() {
     }
   }
   
+  function renameFile(oldFile, newFile) {
+    if (oldFile === newFile || newFile === '' || newFile === ' ') return;
+    
+    var filePath = "/";
+    for (var i = 1; i < path.length; i++) {
+      filePath += path[i] + "/";
+    }
+    
+    oldPath = filePath + oldFile;
+    newPath = filePath + newFile;
+
+    $.get('rename.html?old=' + oldPath + '&new=' + newPath, function(data) {
+      getDir();
+      rebuildFileList();
+    });
+  }
+    
+  
   function openDir(dirName) {
     $('#actions #file-actions .button').addClass('disable');
     path.push(dirName);
     getDir();
-    rebuildFileList();
-    rebuildBreadCrumbs();
   }
   
   function createDir(dirName) {
