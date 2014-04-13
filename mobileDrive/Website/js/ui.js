@@ -112,8 +112,18 @@ $(function() {
     $.ajax({
       url: 'upload.html',
       type: 'POST',
+      xhr: function() {
+        var myXhr = $.ajaxSettings.xhr();
+        if (myXhr.upload) {
+          myXhr.upload.addEventListener('#upload-progress', uploadProgress, false);
+        }
+        return myXhr; 
+      },
       success: function(data, textStatus, hqXHR) {
         getDir();
+        $('#select-file-button').text("Select file...");
+        $('#upload-button').addClass('disable');
+        $('#upload-progress > div').css('width', '0%');
       },
       data: formData,
       cache: false,
@@ -288,5 +298,11 @@ $(function() {
       return 1;
     }
     return 0;
+  }
+  
+  function uploadProgress(e) {
+    if (e.lengthComputable) {
+      $('#upload-progress > div').css('width', e.loaded + '%');
+    }
   }
 });
