@@ -52,27 +52,6 @@
             
         }];
         
-        //NSString* myFile = [[NSBundle mainBundle] pathForResource:@"arrow_down" ofType:@"png" inDirectory:@"Website/img"];
-        /*
-        [webServer addHandlerForMethod:@"GET" path:@"/download" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
-            
-            // Called from GCD thread
-            GCDWebServerResponse* response = nil;
-            
-            NSMutableString* content = [[NSMutableString alloc] init];
-            //[_appDelegate.model getJsonContentsIn: "/"];
-            //[getJsonContentsIn
-         
-//            [content appendFormat:@"<html><body><p>/download?id=%@&name=%@</p></body></html>",
-//             [request.query objectForKey:@"id"],
-//             [request.query objectForKey:@"name"]
-//             ];
-            //response = [GCDWebServerFileResponse responseWithFile:myFile isAttachment:YES];
-            //response = [GCDWebServerResponse responseWithStatusCode:403];
-            //return response;
-            return [GCDWebServerDataResponse :[_appDelegate.model getJsonContentsIn: @"/"]];
-        }];*/
-        
         [webServer addHandlerForMethod:@"GET" path:@"/directory.json" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
             
             // Called from GCD thread
