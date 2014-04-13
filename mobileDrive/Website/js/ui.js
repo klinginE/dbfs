@@ -102,6 +102,8 @@ $(function() {
   
   // Upload file button
   $('#upload-button').click(function() {
+    if ($('#upload-button').hasClass('disable')) return;
+    
     var dirPath = "/";
     for (var i = 1; i < path.length; i++) {
       dirPath += path[i] + "/";
@@ -134,6 +136,8 @@ $(function() {
   
   // Open/download file button
   $('#open-button').click(function() {
+    if ($('#open-button').hasClass('disable')) return;
+    
     var fileName = $('td.selected.file-name').text().trim();
     var fileType = $('td.selected.file-type').text().trim();
     
