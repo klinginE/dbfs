@@ -233,7 +233,7 @@
             }
 
             // Refresh the iPad view
-            [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: ADD_MODEL_TAG
+            [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: DELETE_MODEL_TAG
                                                                                                From: dir To: nil];
 
             // Respond with success JSON
