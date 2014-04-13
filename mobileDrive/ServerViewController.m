@@ -186,6 +186,8 @@
 
             NSData *data = [[NSFileManager defaultManager] contentsAtPath:tempFile];
             NSString *fnHeader = [NSString stringWithFormat:@"attachment; filename=%@", [path lastPathComponent]];
+            NSError *error;
+            [[NSFileManager defaultManager] removeItemAtPath:tempFile error:NULL];
 
             GCDWebServerDataResponse *response = [GCDWebServerDataResponse responseWithData:data contentType:@"application/octet-stream"];
             [response setValue:fnHeader forAdditionalHeader:@"Content-Disposition"];
