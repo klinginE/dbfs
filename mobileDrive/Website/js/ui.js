@@ -134,6 +134,28 @@ $(function() {
     });
   });
   
+  // Delete button
+  $('#delete-button').click(function() {
+    if ($('#delete-button').hasClass('disable')) return;
+    
+    var fileName = $('td.selected.file-name').text().trim();
+    var fileType = $('td.selected.file-type').text().trim();
+    
+    var filePath = "/";
+    for (var i = 1; i < path.length; i++) {
+      filePath += path[i] + "/";
+    }
+    filePath += fileName;
+    
+    if (fileType === 'Directory') {
+      filePath += '/';
+    }
+    
+    $.get('delete.html?path=' + filePath, function(data) {
+      getDir();
+    });
+  });
+  
   // Open/download file button
   $('#open-button').click(function() {
     if ($('#open-button').hasClass('disable')) return;
