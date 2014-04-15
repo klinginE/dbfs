@@ -150,14 +150,6 @@
     if (index)
         for (; [path characterAtIndex:index - 1] != '/'; index--);
     state->currentDir = [self nsStringToCString:[path substringFromIndex:index]];
-
-    if (!strcmp(state->currentDir, "/")) {
-
-        free(state->currentDir);
-        state->currentDir = strdup("root/");
-
-    }
-
     state->depth = 0;
     for (int i = 0; i < (len - 1); i++)
         if ([path characterAtIndex:i] == '/')
@@ -248,8 +240,6 @@
 
 -(void)initPathViewWithAction:(SEL)action ForEvents:(UIControlEvents)events {
 
-    NSLog(@"init path view!");
-    NSLog(@"%@", [NSString stringWithUTF8String:self.iPadState.currentPath]);
     UIFont *textFont = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     CGSize currentPathSize = [self sizeOfString:[NSString stringWithUTF8String:self.iPadState.currentPath]
                                        withFont:textFont];
@@ -273,7 +263,7 @@
                                             currentPathSize.height)];
     
 
-    NSString *title = @"root/";
+    NSString *title = @" / ";
     NSInteger len = 0;
     for (int i = 1; i <= (self.iPadState.depth + 1); i++) {
 
@@ -281,7 +271,7 @@
                           InPath:[NSString stringWithUTF8String:self.iPadState.currentPath]];
 
         if ([title isEqualToString:@"/"] && i == 1)
-            title = @"root/";
+            title = @"  /  ";
 
         UIButton *pathButton = [self makeButtonWithTitle:title
                                                      Tag:(i - 1)
@@ -300,7 +290,6 @@
 
             [pathButton setEnabled:NO];
             [pathButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
-            NSLog(@"pathtext= %@", pathButton.titleLabel.text);
 
         }
         len += titleSize.width;
@@ -722,11 +711,13 @@
                         if (err == DBFS_OKAY)
                             [self reloadTableViewData];
                         else {
+
                             NSLog(@"DBFS Not OK with DELETE");
                             //FIXME add code here to deal with DBFS_Error
                             UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                             [alert setMessage:[self.appDelegate.model dbError:err]];
                             [alert show];
+
                         }
 
                     }
@@ -796,11 +787,12 @@
                             if (err == DBFS_OKAY)
                                 [self reloadTableViewData];
                             else {
+
                                 NSLog(@"DBFS Not OK with ADD");
-                                //FIXME add code here to deal with DBFS_Error
                                 UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                                 [alert setMessage:[self.appDelegate.model dbError:err]];
                                 [alert show];
+
                             }
 
                         }
@@ -823,15 +815,16 @@
                             else
                                 newPath = text;
                             BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
-                            if (isDir && [newPath characterAtIndex:([newPath length] - 1)] != '/')
-                                newPath = [NSString stringWithFormat:@"%@/", newPath];
-
                             NSInteger index = [newPath length] - [selectedKey length];
-                            if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
-                                newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+                            if ((isDir || index < 0) && [newPath characterAtIndex:([newPath length] - 1)] != '/')
+                                newPath = [NSString stringWithFormat:@"%@/", newPath];
 
                             NSInteger oldLen = [oldPath length];
                             NSInteger newLen = [newPath length];
+                            
+                            if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
+                                newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+                            newLen = [newPath length];
 
                             if ([self strOkay:oldPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
                                 [self strOkay:newPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
@@ -845,11 +838,12 @@
                                 if (err == DBFS_OKAY)
                                     [self reloadTableViewData];
                                 else {
+
                                     NSLog(@"DBFS Not OK with MOVE");
-                                    //FIXME add code here to deal with DBFS_Error
                                     UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                                     [alert setMessage:[self.appDelegate.model dbError:err]];
                                     [alert show];
+
                                 }
 
                             }
@@ -876,7 +870,7 @@
                         if (selectedDict && selectedKey) {
 
                             BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
-                            if (isDir && [text characterAtIndex:([text length] - 1)] != '/')
+                            if (isDir&& [text characterAtIndex:([text length] - 1)] != '/')
                                 text = [NSString stringWithFormat:@"%@/", text];
 
                             NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
@@ -893,11 +887,12 @@
                                 if (err == DBFS_OKAY)
                                     [self reloadTableViewData];
                                 else {
+
                                     NSLog(@"DBFS Not OK With RENAME");
-                                    //FIXME add code here to deal with DBFS_Error
                                     UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                                     [alert setMessage:[self.appDelegate.model dbError:err]];
                                     [alert show];
+
                                 }
 
                             }
@@ -940,7 +935,6 @@
 
 -(void)buttonPressed:(UIBarButtonItem *)sender {
 
-    //NSLog(@"buttonPressed: %d", sender.tag);
     switch (sender.tag) {
 
         case HELP_BUTTON_TAG:
@@ -1118,7 +1112,6 @@
 
                     if (self.detailView && !self.detailView.isHidden)
                         [self.detailView hideAnimated:NO];
-                    //NSLog(@"sub dir delete");
                     NSInteger depth = -1;
                     for (int i = 0; i < serverLen; i++)
                         if ([serverPath characterAtIndex:i] == '/')
@@ -1163,7 +1156,7 @@
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
                                                                           target:nil
                                                                           action:nil];
-    UIBarButtonItem *flex2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+    UIBarButtonItem *fixed = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
                                                                            target:nil
                                                                            action:nil];
 
@@ -1174,6 +1167,7 @@
                                0,
                                [self sizeOfString:ipLabel.text withFont:ipLabel.font].width,
                                MEDIAN_FONT_SIZE);
+    [ipLabel setBackgroundColor:[UIColor clearColor]];
     UIBarButtonItem *ipButtonItem = [[UIBarButtonItem alloc] initWithCustomView:ipLabel];
     ipButtonItem.tag = IP_TAG;
 
@@ -1183,7 +1177,7 @@
                                                                      0,
                                                                      [self sizeOfString:switchString
                                                                                withFont:[UIFont systemFontOfSize: MEDIAN_FONT_SIZE]].width,
-                                                                     CELL_HEIGHT)];
+                                                                     MEDIAN_FONT_SIZE)];
     switchLable.text = switchString;
     switchLable.backgroundColor = [UIColor clearColor];
     switchLable.textColor = [UIColor blackColor];
@@ -1195,7 +1189,7 @@
     UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:self.conectSwitchView];
 
     // put objects in toolbar
-    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:addDirButton, flex, ipButtonItem, flex2, switchButtonItem, cSwitch, nil];
+    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:flex, addDirButton, flex, ipButtonItem, flex, switchButtonItem, fixed, cSwitch, flex, nil];
     self.toolbarItems = toolBarItems;
 
     // set tool bar settings
