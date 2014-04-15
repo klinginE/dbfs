@@ -151,6 +151,13 @@
         for (; [path characterAtIndex:index - 1] != '/'; index--);
     state->currentDir = [self nsStringToCString:[path substringFromIndex:index]];
 
+    if (!strcmp(state->currentDir, "/")) {
+
+        free(state->currentDir);
+        state->currentDir = strdup("root/");
+
+    }
+
     state->depth = 0;
     for (int i = 0; i < (len - 1); i++)
         if ([path characterAtIndex:i] == '/')
@@ -206,7 +213,7 @@
                 break;
             case CONFIRM_ALERT_TAG:
                 [alert setDelegate:self];
-                [alert setTitle:@"This action is permanent!"];
+                [alert setTitle:@"Confirm Change"];
                 [alert setMessage:@"Are you sure you want to perform this action?"];
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
@@ -266,12 +273,15 @@
                                             currentPathSize.height)];
     
 
-    NSString *title = @"/";
+    NSString *title = @"root/";
     NSInteger len = 0;
     for (int i = 1; i <= (self.iPadState.depth + 1); i++) {
 
         title = [self dirAtDepth:(i - 1)
                           InPath:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+
+        if ([title isEqualToString:@"/"] && i == 1)
+            title = @"root/";
 
         UIButton *pathButton = [self makeButtonWithTitle:title
                                                      Tag:(i - 1)
@@ -465,7 +475,7 @@
     [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
 
     // Set up back button
-    [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:self.title
+    [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:@"Back"
                                                                        Tag:BACK_BUTTON_TAG
                                                                     Target:nil
                                                                     Action:nil]];
