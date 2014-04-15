@@ -149,7 +149,7 @@
     return [self.dbInterface moveDirectory:dirName to:newName fromDatabase:self->dbfs];
 }
 
--(NSDictionary *)getFileListIn:(NSString *)dirName {
+-(NSArray *)getFileListIn:(NSString *)dirName {
     DBFS_FileList fileList;
     fileList = [self.dbInterface getFileListIn:dirName fromDatabase:self->dbfs];
     
@@ -157,7 +157,8 @@
     NSMutableArray *keys = [[NSMutableArray alloc] init];
 
     for (int i = 0; i < fileList.count; i++) {
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:[[NSNumber alloc] initWithBool:NO], @"Type", nil];
+        NSString *name = [[NSString alloc] initWithUTF8String:((fileList.files)+i)->name];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:NO], @"Type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"Size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"modified", nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((fileList.files)+i)->name]];
         [fileDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -167,12 +168,12 @@
     NSArray *alphabeticalKeys = [[fileDict allKeys] sortedArrayUsingSelector:@selector(compare:)];
     NSArray *objects = [fileDict objectsForKeys:alphabeticalKeys notFoundMarker:[NSNull null]];
     
-    NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects forKeys:alphabeticalKeys];
+//    NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects forKeys:alphabeticalKeys];
     
-    return finalDict;
+    return objects;
 }
 
--(NSDictionary *)getDirectoryListIn:(NSString *)dirName {
+-(NSArray *)getDirectoryListIn:(NSString *)dirName {
     DBFS_DirList dirList;
     dirList = [self.dbInterface getDirectoryListIn:dirName inDatabase:dbfs];
     
@@ -180,42 +181,54 @@
     NSMutableArray *keys = [[NSMutableArray alloc] init];
  
     for (int i = 0; i < dirList.count; i++) {
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:[[NSNumber alloc] initWithBool:YES], @"Type", nil];
+        NSString *name = [[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:YES], @"Type", [[NSNumber alloc] initWithInt:0], @"Size", @"", @"modified", nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name]];
         [dirDict setObject:d forKey:[keys objectAtIndex:i]];
     }
     
     /* Alphabetize the directory list */
+    
     NSArray *alphabeticalKeys = [[dirDict allKeys] sortedArrayUsingSelector:@selector(compare:)];
     NSArray *objects = [dirDict objectsForKeys:alphabeticalKeys notFoundMarker:[NSNull null]];
     
-    NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects forKeys:alphabeticalKeys];
+//    NSLog(@"keys: %@", alphabeticalKeys);
     
-    return finalDict;
+//    NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects forKeys:alphabeticalKeys];
+//    NSLog(@"final: %@", finalDict);
+    return objects;
 }
 
--(NSDictionary *)getContentsIn:(NSString *)dirName {
-    NSMutableDictionary *contentDict = [[NSMutableDictionary alloc] initWithDictionary:[self getDirectoryListIn:dirName]];
-    
-    NSDictionary *tempDict = [self getFileListIn:dirName];
-    
-    [contentDict addEntriesFromDictionary:tempDict];
-    
-    return contentDict;
+-(NSArray *)getContentsIn:(NSString *)dirName {
+    NSMutableArray *contentArray = [[NSMutableArray alloc] initWithArray:[self getDirectoryListIn:dirName]];
+//    NSMutableDictionary *contentDict = [[NSMutableDictionary alloc] initWithDictionary:[self getDirectoryListIn:dirName]];
+    NSLog(@"init: %@", contentArray);
+    NSArray *tempArray = [self getFileListIn:dirName];
+//    NSDictionary *tempDict = [self getFileListIn:dirName];
+    [contentArray addObjectsFromArray:tempArray];
+//    [contentDict addEntriesFromDictionary:tempDict];
+    NSLog(@"last: %@", contentArray);
+    return contentArray;
 }
 
 -(NSString *)getJsonContentsIn:(NSString *)dirName {
     NSString *temp = @"{\n\t\"contents\": [";
     NSString *json = [[NSString alloc] initWithString:temp];
-    NSDictionary *dict = [self getContentsIn:dirName];
-    NSArray *keys = [dict allKeys];
+    NSArray *dict = [self getContentsIn:dirName];
+//    NSArray *keys = [dict allKeys];
     for (NSUInteger i = 0; i < [dict count]; ++i) {
-        NSString *name = [keys objectAtIndex:i];
+//        NSString *name = [keys objectAtIndex:i];
+        NSString *name = [[dict objectAtIndex:i] objectForKey:@"Name"];
         json = [json stringByAppendingString:@"\n\t\t{\n\t\t\t\"name\": \""];
         json = [json stringByAppendingString:name];
-        json = [json stringByAppendingString:@"\",\n\t\t\t\"size\": \"\",\n\t\t\t\"modified\": \"\""];
-        json = [json stringByAppendingString:@"\n\t\t}"];
+        json = [json stringByAppendingString:@"\",\n\t\t\t\"size\": \""];
+        json = [json stringByAppendingString:[NSString stringWithFormat:@"%@", [[dict objectAtIndex:i] objectForKey:@"Size"]]];
+//        json = [json stringByAppendingString:[NSString stringWithFormat:@"%@", [[dict objectForKey:name] objectForKey:@"Size"]]];
+        json = [json stringByAppendingString:@"\",\n\t\t\t\"modified\": \""];
+        json = [json stringByAppendingString:[NSString stringWithFormat:@"%@", [[dict objectAtIndex:i] objectForKey:@"modified"]]];
+        
+        json = [json stringByAppendingString:@"\"\n\t\t}"];
         if (i < [dict count] - 1) {
             json = [json stringByAppendingString:@","];
         }
