@@ -17,8 +17,7 @@
 // Private Properties
 // State
 @property (weak, atomic) MobileDriveAppDelegate *appDelegate;
-@property (strong, nonatomic) NSDictionary *filesDictionary;
-@property (strong, nonatomic) NSArray *fileKeys;
+@property (strong, nonatomic) NSArray *filesArray;
 
 // Views
 @property (strong, atomic) NSMutableArray *alertViews;
@@ -61,6 +60,7 @@
 -(void)buttonPressed:(UIBarButtonItem *)sender;
 -(void)detailedVeiwButtonPressed:(UIButton *)sender;
 -(void)handleLongPress:(UILongPressGestureRecognizer*)sender;
+-(void)reloadTableViewData;
 -(void)viewDidLoad;
 
 // Display Views
@@ -507,8 +507,7 @@
     //NSLog(@"dealloc");
     // Free state
     [self freeState:self.iPadState];
-    self.filesDictionary = nil;
-    self.fileKeys = nil;
+    self.filesArray = nil;
 
     // Free Views
     self.alertViews = nil;
@@ -626,16 +625,9 @@
 
     [super viewWillAppear:animated];
     self.conectSwitchView.on = self.appDelegate.isConnected;
-    
-    if (self.filesDictionary && self.fileKeys && self.mainTableView) {
 
-        self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-        self.fileKeys = [self.filesDictionary allKeys];
-        [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
-                                             withObject:nil
-                                          waitUntilDone:YES];
-
-    }
+    if (self.filesArray && self.mainTableView)
+        [self reloadTableViewData];
 
 }
 
@@ -727,15 +719,8 @@
                             err = [self.appDelegate.model deleteDirectory:path];
                         else
                             err = [self.appDelegate.model deleteFile:path];
-                        if (err == DBFS_OKAY) {
-
-                            self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String: self.iPadState.currentPath]];
-                            self.fileKeys = [self.filesDictionary allKeys];
-                            [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
-                                                                 withObject:nil
-                                                              waitUntilDone:YES];
-
-                        }
+                        if (err == DBFS_OKAY)
+                            [self reloadTableViewData];
                         else {
                             NSLog(@"DBFS Not OK with DELETE");
                             //FIXME add code here to deal with DBFS_Error
@@ -808,14 +793,8 @@
                         if ([self strOkay:path ForTag:ADD_ALERT_TAG IsDir:YES]) {
 
                             DBFS_Error err = [self.appDelegate.model createDirectory:path];
-                            if (err == DBFS_OKAY) {
-
-                                self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                                self.fileKeys = [self.filesDictionary allKeys];
-                                [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
-                                                                     withObject:nil
-                                                                  waitUntilDone:YES];
-                            }
+                            if (err == DBFS_OKAY)
+                                [self reloadTableViewData];
                             else {
                                 NSLog(@"DBFS Not OK with ADD");
                                 //FIXME add code here to deal with DBFS_Error
@@ -863,15 +842,8 @@
                                     err = [self.appDelegate.model moveDirectory:oldPath to:newPath];
                                 else
                                     err = [self.appDelegate.model moveFile:oldPath to:newPath];
-                                if (err == DBFS_OKAY) {
-
-                                    self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                                    self.fileKeys = [self.filesDictionary allKeys];
-                                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
-                                                                         withObject:nil
-                                                                      waitUntilDone:YES];
-
-                                }
+                                if (err == DBFS_OKAY)
+                                    [self reloadTableViewData];
                                 else {
                                     NSLog(@"DBFS Not OK with MOVE");
                                     //FIXME add code here to deal with DBFS_Error
@@ -918,15 +890,8 @@
                                     err = [self.appDelegate.model renameDirectory:oldPath to:newPath];
                                 else
                                     err = [self.appDelegate.model renameFile:oldPath to:newPath];
-                                if (err == DBFS_OKAY) {
-
-                                    self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                                    self.fileKeys = [self.filesDictionary allKeys];
-                                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
-                                                                         withObject:nil
-                                                                      waitUntilDone:YES];
-
-                                }
+                                if (err == DBFS_OKAY)
+                                    [self reloadTableViewData];
                                 else {
                                     NSLog(@"DBFS Not OK With RENAME");
                                     //FIXME add code here to deal with DBFS_Error
@@ -1018,8 +983,8 @@
 
     CGPoint location = [sender locationInView:self.mainTableView];
     NSIndexPath *indexPath = [self.mainTableView indexPathForRowAtPoint:location];
-    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [self.filesDictionary objectForKey:key];
+    NSDictionary *dict = [self.filesArray objectAtIndex:indexPath.row];
+    NSString *key = [dict objectForKey:@"Name"];
 
     if (sender.state == UIGestureRecognizerStateBegan)
         [self displayDetailedViwForItem:dict WithKey:key];
@@ -1036,6 +1001,15 @@
     if ([a count] >= 3)
         to = a[2];
     [self refreshForTag:tag From:from To:to];
+
+}
+
+-(void)reloadTableViewData {
+
+    self.filesArray = [self.appDelegate.model getContentsArrayIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
+                                         withObject:nil
+                                      waitUntilDone:YES];
 
 }
 
@@ -1066,21 +1040,11 @@
     NSLog(@"refresh serverPath= %@", serverPath);
     NSLog(@"refresh tag= %u", tag);
 
-    if (self.filesDictionary && self.fileKeys && self.mainTableView && serverLen <= currentLen)
+    if (self.filesArray && self.mainTableView && serverLen <= currentLen)
         switch (tag) {
             case ADD_MODEL_TAG:
-                if ([serverPath isEqualToString:currentPath]) {
-
-                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
-                    self.fileKeys = [self.filesDictionary allKeys];
-                    //NSLog(@"reloading data");
-                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
-                                                         withObject:nil
-                                                      waitUntilDone:YES];
-                    //[self.mainTableView reloadData];
-                    //NSLog(@"done reloading data");
-
-                }
+                if ([serverPath isEqualToString:currentPath])
+                    [self reloadTableViewData];
                 break;
             case MOVE_MODEL_TAG:
             case RENAME_MODEL_TAG:
@@ -1092,11 +1056,7 @@
                         [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
                         [self.detailView hideAnimated:NO];
 
-                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
-                    self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
-                                                         withObject:nil
-                                                      waitUntilDone:YES];
+                    [self reloadTableViewData];
 
                 }
                 else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
@@ -1137,11 +1097,7 @@
                     [self makeFrameForViews];
                     [self.view addSubview:self.pathScrollView];
 
-                    self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                    self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
-                                                         withObject:nil
-                                                      waitUntilDone:YES];
+                    [self reloadTableViewData];
 
                 }
                 break;
@@ -1154,11 +1110,7 @@
                         [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
                         [self.detailView hideAnimated:NO];
 
-                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
-                    self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
-                                                         withObject:nil
-                                                      waitUntilDone:YES];
+                    [self reloadTableViewData];
                     
                 }
                 else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
@@ -1191,16 +1143,8 @@
                                                object:[UIDevice currentDevice]];
 
     // Set up directory Contents
-    if(_filesDictionary == nil) {
-
-        //NSString *path = [[NSBundle mainBundle] pathForResource:@"files" ofType:@"plist"];
-        //_filesDictionary = [[NSDictionary alloc] initWithContentsOfFile:path];
-        //_fileKeys = [[_filesDictionary allKeys] sortedArrayUsingSelector:@selector(compare:)];
-
-        _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-        _fileKeys = [_filesDictionary allKeys];
-
-    }
+    if(_filesArray == nil)
+        _filesArray = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
 
     // Add a help button to the top right
     UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"Need help?"
@@ -1357,7 +1301,7 @@
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 
-    return [self.fileKeys count];
+    return [self.filesArray count];
 
 }
 
@@ -1382,8 +1326,8 @@
     }
 
     // fecthc key and dict info
-    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [self.filesDictionary objectForKey:key];
+    NSDictionary *dict = [self.filesArray objectAtIndex:indexPath.row];
+    NSString *key = [dict objectForKey:@"Name"];
 
     // set up cell text and other atributes
     //cell.detailTextLabel.text = [NSString stringWithUTF8String:self.iPadState.currentPath];
@@ -1409,8 +1353,8 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
     // Fetch data from keys and dictionary
-    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [self.filesDictionary objectForKey:key];
+    NSDictionary *dict = [self.filesArray objectAtIndex:indexPath.row];
+    NSString *key = [dict objectForKey:@"Name"];
 
     // if the dict object is a directory then...
     if ([[dict objectForKey:@"Type"] boolValue]) {
