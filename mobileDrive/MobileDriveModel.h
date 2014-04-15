@@ -44,12 +44,19 @@
 
 -(int)renameDirectory:(NSString *)dirName to:(NSString *)destName;
 
--(NSArray *)getFileListIn:(NSString *)dirName;
--(NSArray *)getDirectoryListIn:(NSString *)dirName;
+-(NSDictionary *)getFileListIn:(NSString *)dirName;
+-(NSDictionary *)getDirectoryListIn:(NSString *)dirName;
 
 // Returns a dictionary containing the contents of dirName.
 // Organization: directories first followed by files, both are alphabetical.
--(NSArray *)getContentsIn:(NSString *)dirName;
+-(NSDictionary *)getContentsIn:(NSString *)dirName;
+
+-(NSArray *)getFileArrayIn:(NSString *)dirName;
+-(NSArray *)getDirectoryArrayIn:(NSString *)dirName;
+
+// Returns a dictionary containing the contents of dirName.
+// Organization: directories first followed by files, both are alphabetical.
+-(NSArray *)getContentsArrayIn:(NSString *)dirName;
 
 // Returns NSString containing the list of current contents in JSON format.
 -(NSString *)getJsonContentsIn:(NSString *)dirName;
