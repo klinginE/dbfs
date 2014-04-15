@@ -64,7 +64,7 @@ const char *sql_fs2_lsd1 = QUOTE(
 );
 
 const char *sql_fs2_lsf1 = QUOTE(
-    SELECT file_name, file_timestamp
+    SELECT file_name, file_timestamp, length(file_contents)
     FROM files_v2
     WHERE in_dir = :indir;
 );

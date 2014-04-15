@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 
 static
@@ -122,7 +123,12 @@ int do_lsf(DBFS *dbfs, const char *fname, FILE *out)
     }
     fprintf(out, "%zu files:\n", flist.count);
     for (i = 0; i < flist.count; ++i)
-        fprintf(out, "  [%zu]: %s\n", i, flist.files[i].name);
+    {
+        const char *name = flist.files[i].name;
+        int size = flist.files[i].size;
+        time_t timestamp = flist.files[i].timestamp;
+        fprintf(out, "  [%zu]: %s (%d bytes) @ %s"/*"\n"*/, i, name, size, ctime(&timestamp));
+    }
     dbfs_free_file_list(flist);
     return 0;
 }
@@ -136,7 +142,7 @@ int do_get(DBFS *dbfs, const char *fname, FILE *out)
         fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
-    DBFS_Error err = dbfs_get(dbfs, (DBFS_FileName){fname}, &blob);
+    DBFS_Error err = dbfs_get(dbfs, (DBFS_FileName){fname, 0, 0}, &blob);
     if (err)
     {
         fprintf(stderr, "%s\n", dbfs_err(err));
@@ -158,7 +164,7 @@ int do_put(DBFS *dbfs, const char *fname, FILE *in)
     }
 
     blob = slurp(in);
-    DBFS_Error err = dbfs_put(dbfs, (DBFS_FileName){fname}, blob);
+    DBFS_Error err = dbfs_put(dbfs, (DBFS_FileName){fname, 0, 0}, blob);
     if (err)
     {
         fprintf(stderr, "%s\n", dbfs_err(err));
@@ -179,7 +185,7 @@ int do_ovr(DBFS *dbfs, const char *fname, FILE *in)
     }
 
     blob = slurp(in);
-    DBFS_Error err = dbfs_ovr(dbfs, (DBFS_FileName){fname}, blob);
+    DBFS_Error err = dbfs_ovr(dbfs, (DBFS_FileName){fname, 0, 0}, blob);
     if (err)
     {
         fprintf(stderr, "%s\n", dbfs_err(err));
@@ -198,7 +204,7 @@ int do_del(DBFS *dbfs, const char *fname)
         return 1;
     }
 
-    DBFS_Error err = dbfs_del(dbfs, (DBFS_FileName){fname});
+    DBFS_Error err = dbfs_del(dbfs, (DBFS_FileName){fname, 0, 0});
     if (err)
     {
         fprintf(stderr, "%s\n", dbfs_err(err));
@@ -215,7 +221,7 @@ int do_mvf(DBFS *dbfs, const char *from, const char *to)
         fprintf(stderr, "%s\n", "missing argument");
         return 1;
     }
-    DBFS_Error err = dbfs_mvf(dbfs, (DBFS_FileName){from}, (DBFS_FileName){to});
+    DBFS_Error err = dbfs_mvf(dbfs, (DBFS_FileName){from, 0, 0}, (DBFS_FileName){to, 0, 0});
     if (err)
     {
         fprintf(stderr, "%s\n", dbfs_err(err));
