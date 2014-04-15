@@ -57,7 +57,7 @@
 //    NSLog(oldPath);
 //    NSLog(newPath);
     
-    [self.iPadTableViewController refreshForTag:tag From:oldPath To:newPath];
+    [((IPadTableViewController *)self.iPadNavController.topViewController) refreshForTag:tag From:oldPath To:newPath];
 
 }
 
