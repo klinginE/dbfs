@@ -56,8 +56,10 @@
 //    NSLog(@"Tag: %u", tag);
 //    NSLog(oldPath);
 //    NSLog(newPath);
-    
-    [((IPadTableViewController *)self.iPadNavController.topViewController) refreshForTag:tag From:oldPath To:newPath];
+
+    NSNumber *n = [[NSNumber alloc] initWithInt:tag];
+    NSArray *a = [[NSArray alloc] initWithObjects:n, oldPath, newPath, nil];
+    [((IPadTableViewController *)self.iPadNavController.topViewController) performSelector:@selector(refreshWithArray:) onThread:[NSThread mainThread] withObject:a waitUntilDone:YES];
 
 }
 
@@ -65,7 +67,9 @@
 
     assert(depth >= 0);
     assert([self.iPadNavController.viewControllers count] - 1 >= depth);
+
     [self.iPadNavController popToViewController:self.iPadNavController.viewControllers[depth] animated:animate];
+
     if (message) {
 
         UIAlertView *alert = [[UIAlertView alloc] init];

@@ -91,6 +91,7 @@ typedef struct {
 -(char *)nsStringToCString:(NSString *)str;
 
 // Events
+-(void)refreshWithArray:(NSArray *)a;
 -(void)refreshForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath;
 
 @end

@@ -16,7 +16,7 @@
 
 // Private Properties
 // State
-@property (weak, nonatomic) MobileDriveAppDelegate *appDelegate;
+@property (weak, atomic) MobileDriveAppDelegate *appDelegate;
 @property (strong, nonatomic) NSDictionary *filesDictionary;
 @property (strong, nonatomic) NSArray *fileKeys;
 
@@ -1013,6 +1013,20 @@
 
 }
 
+-(void)refreshWithArray:(NSArray *)a {
+
+    assert(a);
+    NSLog(@"%@", a);
+    assert([a count] >= 2);
+    modelUpdateTag tag = ((NSNumber *)a[0]).intValue;
+    NSString *from = a[1];
+    NSString *to = nil;
+    if ([a count] >= 3)
+        to = a[2];
+    [self refreshForTag:tag From:from To:to];
+
+}
+
 -(void)refreshForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
 
     assert(oldPath);
@@ -1031,8 +1045,11 @@
     NSString *serverPath = [oldPath substringToIndex:(index + 1)];
     NSInteger serverLen = [serverPath length];
 
+    NSString *oldName = [oldPath substringFromIndex:(index + 1)];
+
     NSLog(@"refresh currentPath= %@", currentPath);
     NSLog(@"refresh oldPath= %@", oldPath);
+    NSLog(@"refresh oldName= %@", oldName);
     NSLog(@"refresh newPath= %@", newPath);
     NSLog(@"refresh serverPath= %@", serverPath);
     NSLog(@"refresh tag= %u", tag);
@@ -1105,7 +1122,12 @@
                 break;
             case DELETE_MODEL_TAG:
                 if ([serverPath isEqualToString:currentPath]) {
-                    
+
+                    if (self.detailView &&
+                        !self.detailView.isHidden &&
+                        [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
+                        [self.detailView hideAnimated:NO];
+
                     self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
                     self.fileKeys = [self.filesDictionary allKeys];
                     [self.mainTableView performSelectorOnMainThread:@selector(reloadData)
@@ -1116,6 +1138,9 @@
                 else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [oldPath characterAtIndex:(oldLen - 1)] == '/') {
 
+                    if (self.detailView && !self.detailView.isHidden)
+                        [self.detailView hideAnimated:NO];
+                    NSLog(@"sub dir delete");
                     NSInteger depth = -1;
                     for (int i = 0; i < serverLen; i++)
                         if ([serverPath characterAtIndex:i] == '/')
@@ -1261,7 +1286,8 @@
     [custom addSubview:nameLabel];
 
     int i = 1;
-    CGFloat maxWidth = [self sizeOfString:nameLabel.text withFont:nameLabel.font].width;
+    CGFloat maxWidth = [self sizeOfString:nameLabel.text withFont:nameLabel.font].width +
+                       [self sizeOfString:key withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width;
     for (NSString *k in [dict keyEnumerator]) {
         
         UILabel *l = [[UILabel alloc] init];
@@ -1282,7 +1308,6 @@
     if (!self.detailView) {
 
         _detailView = [[CODialog alloc] initWithWindow:[[[UIApplication sharedApplication] delegate] window]];
-        [_detailView setTitle:@"File/Directory details:"];
         _detailView.dialogStyle = CODialogStyleCustomView;
 
         for (NSString *b in self.actionSheetButtons)
@@ -1294,6 +1319,7 @@
     custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, (i + 1) * SMALL_FONT_SIZE);
     custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);
     self.detailView.customView = custom;
+    [self.detailView setTitle:[NSString stringWithFormat:@"File/Directory details for: %@", key]];
 
     selectedDict = dict;
     selectedKey = key;
