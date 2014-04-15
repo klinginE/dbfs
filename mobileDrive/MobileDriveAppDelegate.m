@@ -73,7 +73,7 @@
     if (message) {
 
         UIAlertView *alert = [[UIAlertView alloc] init];
-        [alert setTitle:@"Had to redirect to new current directory because:"];
+        [alert setTitle:@"Had to redirect to new directory because:"];
         [alert setMessage:message];
         [alert addButtonWithTitle:@"OK"];
         [alert show];
