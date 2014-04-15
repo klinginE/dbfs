@@ -158,7 +158,7 @@
     
     for (int i = 0; i < fileList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((fileList.files)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:NO], @"Type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"Size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:NO], @"Type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"Size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"Modified", nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((fileList.files)+i)->name]];
         [fileDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -182,7 +182,7 @@
     
     for (int i = 0; i < dirList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:YES], @"Type", [[NSNumber alloc] initWithInt:0], @"Size", @"", @"modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:YES], @"Type", [[NSNumber alloc] initWithInt:0], @"Size", @"", @"Modified", nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name]];
         [dirDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -203,12 +203,10 @@
 -(NSArray *)getContentsArrayIn:(NSString *)dirName {
     NSMutableArray *contentArray = [[NSMutableArray alloc] initWithArray:[self getDirectoryArrayIn:dirName]];
     //    NSMutableDictionary *contentDict = [[NSMutableDictionary alloc] initWithDictionary:[self getDirectoryListIn:dirName]];
-    NSLog(@"init: %@", contentArray);
     NSArray *tempArray = [self getFileArrayIn:dirName];
     //    NSDictionary *tempDict = [self getFileListIn:dirName];
     [contentArray addObjectsFromArray:tempArray];
     //    [contentDict addEntriesFromDictionary:tempDict];
-    NSLog(@"last: %@", contentArray);
     return contentArray;
 }
 
@@ -222,7 +220,7 @@
 
     for (int i = 0; i < fileList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((fileList.files)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:NO], @"Type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"Size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:NO], @"Type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"Size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"Modified", nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((fileList.files)+i)->name]];
         [fileDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -246,7 +244,7 @@
  
     for (int i = 0; i < dirList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:YES], @"Type", [[NSNumber alloc] initWithInt:0], @"Size", @"", @"modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:YES], @"Type", [[NSNumber alloc] initWithInt:0], @"Size", @"", @"Modified", nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name]];
         [dirDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -290,7 +288,7 @@
         json = [json stringByAppendingString:[NSString stringWithFormat:@"%@", [[dict objectAtIndex:i] objectForKey:@"Size"]]];
 //        json = [json stringByAppendingString:[NSString stringWithFormat:@"%@", [[dict objectForKey:name] objectForKey:@"Size"]]];
         json = [json stringByAppendingString:@"\",\n\t\t\t\"modified\": \""];
-        json = [json stringByAppendingString:[NSString stringWithFormat:@"%@", [[dict objectAtIndex:i] objectForKey:@"modified"]]];
+        json = [json stringByAppendingString:[NSString stringWithFormat:@"%@", [[dict objectAtIndex:i] objectForKey:@"Modified"]]];
         
         json = [json stringByAppendingString:@"\"\n\t\t}"];
         if (i < [dict count] - 1) {
