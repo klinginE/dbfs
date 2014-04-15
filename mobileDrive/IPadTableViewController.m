@@ -1261,7 +1261,17 @@
     for (NSString *k in [dict keyEnumerator]) {
         
         UILabel *l = [[UILabel alloc] init];
-        l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
+        if (k isEqualToString:@"modified") {
+
+            NSNumber *date = [dict objectForKey:k];
+            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+            dateFormatter.dateFormat = @"yyyy-MM-dd HH:mm:ss";
+            dateFormatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"PST"];
+            //l.text = [NSString stringWithFormat:@"%@: %@", k, [dateFormatter ]];
+
+        }
+        else
+            l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
         [l setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
         CGFloat width = [self sizeOfString:l.text
                                   withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width;
