@@ -1144,7 +1144,7 @@
 
     // Set up directory Contents
     if(_filesArray == nil)
-        _filesArray = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+        _filesArray = [self.appDelegate.model getContentsArrayIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
 
     // Add a help button to the top right
     UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"Need help?"
@@ -1244,44 +1244,53 @@
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
     UIScrollView *custom = [[UIScrollView alloc] initWithFrame:CGRectZero];
-    UILabel *nameLabel = [[UILabel alloc] init];
-    nameLabel.text = [NSString stringWithFormat:@"Name: %@", key];
-    nameLabel.frame = CGRectMake(0, 0, [self sizeOfString:nameLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
-    [nameLabel setTextColor:[UIColor whiteColor]];
-    [nameLabel setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
-    
     [custom setBackgroundColor:[UIColor clearColor]];
     [custom setBounces:NO];
 
-    [custom addSubview:nameLabel];
-
-    int i = 1;
-    CGFloat maxWidth = [self sizeOfString:nameLabel.text withFont:nameLabel.font].width +
-                       [self sizeOfString:key withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width;
+    int i = 0;
+    CGFloat maxWidth = 0;
     for (NSString *k in [dict keyEnumerator]) {
-        
-        UILabel *l = [[UILabel alloc] init];
-        if (k isEqualToString:@"modified") {
 
-            NSNumber *date = [dict objectForKey:k];
-            NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-            dateFormatter.dateFormat = @"yyyy-MM-dd HH:mm:ss";
-            dateFormatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"PST"];
-            //l.text = [NSString stringWithFormat:@"%@: %@", k, [dateFormatter ]];
+        if (((![k isEqualToString:@"Modified"]) || ([k isEqualToString:@"Modified"] && ![[dict objectForKey:@"Type"] boolValue])) &&
+            ((![k isEqualToString:@"Size"])     || ([k isEqualToString:@"Size"] &&     ![[dict objectForKey:@"Type"] boolValue]))) {
+
+            UILabel *l = [[UILabel alloc] init];
+            if ([k isEqualToString:@"Modified"]) {
+
+                NSInteger dateSec = [[dict objectForKey:k] integerValue];
+                NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+                dateFormatter.dateFormat = @"yyyy-MM-dd HH:mm:ss";
+                dateFormatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"PST"];
+                NSDate *date = [[NSDate alloc] initWithTimeIntervalSince1970:dateSec];
+                l.text = [NSString stringWithFormat:@"%@: %@", k, [dateFormatter stringFromDate:date]];
+
+            }
+            else if ([k isEqualToString:@"Type"]) {
+
+                if ([[dict objectForKey:k] boolValue])
+                    l.text = [NSString stringWithFormat:@"%@: Directory", k];
+                else
+                    l.text = [NSString stringWithFormat:@"%@: File", k];
+
+            }
+            else if ([k isEqualToString:@"Size"])
+                l.text = [NSString stringWithFormat:@"%@: %@ Byte(s)", k, [dict objectForKey:k]];
+            else
+                l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
+
+            [l setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
+            CGFloat width = [self sizeOfString:l.text
+                                      withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width;
+            l.frame = CGRectMake(0, SMALL_FONT_SIZE * i, width, SMALL_FONT_SIZE + 5);
+            [l setTextColor:[UIColor whiteColor]];
+
+            [custom addSubview:l];
+
+            if (width > maxWidth)
+                maxWidth = width;
+            i++;
 
         }
-        else
-            l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
-        [l setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
-        CGFloat width = [self sizeOfString:l.text
-                                  withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width;
-        l.frame = CGRectMake(0, SMALL_FONT_SIZE * i, width, SMALL_FONT_SIZE);
-        [l setTextColor:[UIColor whiteColor]];
-        [custom addSubview:l];
-        
-        if (width > maxWidth)
-            maxWidth = width;
-        i++;
         
     }
 
@@ -1296,10 +1305,11 @@
                                        selector:@selector(detailedVeiwButtonPressed:)];
 
     }
-    custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, (i + 1) * SMALL_FONT_SIZE);
+    [self.detailView setTitle:[NSString stringWithFormat:@"File/Directory details for: %@", key]];
+    custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, i * (SMALL_FONT_SIZE + 5));
     custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);
     self.detailView.customView = custom;
-    [self.detailView setTitle:[NSString stringWithFormat:@"File/Directory details for: %@", key]];
+    
 
     selectedDict = dict;
     selectedKey = key;
