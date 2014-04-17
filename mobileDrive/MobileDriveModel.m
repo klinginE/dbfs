@@ -183,8 +183,8 @@
     for (int i = 0; i < dirList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name];
         NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:YES], @"Type", [[NSNumber alloc] initWithInt:0], @"Size", @"", @"Modified", nil];
-        
-        [keys addObject:[[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name]];
+        NSString *s = [NSString stringWithUTF8String:((dirList.dirs)+i)->name];
+        [keys addObject:[[NSString alloc] initWithString:s]];
         [dirDict setObject:d forKey:[keys objectAtIndex:i]];
     }
     

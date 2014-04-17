@@ -482,12 +482,9 @@
 -(void)freeState:(State)state {
 
     //This assumes that the strings were created on the heap
-    if (state.currentDir != NULL)
-        free(state.currentDir);
-    if (state.currentPath != NULL)
-        free(state.currentPath);
-    if (state.ipAddress != NULL)
-        free(state.ipAddress);
+    state.currentDir = NULL;
+    state.currentPath = NULL;
+    state.ipAddress = NULL;
 
 }
 
@@ -596,16 +593,9 @@
 #pragma mark - Converters
 
 -(char *)nsStringToCString:(NSString *)s {
-    
-    NSInteger len = [s length];
-    char *c = (char *)malloc(len + 1);
-    NSInteger i = 0;
-    for (; i < len; i++)
-        c[i] = [s characterAtIndex:i];
-    c[i] = '\0';
-    
-    return c;
-    
+
+    return (char *)[s UTF8String];
+
 }
 
 #pragma mark - Event Handelers

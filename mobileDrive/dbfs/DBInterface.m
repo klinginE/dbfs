@@ -18,19 +18,9 @@
 }
 
 -(char *)nsStringToCString:(NSString *)s {
-    
-    int len = [s length];
-    char *c = (char *)malloc(len + 1);
-    int i = 0;
-    for (; i < len; i++) {
-        
-        c[i] = [s characterAtIndex:i];
-        
-    }
-    c[i] = '\0';
-    
-    return c;
-    
+
+    return (char *)[s UTF8String];
+
 }
 
 -(DBFS_Blob)slurp:(FILE *)in {
