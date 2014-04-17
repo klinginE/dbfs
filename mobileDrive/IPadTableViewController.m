@@ -1351,8 +1351,12 @@
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
     }
-    else
+    else {
+
         cell.textLabel.text = [NSString stringWithFormat:@"📄 %@", key];
+        cell.accessoryType = UITableViewCellAccessoryNone;
+
+    }
     cell.textLabel.font = [UIFont boldSystemFontOfSize:LARGE_FONT_SIZE];
     cell.detailTextLabel.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
 
