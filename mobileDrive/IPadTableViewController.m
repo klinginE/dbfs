@@ -138,6 +138,8 @@
          Address:(NSString *)ip
             Port:(NSString *)port {
 
+    [self freeState:state];
+
     state->currentPath = [self nsStringToCString:path];
     state->ipAddress = [self nsStringToCString:ip];
     state->port = [self nsStringToCString:port];
@@ -158,6 +160,8 @@
     NSLog(@"dir= %s", state->currentDir);
     NSLog(@"path= %s", state->currentPath);
     NSLog(@"depth= %d", state->depth);
+    NSLog(@"ip= %s", state->ipAddress);
+    NSLog(@"port= %s", state->port);
 
 }
 
@@ -479,12 +483,22 @@
 
 #pragma mark - Deallocs
 
--(void)freeState:(State)state {
+-(void)freeState:(State *)state {
 
     //This assumes that the strings were created on the heap
-    state.currentDir = NULL;
-    state.currentPath = NULL;
-    state.ipAddress = NULL;
+    if (state->currentDir != NULL)
+        free(state->currentDir);// = NULL;
+    if (state->currentPath != NULL)
+        free(state->currentPath);// = NULL;
+    if (state->ipAddress != NULL)
+        free(state->ipAddress);// = NULL;
+    if (state->port != NULL)
+        free(state->port);// = NULL;
+    
+    state->currentDir = NULL;
+    state->currentPath = NULL;
+    state->ipAddress = NULL;
+    state->port = NULL;
 
 }
 
@@ -492,7 +506,7 @@
 
     //NSLog(@"dealloc");
     // Free state
-    [self freeState:self.iPadState];
+    [self freeState:(&_iPadState)];
     self.filesArray = nil;
 
     // Free Views
@@ -525,7 +539,7 @@
             if (bi.tag == IP_TAG) {
 
                 UILabel *newLabel = [[UILabel alloc] init];
-                newLabel.text = [NSString stringWithFormat:@"IP: %@:%@", ip, port];
+                newLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", ip, port];
                 newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
                 newLabel.frame = CGRectMake(0,
                                             0,
@@ -594,7 +608,7 @@
 
 -(char *)nsStringToCString:(NSString *)s {
 
-    return (char *)[s UTF8String];
+    return strdup([s UTF8String]);
 
 }
 
@@ -1058,7 +1072,7 @@
 
                     NSString *newAddress = [NSString stringWithUTF8String:self.iPadState.ipAddress];
                     NSString *newPort = [NSString stringWithUTF8String:self.iPadState.port];
-                    [self freeState:self.iPadState];
+                    [self freeState:(&_iPadState)];
                     [self initState:&_iPadState WithPath:newIpadPath Address:newAddress Port:newPort];
                     if ([oldPath isEqualToString:currentPath])
                         self.title = [NSString stringWithUTF8String:self.iPadState.currentDir];
@@ -1151,7 +1165,7 @@
                                                                            action:nil];
 
     UILabel *ipLabel = [[UILabel alloc] init];
-    ipLabel.text = [NSString stringWithFormat:@"IP: %@:%@", [NSString stringWithUTF8String:self.iPadState.ipAddress], [NSString stringWithUTF8String:self.iPadState.port]];
+    ipLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", [NSString stringWithUTF8String:self.iPadState.ipAddress], [NSString stringWithUTF8String:self.iPadState.port]];
     ipLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     ipLabel.frame = CGRectMake(0,
                                0,

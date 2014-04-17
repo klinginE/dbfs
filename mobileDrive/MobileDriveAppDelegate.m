@@ -19,7 +19,7 @@
 @end
 
 @implementation MobileDriveAppDelegate{
-   __block NSString * ipAddress;
+    NSString *ipAddress;
     id lockIpAddress;
 }
 
@@ -93,7 +93,7 @@
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
                                                                         ipAddress:ipAddress
-                                                                            port:[NSString stringWithFormat:@"%d", kDefaultPort]
+                                                                            port:[NSString stringWithFormat:@"%d", (NSInteger)kDefaultPort]
                                                                     switchAction:@selector(switchChanged:)
                                                                        forEvents:UIControlEventValueChanged
                                                                       pathAction:@selector(pathButtonPressed:)

@@ -76,7 +76,7 @@ typedef struct {
                        ForEvents:(UIControlEvents)events;
 
 // Public dealloc
--(void)freeState:(State)state;
+-(void)freeState:(State *)state;
 -(void)dealloc;
 
 // Public setter
