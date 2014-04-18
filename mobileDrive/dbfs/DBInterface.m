@@ -85,12 +85,10 @@
     int result = dbfs_get(dbfs, (DBFS_FileName){name}, &blob);
     
     if(result == DBFS_OKAY) {
-        return [[NSData alloc] initWithBytes: blob.data length:blob.size];
-        //        *size = blob.size;
-//        fwrite(blob.data, 1, blob.size, out);
+        NSData * tempBlob = [[NSData alloc] initWithBytes: blob.data length:blob.size];
         dbfs_free_blob(blob);
+        return tempBlob;
     }
-    
     return nil;
 }
 

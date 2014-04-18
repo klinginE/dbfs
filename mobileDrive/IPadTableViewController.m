@@ -10,10 +10,7 @@
 #import "IPadTableViewController.h"
 #import <string.h>
 #import <assert.h>
-#import <AVFoundation/AVFoundation.h>
-#include <AudioToolbox/AudioToolbox.h>
 #import "CODialog.h"
-#import "AudioPlayerViewController.h"
 
 @interface IPadTableViewController ()
 
@@ -80,6 +77,8 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
 -(char) findFileType: (NSString*) fileExtension;
+
+@property (retain) UIDocumentInteractionController *documentInteractionController;
 @end
 
 @implementation IPadTableViewController {
@@ -87,7 +86,6 @@
     NSDictionary *selectedDict;
     NSString *selectedKey;
     char extensionTypeFound; // used for opening files on iPad
-
 }
 
 #pragma mark - Initers
@@ -959,8 +957,6 @@
         case ADD_DIR_BUTTON_TAG:
             [self displayAddDirPage];
             break;
-        case BACK_BUTTON_TAG:
-            [self stopPlayingAudio];
         default:
             break;
 
@@ -968,91 +964,80 @@
 
 }
 
--(void) displayImageWithPath: (NSString*) filePath fileName: (NSString*) fileName{
-    NSData * blob = [self.appDelegate.model getFile_NSDATA:filePath];
+-(char) check_list_ext: (NSArray*) extTuple findFileType: (NSString*) fileExtension {
 
-    UIViewController *imageController = [[UIViewController alloc] init];
-    imageController.title = fileName;
-
-    UIImage *tempImage = [[UIImage alloc] initWithData:blob];
-    UIImageView * tempImageView = [[UIImageView alloc] initWithImage:tempImage];
-    tempImageView.frame = CGRectMake(imageController.view.frame.origin.x + 30,
-                                     imageController.view.frame.origin.y+75,
-                                     tempImage.size.width,
-                                     tempImage.size.height);
-
-    [imageController.view addSubview:tempImageView];
+    NSString* listExtensions = extTuple[0];
+    char codeExtension = [ (NSNumber*) extTuple[1] charValue ];
     
-    [self.navigationController pushViewController:imageController animated:YES];
-
-}
-
--(void) displayPDFWithPath: (NSString*) filePath fileName: (NSString*) fileName{
-    NSData * blob = [self.appDelegate.model getFile_NSDATA:filePath];
-
-    UIViewController *pdfController = [[UIViewController alloc] init];
-    pdfController.title = fileName;
+    NSArray *singleImageExtensions = [listExtensions componentsSeparatedByString: @" "];
     
-    UIWebView *webView = [[UIWebView alloc] initWithFrame:CGRectMake(pdfController.view.frame.origin.x,
-                                                                     pdfController.view.frame.origin.y,
-                                                                     pdfController.view.frame.size.width,
-                                                                     pdfController.view.frame.size.height)];
-    [webView loadData:blob MIMEType:@"application/pdf" textEncodingName:@"utf-8" baseURL:nil];
-
-    [pdfController.view addSubview:webView];
-    
-    [self.navigationController pushViewController:pdfController animated:YES];
-}
-
--(void) displayAudioWithPath: (NSString*) filePath imageName: (NSString*) fileName{
-
-    NSData * blob = [self.appDelegate.model getFile_NSDATA:filePath];
-    
-    AudioPlayerViewController *audioController = [[AudioPlayerViewController alloc] init];
-    audioController.title = fileName;
-
-    self.appDelegate.audioPlayer = [[AVAudioPlayer alloc] initWithData:blob error:nil];
-    self.appDelegate.audioPlayer.numberOfLoops = -1;
-    [self.appDelegate.audioPlayer play];
-    [self.navigationController pushViewController:audioController animated:YES];
-
-}
-
--(void) startPlayingAudio{
-    if( self.appDelegate.audioPlayer )
-        [self.appDelegate.audioPlayer play];
-}
--(void) stopPlayingAudio{
-    NSLog(@"stopPlayingAudio");
-    if( self.appDelegate.audioPlayer ){
-        [self.appDelegate.audioPlayer stop];
-        self.appDelegate.audioPlayer = nil;
+    // Looking to see if file is an image
+    for ( NSString* ext in singleImageExtensions){
+        if ([fileExtension isEqualToString:ext]) {
+            return codeExtension;
+        }
     }
+    return UNKNOWN_EXTENSION;
 }
 
 -(char) findFileType: (NSString*) fileExtension{
     // identifying extension
-    char extensionTypeFound = UNKNOWN_EXTENSION;
+    char extensionTypeFound_temp = UNKNOWN_EXTENSION;
 
     NSString * imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
-    NSArray *singleImageExtensions = [imageExtensions componentsSeparatedByString: @" "];
+    NSString * docExtensions = @"doc docx xlsx xls ppt pptx";
+    NSString * audioExtensions = @"mp3 wav";
+    NSString * generalExtensions = @"zip pdf";
+    
+    NSMutableArray *allExtensions = [ [NSMutableArray alloc] init];
+    
+    [allExtensions addObject: @[imageExtensions, [[NSNumber alloc] initWithChar:IMAGE_EXTENSION]] ];
+    [allExtensions addObject: @[docExtensions, [[NSNumber alloc] initWithChar:DOC_EXTENSION]] ];
+    [allExtensions addObject: @[audioExtensions, [[NSNumber alloc] initWithChar:AUDIO_EXTENSION]] ];
+    [allExtensions addObject: @[generalExtensions, [[NSNumber alloc] initWithChar:GENERAL_EXTENSION]] ];
 
-    // Looking to see if file is an image
-    for ( NSString* ext in singleImageExtensions){
-        if ([fileExtension isEqualToString:ext]) {
-            extensionTypeFound = IMAGE_EXTENSION;
+    for ( NSArray * tempTuple in allExtensions){
+        if (extensionTypeFound_temp & UNKNOWN_EXTENSION) {
+            extensionTypeFound_temp = [self check_list_ext:tempTuple findFileType:fileExtension];
+        }else{
             break;
         }
     }
-    // Or is the file an mp3 or a pdf?
-    if ( (extensionTypeFound & UNKNOWN_EXTENSION ) ) {
-        if ([fileExtension isEqualToString:@"mp3"]) {
-            extensionTypeFound = AUDIO_EXTENSION;
-        }else if ([fileExtension isEqualToString:@"pdf"]){
-            extensionTypeFound = PDF_EXTENSION;
+
+    return extensionTypeFound_temp;
+}
+
+-(void) displayFileWithfilePath: (NSString *) filePath fileName: (NSString*) filename{
+    
+        NSData * blob = [self.appDelegate.model getFile_NSDATA:filePath];
+        NSString * tempfilename = [NSString stringWithFormat:@"temp.%@", [filename pathExtension]];
+//        NSString * tempfilename = filename;
+        
+        NSString* filePath_t = [NSTemporaryDirectory() stringByAppendingString:tempfilename];
+        
+        NSURL* url = [NSURL fileURLWithPath:filePath_t];
+        NSError * writeError = nil;
+        [blob writeToURL:url options:0 error:&writeError];
+        if (writeError){
+            NSLog(@"Error write file to disk to display it");
+            return;
         }
-    }
-    return extensionTypeFound;
+        blob = nil;
+        self.documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:url];
+        self.documentInteractionController.name = filename;
+        [self.documentInteractionController setDelegate:self];
+        // Preview PDF
+        [self.documentInteractionController presentPreviewAnimated:YES];
+    
+}
+
+- (UIViewController *) documentInteractionControllerViewControllerForPreview: (UIDocumentInteractionController *) controller{
+    return self;
+}
+
+- (void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController *)controller{
+    NSLog(@"End Document viewer");
+    self.documentInteractionController = nil;
 }
 
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
@@ -1060,28 +1045,12 @@
     [self.detailView hideAnimated:NO];
     
     if ([sender.titleLabel.text isEqualToString:@"Open"]) {
-        NSLog(@"---------------");
-        NSLog([NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey]);
-        NSLog(@"---------------");
-        NSString * fileExtension = [[selectedKey pathExtension] lowercaseString];
-
         // Display file according to type
         NSString *filePath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
-        
-        if ( extensionTypeFound & IMAGE_EXTENSION ) {
-            NSLog(@"Image file");
-            [self displayImageWithPath:filePath fileName:selectedKey];
-        }else if (extensionTypeFound & AUDIO_EXTENSION){
-            NSLog(@"Audio file");
-            [self displayAudioWithPath:filePath imageName:selectedKey];
-        }else if (extensionTypeFound & PDF_EXTENSION){
-            NSLog(@"PDF file");
-            [self displayPDFWithPath:filePath fileName:selectedKey];
-        }else{
-            NSLog(@"Unknown file. Extension: >>%@<<", fileExtension);
-            
+
+        if ( !(extensionTypeFound & UNKNOWN_EXTENSION) ) {
+               [self displayFileWithfilePath: filePath fileName:selectedKey];
         }
-        /* */
     }
     else if ([sender.titleLabel.text isEqualToString:@"Move"]) {
 

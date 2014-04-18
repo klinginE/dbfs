@@ -28,7 +28,9 @@ enum{
     IMAGE_EXTENSION = 0x01,
     PDF_EXTENSION = 0x02,
     AUDIO_EXTENSION = 0x04,
-    UNKNOWN_EXTENSION = 0x08
+    UNKNOWN_EXTENSION = 0x08,
+    DOC_EXTENSION = 0x10,
+    GENERAL_EXTENSION = 0x20
 };
 
 
@@ -46,7 +48,7 @@ enum{
 
 @end
 
-@interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
+@interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIDocumentInteractionControllerDelegate>
 
 // Structs
 typedef struct {
@@ -102,9 +104,5 @@ typedef struct {
 // Events
 -(void)refreshWithArray:(NSArray *)a;
 -(void)refreshForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath;
-
-// Start and stop player.
--(void) startPlayingAudio;
--(void) stopPlayingAudio;
 
 @end
