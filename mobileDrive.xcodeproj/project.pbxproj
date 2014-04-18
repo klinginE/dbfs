@@ -235,8 +235,8 @@
 			isa = PBXGroup;
 			children = (
 				DE7F71D218EB6AC3002CC799 /* dbfs-demo.c */,
-				DE7F71D318EB6AC3002CC799 /* dbfs.c */,
 				DE7F71D418EB6AC3002CC799 /* dbfs.h */,
+				DE7F71D318EB6AC3002CC799 /* dbfs.c */,
 				DE7F71D518EB6AC3002CC799 /* dbfs__literals.h */,
 				DE7F71D618EB6AC3002CC799 /* DBInterface.h */,
 				DE7F71D718EB6AC3002CC799 /* DBInterface.m */,

@@ -47,10 +47,12 @@
 }
 
 -(NSString *)dbError:(int)err {
+
     NSString *error;
     const char *c = dbfs_err(err);
     error = [NSString stringWithUTF8String:c];
     return error;
+
 }
 
 -(DBFS *)openDatabase:(NSString *)name {

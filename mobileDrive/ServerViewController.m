@@ -59,7 +59,9 @@
             if ( pathArg == NULL){
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }else{
-                NSData * json_in_NSData =[[ [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
+                
+                MobileDriveModel *model = [((MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate) model];
+                NSData * json_in_NSData =[[model getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
                 return [GCDWebServerDataResponse responseWithData: json_in_NSData contentType: @"application/json"];
             }
         }];

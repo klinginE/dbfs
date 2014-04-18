@@ -12,7 +12,7 @@
 @implementation MobileDriveModel {
     NSDictionary *_directoryContents;
     NSArray *_directoryKeys;
-    DBFS *dbfs;
+    __block DBFS *dbfs;
 }
 
 -(id)init {
@@ -23,8 +23,15 @@
         
         NSArray *dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *docsDir = [dirPaths objectAtIndex:0];
-        NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"database.sqlite"]];
-        dbfs = [self.dbInterface openDatabase:dbPath];
+
+        __block NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"database.sqlite"]];
+        dispatch_block_t block = ^{
+            dbfs = [self.dbInterface openDatabase:dbPath];
+        };
+        if ([NSThread isMainThread])
+            block();
+        else
+            dispatch_sync(dispatch_get_main_queue(), block);
 
     }
 
@@ -32,18 +39,39 @@
 }
 
 -(NSString *)dbError:(int)err {
-    return [self.dbInterface dbError:err];
+    
+    __block NSString *r = 0;
+    __block int err_t = err;
+    dispatch_block_t block = ^{
+        r = [self.dbInterface dbError:err_t];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+
+    return r;
+
 }
 
 -(void)closeDatabase {
-    [self.dbInterface closeDatabase:dbfs];
+
+    dispatch_block_t block = ^{
+        [self.dbInterface closeDatabase:dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+
 }
 
 
 -(DBFS_Blob)slurp:(FILE *)in {
+
     DBFS_Blob blob;
-    
     return blob;
+
 }
 
 -(int)getFile:(NSString *)fname to:(FILE *)out withSize:(int *)size {
@@ -53,9 +81,20 @@
     else if ([fname isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    int result = [self.dbInterface getFile:fname fromDatabase:self->dbfs to:out withSize:size];
-    
+    __block int result;
+    __block NSString *fname_t = fname.copy;
+    __block FILE *out_t = out;
+    __block int *size_t = size;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface getFile:fname_t fromDatabase:self->dbfs to:out_t withSize:size_t];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+
     return result;
+
 }
 
 -(int)putFile:(NSString *)fname from:(FILE *)in withSize:(int)size {
@@ -65,8 +104,19 @@
     else if ([fname isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [self.dbInterface putFile:fname fromDatabase:self->dbfs from:in withSize:size];
-    
+    __block int result;
+    __block NSString *fname_t = fname.copy;
+    __block FILE *in_t = in;
+    __block int size_t = size;
+    dispatch_block_t block = ^{
+        result =  [self.dbInterface putFile:fname_t fromDatabase:self->dbfs from:in_t withSize:size_t];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+    return result;
+
 }
 
 -(int)renameFile:(NSString *)oldName to:(NSString *)newName {
@@ -76,7 +126,19 @@
     else if ([oldName isEqualToString:@""] || [newName isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [self.dbInterface renameFile:oldName to:newName fromDatabase:self->dbfs];
+    __block int result;
+    __block NSString *oldName_t = oldName.copy;
+    __block NSString *newName_t = newName.copy;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface renameFile:oldName_t to:newName_t fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+
+    return result;
+
 }
 
 -(int)moveFile:(NSString *)oldName to:(NSString *)newName {
@@ -86,7 +148,17 @@
     else if ([oldName isEqualToString:@""] || [newName isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [self.dbInterface renameFile:oldName to:newName fromDatabase:self->dbfs];
+    __block int result;
+    __block NSString *oldName_t = oldName.copy;
+    __block NSString *newName_t = newName.copy;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface renameFile:oldName_t to:newName_t fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+    return result;
 }
 
 -(int)overwriteFile:(NSString *)fname from:(FILE *)in {
@@ -96,7 +168,18 @@
     else if ([fname isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return[self.dbInterface overwriteFile:fname inDatabase:self->dbfs from:in];
+    __block int result;
+    __block NSString *fname_t = fname.copy;
+    __block FILE *in_t = in;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface overwriteFile:fname_t inDatabase:self->dbfs from:in_t];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+    return result;
+
 }
 
 -(int)deleteFile:(NSString *)fname {
@@ -106,7 +189,18 @@
     else if ([fname isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [self.dbInterface deleteFile:fname fromDatabase:self->dbfs];
+    
+    __block int result;
+    __block NSString *fname_t = fname.copy;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface deleteFile:fname_t fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+    return result;
+
 }
 
 -(int)createDirectory:(NSString *)dirName {
@@ -116,7 +210,18 @@
     else if ([dirName isEqualToString:@""]) {
         return DBFS_NOT_DIRNAME;
     }
-    return [self.dbInterface createDirectory:dirName fromDatabase:self->dbfs];
+    
+    __block int result;
+    __block NSString *dirName_t = dirName.copy;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface createDirectory:dirName_t fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+    return result;
+
 }
 
 -(int)deleteDirectory:(NSString *)dirName {
@@ -126,7 +231,16 @@
     else if ([dirName isEqualToString:@""]) {
         return DBFS_NOT_DIRNAME;
     }
-    return [self.dbInterface deleteDirectory:dirName fromDatabase:self->dbfs];
+    __block int result;
+    __block NSString *dirName_t = dirName.copy;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface deleteDirectory:dirName_t fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+    return result;
 }
 
 -(int)moveDirectory:(NSString *)dirName to:(NSString *)destName {
@@ -136,7 +250,18 @@
     else if ([dirName isEqualToString:@""] || [destName isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [self.dbInterface moveDirectory:dirName to:destName fromDatabase:self->dbfs];
+    __block int result;
+    __block NSString *dirName_t = dirName.copy;
+    __block NSString *destName_t = destName.copy;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface moveDirectory:dirName_t to:destName_t fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+    return result;
+
 }
 
 -(int)renameDirectory:(NSString *)dirName to:(NSString *)newName {
@@ -146,13 +271,30 @@
     else if ([dirName isEqualToString:@""] || [newName isEqualToString:@""]) {
         return DBFS_NOT_FILENAME;
     }
-    return [self.dbInterface moveDirectory:dirName to:newName fromDatabase:self->dbfs];
+    __block int result;
+    __block NSString *dirName_t = dirName.copy;
+    __block NSString *newName_t = newName.copy;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface moveDirectory:dirName_t to:newName_t fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+    return result;
 }
 
 -(NSArray *)getFileArrayIn:(NSString *)dirName {
-    DBFS_FileList fileList;
-    fileList = [self.dbInterface getFileListIn:dirName fromDatabase:self->dbfs];
-    
+    __block DBFS_FileList fileList;
+    __block NSString *dirName_t = dirName.copy;
+    dispatch_block_t block = ^{
+        fileList = [self.dbInterface getFileListIn:dirName_t fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+
     NSMutableDictionary *fileDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
     
@@ -174,9 +316,16 @@
 }
 
 -(NSArray *)getDirectoryArrayIn:(NSString *)dirName {
-    DBFS_DirList dirList;
-    dirList = [self.dbInterface getDirectoryListIn:dirName inDatabase:dbfs];
-    
+    __block DBFS_DirList dirList;
+    NSString *dirName_t = dirName.copy;
+    dispatch_block_t block = ^{
+        dirList = [self.dbInterface getDirectoryListIn:dirName_t inDatabase:dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+
     NSMutableDictionary *dirDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
     
@@ -212,9 +361,16 @@
 
 
 -(NSDictionary *)getFileListIn:(NSString *)dirName {
-    DBFS_FileList fileList;
-    fileList = [self.dbInterface getFileListIn:dirName fromDatabase:self->dbfs];
-    
+    __block DBFS_FileList fileList;
+    __block NSString *dirName_t = dirName.copy;
+    dispatch_block_t block = ^{
+        fileList = [self.dbInterface getFileListIn:dirName_t fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+
     NSMutableDictionary *fileDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
 
@@ -236,8 +392,15 @@
 }
 
 -(NSDictionary *)getDirectoryListIn:(NSString *)dirName {
-    DBFS_DirList dirList;
-    dirList = [self.dbInterface getDirectoryListIn:dirName inDatabase:dbfs];
+    __block DBFS_DirList dirList;
+    __block NSString *dirName_t = dirName.copy;
+    dispatch_block_t block = ^{
+        dirList = [self.dbInterface getDirectoryListIn:dirName_t inDatabase:dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
     
     NSMutableDictionary *dirDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
@@ -299,6 +462,5 @@
     json = [json stringByAppendingString:@"\n\t]\n}"];
     return json;
 }
-
 
 @end
