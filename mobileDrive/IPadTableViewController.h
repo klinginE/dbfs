@@ -24,6 +24,17 @@
 typedef enum {HELP_BUTTON_TAG, ADD_DIR_BUTTON_TAG, BACK_BUTTON_TAG, MOVE_BUTTON_TAG, RENAME_BUTTON_TAG, DELETE_BUTTON_TAG, CANCEL_BUTTON_TAG} buttonTag;
 typedef enum {ADD_ALERT_TAG=512, DELETE_ALERT_TAG, MOVE_ALERT_TAG, RENAME_ALERT_TAG, CONFIRM_ALERT_TAG, ERROR_ALERT_TAG, NONE} alertTag;
 
+// For checking file extensions
+enum{
+    IMAGE_EXTENSION = 0x01,
+    PDF_EXTENSION = 0x02,
+    AUDIO_EXTENSION = 0x04,
+    UNKNOWN_EXTENSION = 0x08,
+    DOC_EXTENSION = 0x10,
+    GENERAL_EXTENSION = 0x20
+};
+
+
 // Protocol
 @protocol IPadTableViewControllerDelegate <NSObject>
 
@@ -38,7 +49,7 @@ typedef enum {ADD_ALERT_TAG=512, DELETE_ALERT_TAG, MOVE_ALERT_TAG, RENAME_ALERT_
 
 @end
 
-@interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
+@interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIDocumentInteractionControllerDelegate>
 
 // Properties
 @property (strong, atomic) IPadState *iPadState;
