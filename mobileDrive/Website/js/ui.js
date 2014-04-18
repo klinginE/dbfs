@@ -1,7 +1,13 @@
 $(function() {
-  // Load file list
-  rebuildFileList();
-  rebuildBreadCrumbs();
+  var path = ["/"];
+  var cwd = [];
+  var sort = 'sort-type';
+  var sortFunc = compareType;
+  var sortReverse = false;
+  var modal = null;
+  
+  // Load the file list
+  getDir();
 
   // Select item from file list
   $('#file-list').click(function(e) {
@@ -58,7 +64,9 @@ $(function() {
     var row = $(e.target).closest('tr');
     var file = row.find("td:first-child").text().trim();
     if (row.hasClass("directory")) {
+      $('#actions #file-actions .button').addClass('disable');
       path.push(file);
+      getDir();
       rebuildFileList();
       rebuildBreadCrumbs();
     }
@@ -74,6 +82,8 @@ $(function() {
     var id = link.attr('id');
     id = parseInt(id.substr(2, id.length));
     path = path.splice(0, id+1);
+
+    getDir();
 
     rebuildFileList();
     rebuildBreadCrumbs();
@@ -96,28 +106,35 @@ $(function() {
 
   // Create new directory window
   $('#create-directory-button').click(function(e) {
-    var $modal = $('div.modal').omniWindow();
-    $modal.trigger('show');
+    modal = $('div.modal').omniWindow();
+    modal.trigger('show');
+    
+    $('#create-directory-form #dir-name').focus();
 
     $('.close-button').click(function(e){
       e.preventDefault();
-      $modal.trigger('hide');
+      modal.trigger('hide');
     });
   });
+  
+  // Create new directory button
+  $('#create-directory-form .button').click(createDirFromForm);
+  $('#create-directory-form input').keyup(createDirFromForm);
+  
+  function createDirFromForm(e) {
+    if (e.type === 'keyup' && e.which != 13) return;
+    
+    var dirName = $('#create-directory-form #dir-name').val();
+    $('#create-directory-form #dir-name').val("");
+    
+    $('#actions #file-actions .button').addClass('disable');
+    
+    createDir(dirName);
+    modal.trigger('hide');
+  }
 
   function rebuildFileList() {
     $('#file-list tr').not('[id~="header-row"]').remove();
-
-    cwd = files;
-
-    for (var i = 0; i < path.length; i++) {
-      for (var j = 0; j < cwd.length; j++) {
-        if (cwd[j].name === path[i]) {
-          cwd = cwd[j].contents
-          break;
-        }
-      }
-    }
 
     if (sortFunc != null) {
       cwd.sort(compareName);
@@ -147,12 +164,50 @@ $(function() {
       $('#file-list').contents().append(row);
     }
   }
+  
+  function createDir(dirName) {
+    var dirPath = "/";
+    for (var i = 1; i < path.length; i++) {
+      dirPath += path[i] + "/";
+    }
+    dirPath += dirName + "/";
+    $.get("createDir.html?path=" + dirPath, function(data) {
+      getDir();
+    });
+  }
+  
+  function getDir() {
+    var dirPath = "/";
+    for (var i = 1; i < path.length; i++) {
+      dirPath += path[i] + "/";
+    }
+    $.get("directory.json?path=" + dirPath, function(data) {
+      cwd = data.contents;
+      for (var i = 0; i < cwd.length; i++) {
+        var filename = cwd[i].name;
+        if (filename.charAt(filename.length - 1) === "/") {
+          cwd[i].name = filename.slice(0, filename.length - 1);
+          cwd[i].type = "Directory";
+          cwd[i].icon = "directory";
+        } else {
+          cwd[i].type = "Text File";
+          cwd[i].icon = "text";
+        }
+      }
+      rebuildFileList();
+      rebuildBreadCrumbs();
+    });
+  }
 
   function rebuildBreadCrumbs() {
     var html = '<img src="img/page_link.png" /> ';
     var sep = '';
     for (var i = 0; i < path.length; i++) {
-      html += sep + '<a href="#" id="bc' + i + '">' + path[i] + '</a>'
+      var bcPath = path[i];
+      if (path[i] === "/") {
+        bcPath = "root";
+      }
+      html += sep + '<a href="#" id="bc' + i + '">' + bcPath + '</a>'
       sep = ' / ';
     }
     $('#breadcrumbs').html(html);

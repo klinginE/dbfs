@@ -7,7 +7,7 @@
 //
 
 #import "ServerViewController.h"
-
+#import "MobileDriveAppDelegate.h"
 // Used to get IP
 #import <ifaddrs.h>
 #import <arpa/inet.h>
@@ -16,12 +16,10 @@
 #define kTrialMaxUploads 50
 
 @interface ServerViewController ()
-
 @end
 
 @implementation ServerViewController{
-    GCDWebServer* webServer;
-   // NSMutableString *current_ip_address;
+    __block GCDWebServer* webServer;
 }
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -38,9 +36,8 @@
     _current_ip_address = [NSMutableString stringWithString: @"test"];
     
     @autoreleasepool {
-        
         // Create server
-        webServer = [[GCDWebServer alloc] init];
+         webServer = [[GCDWebServer alloc] init];
 
         // Get the path to the website directory
         NSString* websitePath = [[NSBundle mainBundle] pathForResource:@"Website" ofType:nil];
@@ -56,30 +53,89 @@
         }];
         
         //NSString* myFile = [[NSBundle mainBundle] pathForResource:@"arrow_down" ofType:@"png" inDirectory:@"Website/img"];
-        
+        /*
         [webServer addHandlerForMethod:@"GET" path:@"/download" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
             
             // Called from GCD thread
             GCDWebServerResponse* response = nil;
             
             NSMutableString* content = [[NSMutableString alloc] init];
-            [content appendFormat:@"<html><body><p>/download?id=%@&name=%@</p></body></html>",
-             [request.query objectForKey:@"id"],
-             [request.query objectForKey:@"name"]
-             ];
+            //[_appDelegate.model getJsonContentsIn: "/"];
+            //[getJsonContentsIn
+         
+//            [content appendFormat:@"<html><body><p>/download?id=%@&name=%@</p></body></html>",
+//             [request.query objectForKey:@"id"],
+//             [request.query objectForKey:@"name"]
+//             ];
             //response = [GCDWebServerFileResponse responseWithFile:myFile isAttachment:YES];
             //response = [GCDWebServerResponse responseWithStatusCode:403];
             //return response;
-            return [GCDWebServerDataResponse responseWithHTML:content];
+            return [GCDWebServerDataResponse :[_appDelegate.model getJsonContentsIn: @"/"]];
+        }];*/
+        
+        [webServer addHandlerForMethod:@"GET" path:@"/directory.json" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+            
+            // Called from GCD thread
+            NSString * pathArg = [request.query objectForKey:@"path"];
+            if ( pathArg == NULL){
+                return [GCDWebServerResponse responseWithStatusCode:403];
+            }else{
+                NSData * json_in_NSData =[[ [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
+                return [GCDWebServerDataResponse responseWithData: json_in_NSData contentType: @"application/json"];
+            }
         }];
         
-        NSLog(@"Before Running server");
-        // Use convenience method that runs server on port 8080 until SIGINT received
+        [webServer addHandlerForMethod:@"GET" path:@"/createDir.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+            
+            // Called from GCD thread
+            NSString * pathArg = [request.query objectForKey:@"path"];
+            if ( pathArg == NULL){
+                return [GCDWebServerResponse responseWithStatusCode:403];
+            }else{
+                NSMutableString* content = [[NSMutableString alloc] init];
+                if ( ![[(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] createDirectory:pathArg] ){
+                                [content appendFormat:@"<html><body><p>Folder %@ was created.</p></body></html>",
+                                  pathArg
+                                ];
+                    
+                    // Calling Refresh Function
+                    [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: ADD_MODEL_TAG
+                                                                                                       From: pathArg To: nil];
+                    
+                }else{
+                    [content appendFormat:@"<html><body><p>Folder %@ was not created.</p></body></html>",
+                     pathArg];
+                }
+                return [GCDWebServerDataResponse responseWithHTML:content];
+            }
+        }];
+        [webServer addHandlerForMethod:@"GET" path:@"/rename.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+            
+            // Called from GCD thread
+            NSString * oldPath = [request.query objectForKey:@"old"];
+            NSString * newPath = [request.query objectForKey:@"new"];
+            
+            if ( oldPath == NULL || newPath == NULL ){
+                return [GCDWebServerResponse responseWithStatusCode:403];
+            }else{
+                NSMutableString* content = [[NSMutableString alloc] init];
+                if ( ![[(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] renameDirectory:oldPath to:newPath] ){
+                    [content appendFormat:@"<html><body><p>Path %@ was renamed to %@.</p></body></html>",
+                     oldPath, newPath];
+                    
+                    // Calling Refresh Function
+                    [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: RENAME_MODEL_TAG
+                                                                                                       From: oldPath To: newPath];
+                }else{
+                    [content appendFormat:@"<html><body><p>Path %@ was NOT renamed to %@.</p></body></html>",
+                     oldPath, newPath];
+                }
+                return [GCDWebServerDataResponse responseWithHTML:content];
+            }
+        }];
+        
         [webServer start];
         
-        NSLog(@"#####");
-        NSLog( [self getIPAddress] );
-        NSLog(@"#####");
     }
     
     return self;

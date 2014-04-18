@@ -39,7 +39,11 @@ void sql_fatal(sqlite3 *db, int err)
         dbfs_fatal("nothing is wrong");
     if (err == SQLITE_MISUSE)
         dbfs_fatal("sqlite misuse!");
-    fprintf(stderr, "error %d: %s\n", err, sqlite3_errstr(err));
+    #if SQLITE_VERSION_NUMBER >= 3007015
+    fprintf(stderr, "error %d\n: %s\n", err, sqlite3_errstr(err));
+    #else
+    fprintf(stderr, "error %d\n", err);
+    #endif
     fprintf(stderr, "message: %s\n", sqlite3_errmsg(db));
     abort();
 }
@@ -478,11 +482,11 @@ DBFS_Error query_mvf1(DBFS *db, int from_dir, const char *from_name, int to_dir,
 DBFS *dbfs_open(const char *name)
 {
     DBFS *rv;
-    sqlite3 *db;
+    sqlite3 *db = NULL;
 
     int err;
     err = sqlite3_open(name, &db);
-    sql_check(NULL, err);
+    sql_check(db, err);
     err = sqlite3_exec(db, sql_fs2_init, NULL, NULL, NULL);
     sql_check(db, err);
 
@@ -729,9 +733,9 @@ const char *dbfs_err(DBFS_Error err)
         case DBFS_COMPONENT_TOO_LONG:
             return "A pathname component was too long.";
         case DBFS_LIGHTS_ON:
-            return "Nobody's home.";
+            return "File/Directory does not exists";
         case DBFS_INTRUDER:
-            return "Somebody's home.";
+            return "File/Directory already exists";
         case DBFS_YOU_SUCK:
             return "The database doesn't like you. I don't like you either.";
         default:

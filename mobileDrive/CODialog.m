@@ -530,22 +530,18 @@ CODialogSynth(highlightedIndex)
   if (overlay == nil) {
     return;
   }
-  
+
   NSTimeInterval animationDuration = (flag ? kCODialogAnimationDuration : 0.0);
   [UIView animateWithDuration:animationDuration delay:0 options:UIViewAnimationOptionLayoutSubviews animations:^{
     overlay.alpha = 0.0;
     self.transform = CGAffineTransformScale([self dialogTransform], kCODialogPopScale, kCODialogPopScale);
-  } completion:^(BOOL finished) {
-    overlay.hidden = YES;
-    self.transform = [self dialogTransform];
-    [self removeFromSuperview];
-    self.overlay = nil;
+      overlay.hidden = YES;
+      self.transform = [self dialogTransform];
+      [self removeFromSuperview];
+      self.overlay = nil;
+      [self.hostWindow makeKeyWindow];
+  } completion:nil];
     
-    // Rekey host window
-    // https://github.com/eaigner/CODialog/issues/6
-    //
-    [self.hostWindow makeKeyWindow];
-  }];
 }
 
 - (void)hideAnimated:(BOOL)flag afterDelay:(NSTimeInterval)delay {

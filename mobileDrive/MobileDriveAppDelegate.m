@@ -11,14 +11,15 @@
 #import "IPadTableViewController.h"
 
 
-@interface MobileDriveAppDelegate()
+@interface MobileDriveAppDelegate() <IPadTableViewControllerDelegate>
 
 @property (strong, nonatomic) IPadTableViewController *iPadTableViewController;
 
 @end
 
 @implementation MobileDriveAppDelegate{
-   NSString * ipAddress;
+   __block NSString * ipAddress;
+    id lockIpAddress;
 }
 
 -(void)switchChanged:(UISwitch *)sender {
@@ -38,41 +39,56 @@
 
 -(void)pathButtonPressed:(UIButton *)sender {
 
- [self.iPadNavController popToViewController:[self.iPadNavController.viewControllers objectAtIndex:sender.tag]
-                                    animated:YES];
+    assert(sender.tag >= 0);
+    assert([self.iPadNavController.viewControllers count] - 1 >= sender.tag);
+    [self.iPadNavController popToViewController:[self.iPadNavController.viewControllers objectAtIndex:sender.tag]
+                                       animated:YES];
+
+}
+
+-(void)refreshIpadForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
+
+    NSLog(@"Tag: %u", tag);
+    NSLog(oldPath);
+    NSLog(newPath);
+    
+    [self.iPadTableViewController refreshForTag:tag From:oldPath To:newPath];
+
+}
+
+-(void)popToViewWithDepth:(NSInteger)depth Anamated:(BOOL)animate WithMessage:(NSString *)message {
+
+    assert(depth >= 0);
+    assert([self.iPadNavController.viewControllers count] - 1 >= depth);
+    [self.iPadNavController popToViewController:self.iPadNavController.viewControllers[depth] animated:animate];
+    if (message) {
+
+        UIAlertView *alert = [[UIAlertView alloc] init];
+        [alert setTitle:@"Had to redirect to new current directory because:"];
+        [alert setMessage:message];
+        [alert addButtonWithTitle:@"OK"];
+        [alert show];
+
+    }
 
 }
 
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
-    // intit global app properties
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.isConnected = YES;
-
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        dispatch_async(dispatch_get_main_queue(), ^{
-            self.serverController = [[ServerViewController alloc] init];
-            
-            ipAddress = [ [NSString alloc] initWithString:[self.serverController getIPAddress] ];
-
-        });
-    });
-    NSLog(@"#%%-------%");
-    NSLog( ipAddress );
-    NSLog(@"#%%-------%");
-    
-    
-//  intit the model
+    self.serverController = [[ServerViewController alloc] init];
     self.model = [[MobileDriveModel alloc] init];
 
-    
+    ipAddress = [self.serverController getIPAddress];
     
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
-                                                                        ipAddress: self.serverController.current_ip_address //@"12.123.123.12"
-                                                                          target:self
+                                                                        ipAddress:ipAddress
                                                                     switchAction:@selector(switchChanged:)
                                                                        forEvents:UIControlEventValueChanged
-                                                                      pathAction:@selector(pathButtonPressed:) pathEvents:UIControlEventTouchUpInside];
+                                                                      pathAction:@selector(pathButtonPressed:)
+                                                                      pathEvents:UIControlEventTouchUpInside];
 
     // init nav controller
     _iPadNavController = [[UINavigationController alloc] initWithRootViewController:self.iPadTableViewController];
@@ -82,7 +98,7 @@
                                                             nil]];
 
     // set up window
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    
     self.window.rootViewController = _iPadNavController;
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];

@@ -14,7 +14,6 @@
 		CE40078A18E546110025C0B0 /* GCDWebServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = CE40078318E546110025C0B0 /* GCDWebServerConnection.m */; };
 		CE40078B18E546110025C0B0 /* GCDWebServerRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CE40078618E546110025C0B0 /* GCDWebServerRequest.m */; };
 		CE40078C18E546110025C0B0 /* GCDWebServerResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = CE40078818E546110025C0B0 /* GCDWebServerResponse.m */; };
-		CE9E605818E4C199008C6D2B /* WebServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CE9E605718E4C199008C6D2B /* WebServer.m */; };
 		CEF41B3918E79B5500073D0F /* Website in Resources */ = {isa = PBXBuildFile; fileRef = CEF41B3818E79B5500073D0F /* Website */; };
 		DE02776618DA9671003C8F60 /* CODialog.m in Sources */ = {isa = PBXBuildFile; fileRef = DE02776518DA9671003C8F60 /* CODialog.m */; };
 		DE0FDF6318C963CB00843686 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6218C963CB00843686 /* Foundation.framework */; };
@@ -29,9 +28,13 @@
 		DE0FDF7E18C963CB00843686 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE0FDF6618C963CB00843686 /* UIKit.framework */; };
 		DE0FDF8618C963CB00843686 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = DE0FDF8418C963CB00843686 /* InfoPlist.strings */; };
 		DE0FDF8818C963CB00843686 /* mobileDriveTests.m in Sources */ = {isa = PBXBuildFile; fileRef = DE0FDF8718C963CB00843686 /* mobileDriveTests.m */; };
+		DE7F71D918EB6AC3002CC799 /* dbfs.c in Sources */ = {isa = PBXBuildFile; fileRef = DE7F71D318EB6AC3002CC799 /* dbfs.c */; };
+		DE7F71DA18EB6AC3002CC799 /* DBInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = DE7F71D718EB6AC3002CC799 /* DBInterface.m */; };
+		DE7F71DF18EB7056002CC799 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DE7F71DD18EB6E20002CC799 /* libsqlite3.dylib */; };
 		DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */ = {isa = PBXBuildFile; fileRef = DE96FBC118CE618B008553D8 /* helpPage.txt */; };
-		DE9833C718C96BA0003CEA5B /* dbfs in Resources */ = {isa = PBXBuildFile; fileRef = DE9833C618C96BA0003CEA5B /* dbfs */; };
 		DED6C4C118D2643900F50F97 /* IPadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DED6C4C018D2643900F50F97 /* IPadTableViewController.m */; };
+		DEF5A1EA18E0F2BC0006D1AE /* (null) in Resources */ = {isa = PBXBuildFile; };
+		DEF5A1F518E0F2BC0006D1AE /* (null) in Resources */ = {isa = PBXBuildFile; };
 		DEF84A6018E0FCF3009AC0CC /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DEF84A5F18E0FCF3009AC0CC /* README.md */; };
 /* End PBXBuildFile section */
 
@@ -61,8 +64,6 @@
 		CE40078618E546110025C0B0 /* GCDWebServerRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerRequest.m; sourceTree = "<group>"; };
 		CE40078718E546110025C0B0 /* GCDWebServerResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServerResponse.h; sourceTree = "<group>"; };
 		CE40078818E546110025C0B0 /* GCDWebServerResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GCDWebServerResponse.m; sourceTree = "<group>"; };
-		CE9E605618E4C199008C6D2B /* WebServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WebServer.h; path = mobileDrive/WebServer.h; sourceTree = SOURCE_ROOT; };
-		CE9E605718E4C199008C6D2B /* WebServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = WebServer.m; path = mobileDrive/WebServer.m; sourceTree = SOURCE_ROOT; };
 		CEF41B3818E79B5500073D0F /* Website */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Website; sourceTree = "<group>"; };
 		DE02776418DA9671003C8F60 /* CODialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CODialog.h; sourceTree = "<group>"; };
 		DE02776518DA9671003C8F60 /* CODialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CODialog.m; sourceTree = "<group>"; };
@@ -82,8 +83,14 @@
 		DE0FDF8318C963CB00843686 /* mobileDriveTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "mobileDriveTests-Info.plist"; sourceTree = "<group>"; };
 		DE0FDF8518C963CB00843686 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		DE0FDF8718C963CB00843686 /* mobileDriveTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = mobileDriveTests.m; sourceTree = "<group>"; };
+		DE7F71D218EB6AC3002CC799 /* dbfs-demo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "dbfs-demo.c"; sourceTree = "<group>"; };
+		DE7F71D318EB6AC3002CC799 /* dbfs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = dbfs.c; sourceTree = "<group>"; };
+		DE7F71D418EB6AC3002CC799 /* dbfs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dbfs.h; sourceTree = "<group>"; };
+		DE7F71D518EB6AC3002CC799 /* dbfs__literals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dbfs__literals.h; sourceTree = "<group>"; };
+		DE7F71D618EB6AC3002CC799 /* DBInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DBInterface.h; sourceTree = "<group>"; };
+		DE7F71D718EB6AC3002CC799 /* DBInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DBInterface.m; sourceTree = "<group>"; };
+		DE7F71DD18EB6E20002CC799 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
 		DE96FBC118CE618B008553D8 /* helpPage.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = helpPage.txt; sourceTree = "<group>"; };
-		DE9833C618C96BA0003CEA5B /* dbfs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = dbfs; sourceTree = "<group>"; };
 		DE9833C818C96BBC003CEA5B /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		DED6C4BF18D2643900F50F97 /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
 		DED6C4C018D2643900F50F97 /* IPadTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IPadTableViewController.m; sourceTree = "<group>"; };
@@ -95,6 +102,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DE7F71DF18EB7056002CC799 /* libsqlite3.dylib in Frameworks */,
 				DE0FDF6518C963CB00843686 /* CoreGraphics.framework in Frameworks */,
 				DE0FDF6718C963CB00843686 /* UIKit.framework in Frameworks */,
 				DE0FDF6318C963CB00843686 /* Foundation.framework in Frameworks */,
@@ -153,6 +161,7 @@
 		DE0FDF6118C963CB00843686 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DE7F71DD18EB6E20002CC799 /* libsqlite3.dylib */,
 				8A014E7618CF825600C83490 /* QuartzCore.framework */,
 				DE0FDF6218C963CB00843686 /* Foundation.framework */,
 				DE0FDF6418C963CB00843686 /* CoreGraphics.framework */,
@@ -166,12 +175,11 @@
 			isa = PBXGroup;
 			children = (
 				CE40077F18E546110025C0B0 /* CGDWebServer */,
-				DE9833C618C96BA0003CEA5B /* dbfs */,
-				CE9E605718E4C199008C6D2B /* WebServer.m */,
-				CE9E605618E4C199008C6D2B /* WebServer.h */,
 				CEF41B3818E79B5500073D0F /* Website */,
 				9564623C18D0DEBC00AA845A /* ServerViewController.h */,
 				9564623D18D0DEBC00AA845A /* ServerViewController.m */,
+				8AFF3ECB18D24CB300FB8A21 /* files.plist */,
+				DE7F71D118EB6AC3002CC799 /* dbfs */,
 				DE0FDF7118C963CB00843686 /* MobileDriveAppDelegate.h */,
 				DE0FDF7218C963CB00843686 /* MobileDriveAppDelegate.m */,
 				DE02776418DA9671003C8F60 /* CODialog.h */,
@@ -216,6 +224,19 @@
 				DE0FDF8418C963CB00843686 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		DE7F71D118EB6AC3002CC799 /* dbfs */ = {
+			isa = PBXGroup;
+			children = (
+				DE7F71D218EB6AC3002CC799 /* dbfs-demo.c */,
+				DE7F71D318EB6AC3002CC799 /* dbfs.c */,
+				DE7F71D418EB6AC3002CC799 /* dbfs.h */,
+				DE7F71D518EB6AC3002CC799 /* dbfs__literals.h */,
+				DE7F71D618EB6AC3002CC799 /* DBInterface.h */,
+				DE7F71D718EB6AC3002CC799 /* DBInterface.m */,
+			);
+			path = dbfs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -298,8 +319,9 @@
 				DEF84A6018E0FCF3009AC0CC /* README.md in Resources */,
 				8AFF3ECC18D24CB300FB8A21 /* files.plist in Resources */,
 				DE0FDF6D18C963CB00843686 /* InfoPlist.strings in Resources */,
-				DE9833C718C96BA0003CEA5B /* dbfs in Resources */,
 				CEF41B3918E79B5500073D0F /* Website in Resources */,
+				DEF5A1F518E0F2BC0006D1AE /* (null) in Resources */,
+				DEF5A1EA18E0F2BC0006D1AE /* (null) in Resources */,
 				DE0FDF7518C963CB00843686 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -323,13 +345,14 @@
 				CE40078C18E546110025C0B0 /* GCDWebServerResponse.m in Sources */,
 				8A014E8018CF8FF600C83490 /* MobileDriveModel.m in Sources */,
 				DED6C4C118D2643900F50F97 /* IPadTableViewController.m in Sources */,
+				DE7F71D918EB6AC3002CC799 /* dbfs.c in Sources */,
 				DE0FDF6F18C963CB00843686 /* main.m in Sources */,
-				CE9E605818E4C199008C6D2B /* WebServer.m in Sources */,
 				CE40078918E546110025C0B0 /* GCDWebServer.m in Sources */,
-				DE0FDF7318C963CB00843686 /* MobileDriveAppDelegate.m in Sources */,
-				DE02776618DA9671003C8F60 /* CODialog.m in Sources */,
 				CE40078B18E546110025C0B0 /* GCDWebServerRequest.m in Sources */,
 				9564623E18D0DEBC00AA845A /* ServerViewController.m in Sources */,
+				DE0FDF7318C963CB00843686 /* MobileDriveAppDelegate.m in Sources */,
+				DE02776618DA9671003C8F60 /* CODialog.m in Sources */,
+				DE7F71DA18EB6AC3002CC799 /* DBInterface.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

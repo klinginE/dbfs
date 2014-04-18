@@ -13,6 +13,8 @@
 #define PUBLIC_EXT @".pub"
 #define PRIVATE_EXT @".pri"
 
+typedef enum {ADD_MODEL_TAG=128, DELETE_MODEL_TAG, MOVE_MODEL_TAG, RENAME_MODEL_TAG} modelUpdateTag;
+
 @class IPadTableViewController;
 @interface MobileDriveAppDelegate : UIResponder <UIApplicationDelegate>
 
@@ -24,5 +26,7 @@
 
 -(void)switchChanged:(UISwitch *)sender;
 -(void)pathButtonPressed:(UIButton *)sender;
+-(void)popToViewWithDepth:(NSInteger)depth Anamated:(BOOL)animate WithMessage:(NSString *)message;
+-(void)refreshIpadForTag:(modelUpdateTag)tag From:(NSString *) oldPath To:(NSString *) newPath;
 
 @end

@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+
 @interface ServerViewController : UIViewController
 @property (nonatomic, strong) NSMutableString *current_ip_address;
 -(void) turnOnServer;
