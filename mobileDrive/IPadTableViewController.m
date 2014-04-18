@@ -235,6 +235,7 @@
 
 -(void)initActionSheetButtons:(NSMutableArray *)buttons {
 
+    [buttons addObject:@"Open"];
     [buttons addObject:@"Move"];
     [buttons addObject:@"Rename"];
     [buttons addObject:@"Delete"];
@@ -959,10 +960,37 @@
 
 }
 
+-(void) displayImage: (NSData *) blob imageName: (NSString*) imageName{
+    UIImage *tempImage = [[UIImage alloc] initWithData:blob];
+    UIImageView * tempImageView = [[UIImageView alloc] initWithImage:tempImage];
+    UIViewController *imageController = [[UIViewController alloc] init];
+    imageController.title = imageName;
+    
+    [imageController.view addSubview:tempImageView];
+    tempImageView.frame = CGRectMake(30,
+                                     self.view.frame.origin.y + 75,
+                                     tempImage.size.width,
+                                     tempImage.size.height);
+    tempImageView.backgroundColor = [UIColor redColor];
+    
+    [self.navigationController pushViewController:imageController animated:YES];
+
+}
+
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
     [self.detailView hideAnimated:NO];
-    if ([sender.titleLabel.text isEqualToString:@"Move"]) {
+    
+    if ([sender.titleLabel.text isEqualToString:@"Open"]) {
+        NSLog(@"---------------");
+        NSLog([NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey]);
+        NSLog(@"---------------");
+
+        NSString *filePath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+        NSData * file_data = [self.appDelegate.model getFile_NSDATA:filePath];
+        [self displayImage:file_data imageName:selectedKey];
+    }
+    else if ([sender.titleLabel.text isEqualToString:@"Move"]) {
 
         UIAlertView *alert = [self objectInArray:self.alertViews WithTag:MOVE_ALERT_TAG];
         [[alert textFieldAtIndex:0] setPlaceholder:[NSString stringWithCString:self.iPadState.currentPath encoding:NSISOLatin1StringEncoding]];//[NSString stringWithUTF8String:self.iPadState.currentPath]];

@@ -58,6 +58,20 @@
     return result;
 }
 
+-(NSData *)getFile_NSDATA:(NSString *)fname{
+    if (fname == nil) {
+//        return DBFS_NOT_FILENAME;
+        return nil;
+    }
+    else if ([fname isEqualToString:@""]) {
+//        return DBFS_NOT_FILENAME;
+        return nil;
+    }
+//    int result = [self.dbInterface getFile:fname fromDatabase:self->dbfs to:out withSize:size];
+    
+    return [self.dbInterface getFile_NSDATA:fname fromDatabase:self->dbfs];
+}
+
 -(int)putFile:(NSString *)fname from:(FILE *)in withSize:(int)size {
     if (fname == nil) {
         return DBFS_NOT_FILENAME;

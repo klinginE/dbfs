@@ -78,6 +78,20 @@
     return result;
 }
 
+-(NSData *) getFile_NSDATA:(NSString *)fname fromDatabase:(DBFS *)dbfs{
+    
+    DBFS_Blob blob;
+    const char *name = [fname UTF8String];
+    int result = dbfs_get(dbfs, (DBFS_FileName){name}, &blob);
+    
+    if(result == DBFS_OKAY) {
+        return [[NSData alloc] initWithBytes: blob.data length:blob.size];
+        //        *size = blob.size;
+//        fwrite(blob.data, 1, blob.size, out);
+    }
+    return nil;
+}
+
 -(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in withSize:(int)size {
     DBFS_Blob blob;
     const char *name = [fname UTF8String];
