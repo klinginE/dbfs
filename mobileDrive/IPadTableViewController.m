@@ -10,7 +10,10 @@
 #import "IPadTableViewController.h"
 #import <string.h>
 #import <assert.h>
+#import <AVFoundation/AVFoundation.h>
+#include <AudioToolbox/AudioToolbox.h>
 #import "CODialog.h"
+#import "AudioPlayerViewController.h"
 
 @interface IPadTableViewController ()
 
@@ -76,12 +79,14 @@
 // Table View Delegate
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
+-(char) findFileType: (NSString*) fileExtension;
 @end
 
 @implementation IPadTableViewController {
 
     NSDictionary *selectedDict;
     NSString *selectedKey;
+    char extensionTypeFound; // used for opening files on iPad
 
 }
 
@@ -235,7 +240,7 @@
 
 -(void)initActionSheetButtons:(NSMutableArray *)buttons {
 
-    [buttons addObject:@"Open"];
+//    [buttons addObject:@"Open"];
     [buttons addObject:@"Move"];
     [buttons addObject:@"Rename"];
     [buttons addObject:@"Delete"];
@@ -471,8 +476,9 @@
     // Set up back button
     [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:@"Back"
                                                                        Tag:BACK_BUTTON_TAG
-                                                                    Target:nil
-                                                                    Action:nil]];
+                                                                    Target:self
+                                                                    Action:@selector(buttonPressed:)
+                                                                    ]];
 
     self.view = [[UIView alloc] initWithFrame:CGRectZero];
 
@@ -944,7 +950,7 @@
 }
 
 -(void)buttonPressed:(UIBarButtonItem *)sender {
-
+    NSLog(@"buttonPressed");
     switch (sender.tag) {
 
         case HELP_BUTTON_TAG:
@@ -953,6 +959,8 @@
         case ADD_DIR_BUTTON_TAG:
             [self displayAddDirPage];
             break;
+        case BACK_BUTTON_TAG:
+            [self stopPlayingAudio];
         default:
             break;
 
@@ -960,11 +968,11 @@
 
 }
 
--(void) displayImageWithPath: (NSString*) filePath imageName: (NSString*) imageName{
+-(void) displayImageWithPath: (NSString*) filePath fileName: (NSString*) fileName{
     NSData * blob = [self.appDelegate.model getFile_NSDATA:filePath];
 
     UIViewController *imageController = [[UIViewController alloc] init];
-    imageController.title = imageName;
+    imageController.title = fileName;
 
     UIImage *tempImage = [[UIImage alloc] initWithData:blob];
     UIImageView * tempImageView = [[UIImageView alloc] initWithImage:tempImage];
@@ -979,12 +987,11 @@
 
 }
 
--(void) displayPDFWithPath: (NSString*) filePath imageName: (NSString*) imageName{
+-(void) displayPDFWithPath: (NSString*) filePath fileName: (NSString*) fileName{
     NSData * blob = [self.appDelegate.model getFile_NSDATA:filePath];
 
-
     UIViewController *pdfController = [[UIViewController alloc] init];
-    pdfController.title = imageName;
+    pdfController.title = fileName;
     
     UIWebView *webView = [[UIWebView alloc] initWithFrame:CGRectMake(pdfController.view.frame.origin.x,
                                                                      pdfController.view.frame.origin.y,
@@ -997,16 +1004,59 @@
     [self.navigationController pushViewController:pdfController animated:YES];
 }
 
-// For checking file extensions
-enum{
-    IMAGE_EXTENSION = 0x01,
-    PDF_EXTENSION = 0x02,
-    AUDIO_EXTENSION = 0x04,
-    UNKNOWN_EXTENSION = 0x08
-};
+-(void) displayAudioWithPath: (NSString*) filePath imageName: (NSString*) fileName{
+
+    NSData * blob = [self.appDelegate.model getFile_NSDATA:filePath];
+    
+    AudioPlayerViewController *audioController = [[AudioPlayerViewController alloc] init];
+    audioController.title = fileName;
+
+    self.appDelegate.audioPlayer = [[AVAudioPlayer alloc] initWithData:blob error:nil];
+    self.appDelegate.audioPlayer.numberOfLoops = -1;
+    [self.appDelegate.audioPlayer play];
+    [self.navigationController pushViewController:audioController animated:YES];
+
+}
+
+-(void) startPlayingAudio{
+    if( self.appDelegate.audioPlayer )
+        [self.appDelegate.audioPlayer play];
+}
+-(void) stopPlayingAudio{
+    NSLog(@"stopPlayingAudio");
+    if( self.appDelegate.audioPlayer ){
+        [self.appDelegate.audioPlayer stop];
+        self.appDelegate.audioPlayer = nil;
+    }
+}
+
+-(char) findFileType: (NSString*) fileExtension{
+    // identifying extension
+    char extensionTypeFound = UNKNOWN_EXTENSION;
+
+    NSString * imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
+    NSArray *singleImageExtensions = [imageExtensions componentsSeparatedByString: @" "];
+
+    // Looking to see if file is an image
+    for ( NSString* ext in singleImageExtensions){
+        if ([fileExtension isEqualToString:ext]) {
+            extensionTypeFound = IMAGE_EXTENSION;
+            break;
+        }
+    }
+    // Or is the file an mp3 or a pdf?
+    if ( (extensionTypeFound & UNKNOWN_EXTENSION ) ) {
+        if ([fileExtension isEqualToString:@"mp3"]) {
+            extensionTypeFound = AUDIO_EXTENSION;
+        }else if ([fileExtension isEqualToString:@"pdf"]){
+            extensionTypeFound = PDF_EXTENSION;
+        }
+    }
+    return extensionTypeFound;
+}
 
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
-
+    NSLog(@"detailedVeiwButtonPressed");
     [self.detailView hideAnimated:NO];
     
     if ([sender.titleLabel.text isEqualToString:@"Open"]) {
@@ -1015,39 +1065,23 @@ enum{
         NSLog(@"---------------");
         NSString * fileExtension = [[selectedKey pathExtension] lowercaseString];
 
-        NSString * imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
-        NSArray *singleImageExtensions = [imageExtensions componentsSeparatedByString: @" "];
-
-        // identifying extension
-        char extensionTypeFound = UNKNOWN_EXTENSION;
-        for ( NSString* ext in singleImageExtensions){
-            if ([fileExtension isEqualToString:ext]) {
-                extensionTypeFound = IMAGE_EXTENSION;
-                break;
-            }
-        }
-        if ( (extensionTypeFound & UNKNOWN_EXTENSION ) ) {
-            if ([fileExtension isEqualToString:@"mp3"]) {
-                extensionTypeFound = AUDIO_EXTENSION;
-            }else if ([fileExtension isEqualToString:@"pdf"]){
-                extensionTypeFound = PDF_EXTENSION;
-            }
-        }
-
         // Display file according to type
         NSString *filePath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+        
         if ( extensionTypeFound & IMAGE_EXTENSION ) {
             NSLog(@"Image file");
-            [self displayImageWithPath:filePath imageName:selectedKey];
+            [self displayImageWithPath:filePath fileName:selectedKey];
         }else if (extensionTypeFound & AUDIO_EXTENSION){
             NSLog(@"Audio file");
+            [self displayAudioWithPath:filePath imageName:selectedKey];
         }else if (extensionTypeFound & PDF_EXTENSION){
             NSLog(@"PDF file");
-            [self displayPDFWithPath:filePath imageName:selectedKey];
+            [self displayPDFWithPath:filePath fileName:selectedKey];
         }else{
             NSLog(@"Unknown file. Extension: >>%@<<", fileExtension);
             
         }
+        /* */
     }
     else if ([sender.titleLabel.text isEqualToString:@"Move"]) {
 
@@ -1331,6 +1365,7 @@ enum{
 
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
+    NSMutableArray *actionSheetButtonsTemp = self.actionSheetButtons;
     UIScrollView *custom = [[UIScrollView alloc] initWithFrame:CGRectZero];
     [custom setBackgroundColor:[UIColor clearColor]];
     [custom setBounces:NO];
@@ -1382,17 +1417,24 @@ enum{
         
     }
 
-    if (!self.detailView) {
+//    if (!self.detailView) {
 
         _detailView = [[CODialog alloc] initWithWindow:[[[UIApplication sharedApplication] delegate] window]];
         _detailView.dialogStyle = CODialogStyleCustomView;
 
-        for (NSString *b in self.actionSheetButtons)
+        extensionTypeFound = UNKNOWN_EXTENSION;
+        extensionTypeFound = [self findFileType: [key pathExtension]]; // testing to see if file can be open
+        if ( !(extensionTypeFound & UNKNOWN_EXTENSION) ){ // if file can be open
+            //[self.actionSheetButtons insertObject:@"Open" atIndex:0];
+            actionSheetButtonsTemp = [ [NSMutableArray alloc] initWithArray:@[@"Open", @"Move", @"Rename", @"Delete", @"Cancel" ]];
+        }
+        
+        for (NSString *b in actionSheetButtonsTemp)
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];
 
-    }
+  //  }
     [self.detailView setTitle:[NSString stringWithFormat:@"File/Directory details for: %@", key]];
     custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, i * (SMALL_FONT_SIZE + 5));
     custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);

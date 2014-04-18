@@ -23,6 +23,15 @@
 typedef enum {HELP_BUTTON_TAG, ADD_DIR_BUTTON_TAG, BACK_BUTTON_TAG, MOVE_BUTTON_TAG, RENAME_BUTTON_TAG, DELETE_BUTTON_TAG, CANCEL_BUTTON_TAG} buttonTag;
 typedef enum {ADD_ALERT_TAG=512, DELETE_ALERT_TAG, MOVE_ALERT_TAG, RENAME_ALERT_TAG, CONFIRM_ALERT_TAG, ERROR_ALERT_TAG, NONE} alertTag;
 
+// For checking file extensions
+enum{
+    IMAGE_EXTENSION = 0x01,
+    PDF_EXTENSION = 0x02,
+    AUDIO_EXTENSION = 0x04,
+    UNKNOWN_EXTENSION = 0x08
+};
+
+
 // Protocol
 @protocol IPadTableViewControllerDelegate <NSObject>
 
@@ -93,5 +102,9 @@ typedef struct {
 // Events
 -(void)refreshWithArray:(NSArray *)a;
 -(void)refreshForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath;
+
+// Start and stop player.
+-(void) startPlayingAudio;
+-(void) stopPlayingAudio;
 
 @end

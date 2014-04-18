@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "ServerViewController.h"
 #import "MobileDriveModel.h"
+#import <AVFoundation/AVFoundation.h>
+#include <AudioToolbox/AudioToolbox.h>
 
 #define PUBLIC_EXT @".pub"
 #define PRIVATE_EXT @".pri"
@@ -23,6 +25,7 @@ typedef enum {ADD_MODEL_TAG=128, DELETE_MODEL_TAG, MOVE_MODEL_TAG, RENAME_MODEL_
 @property (strong, nonatomic) UINavigationController *iPadNavController;
 @property (strong, atomic) ServerViewController *serverController;
 @property (strong, atomic) MobileDriveModel *model;
+@property (nonatomic, retain) AVAudioPlayer * audioPlayer;
 
 -(void)switchChanged:(UISwitch *)sender;
 -(void)pathButtonPressed:(UIButton *)sender;
