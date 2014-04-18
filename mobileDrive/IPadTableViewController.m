@@ -960,22 +960,50 @@
 
 }
 
--(void) displayImage: (NSData *) blob imageName: (NSString*) imageName{
-    UIImage *tempImage = [[UIImage alloc] initWithData:blob];
-    UIImageView * tempImageView = [[UIImageView alloc] initWithImage:tempImage];
+-(void) displayImageWithPath: (NSString*) filePath imageName: (NSString*) imageName{
+    NSData * blob = [self.appDelegate.model getFile_NSDATA:filePath];
+
     UIViewController *imageController = [[UIViewController alloc] init];
     imageController.title = imageName;
-    
-    [imageController.view addSubview:tempImageView];
-    tempImageView.frame = CGRectMake(30,
-                                     self.view.frame.origin.y + 75,
+
+    UIImage *tempImage = [[UIImage alloc] initWithData:blob];
+    UIImageView * tempImageView = [[UIImageView alloc] initWithImage:tempImage];
+    tempImageView.frame = CGRectMake(imageController.view.frame.origin.x + 30,
+                                     imageController.view.frame.origin.y+75,
                                      tempImage.size.width,
                                      tempImage.size.height);
-    tempImageView.backgroundColor = [UIColor redColor];
+
+    [imageController.view addSubview:tempImageView];
     
     [self.navigationController pushViewController:imageController animated:YES];
 
 }
+
+-(void) displayPDFWithPath: (NSString*) filePath imageName: (NSString*) imageName{
+    NSData * blob = [self.appDelegate.model getFile_NSDATA:filePath];
+
+
+    UIViewController *pdfController = [[UIViewController alloc] init];
+    pdfController.title = imageName;
+    
+    UIWebView *webView = [[UIWebView alloc] initWithFrame:CGRectMake(pdfController.view.frame.origin.x,
+                                                                     pdfController.view.frame.origin.y,
+                                                                     pdfController.view.frame.size.width,
+                                                                     pdfController.view.frame.size.height)];
+    [webView loadData:blob MIMEType:@"application/pdf" textEncodingName:@"utf-8" baseURL:nil];
+
+    [pdfController.view addSubview:webView];
+    
+    [self.navigationController pushViewController:pdfController animated:YES];
+}
+
+// For checking file extensions
+enum{
+    IMAGE_EXTENSION = 0x01,
+    PDF_EXTENSION = 0x02,
+    AUDIO_EXTENSION = 0x04,
+    UNKNOWN_EXTENSION = 0x08
+};
 
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
@@ -985,10 +1013,41 @@
         NSLog(@"---------------");
         NSLog([NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey]);
         NSLog(@"---------------");
+        NSString * fileExtension = [[selectedKey pathExtension] lowercaseString];
 
+        NSString * imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
+        NSArray *singleImageExtensions = [imageExtensions componentsSeparatedByString: @" "];
+
+        // identifying extension
+        char extensionTypeFound = UNKNOWN_EXTENSION;
+        for ( NSString* ext in singleImageExtensions){
+            if ([fileExtension isEqualToString:ext]) {
+                extensionTypeFound = IMAGE_EXTENSION;
+                break;
+            }
+        }
+        if ( (extensionTypeFound & UNKNOWN_EXTENSION ) ) {
+            if ([fileExtension isEqualToString:@"mp3"]) {
+                extensionTypeFound = AUDIO_EXTENSION;
+            }else if ([fileExtension isEqualToString:@"pdf"]){
+                extensionTypeFound = PDF_EXTENSION;
+            }
+        }
+
+        // Display file according to type
         NSString *filePath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
-        NSData * file_data = [self.appDelegate.model getFile_NSDATA:filePath];
-        [self displayImage:file_data imageName:selectedKey];
+        if ( extensionTypeFound & IMAGE_EXTENSION ) {
+            NSLog(@"Image file");
+            [self displayImageWithPath:filePath imageName:selectedKey];
+        }else if (extensionTypeFound & AUDIO_EXTENSION){
+            NSLog(@"Audio file");
+        }else if (extensionTypeFound & PDF_EXTENSION){
+            NSLog(@"PDF file");
+            [self displayPDFWithPath:filePath imageName:selectedKey];
+        }else{
+            NSLog(@"Unknown file. Extension: >>%@<<", fileExtension);
+            
+        }
     }
     else if ([sender.titleLabel.text isEqualToString:@"Move"]) {
 
