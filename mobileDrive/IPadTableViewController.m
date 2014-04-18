@@ -781,10 +781,10 @@
                     case ADD_ALERT_TAG:
                     {
 
-                        NSString *path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+                        NSString *path = [NSString stringWithFormat:@"%@%@", [NSString stringWithCString:self.iPadState.currentPath encoding:NSUTF8StringEncoding], text];
 
                         if ([text characterAtIndex:0] != '/')
-                            path = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+                            path = [NSString stringWithFormat:@"%@%@", [NSString stringWithCString:self.iPadState.currentPath encoding:NSUTF8StringEncoding], text];
                         else
                             path = text;
                         if ([path characterAtIndex:([path length] - 1)] != '/')
@@ -817,10 +817,10 @@
                     case MOVE_ALERT_TAG:
                         if (selectedDict && selectedKey) {
 
-                            NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
+                            NSString *oldPath = [NSString stringWithFormat:@"%@%@", [NSString stringWithCString:self.iPadState.currentPath encoding:NSUTF8StringEncoding], selectedKey];
                             NSString *newPath = @"";
                             if ([text characterAtIndex:0] != '/')
-                                newPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+                                newPath = [NSString stringWithFormat:@"%@%@", [NSString stringWithCString:self.iPadState.currentPath encoding:NSUTF8StringEncoding], text];
                             else
                                 newPath = text;
                             BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
@@ -882,8 +882,8 @@
                             if (isDir&& [text characterAtIndex:([text length] - 1)] != '/')
                                 text = [NSString stringWithFormat:@"%@/", text];
 
-                            NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
-                            NSString *newPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, text];
+                            NSString *oldPath = [NSString stringWithFormat:@"%@%@", [NSString stringWithCString:self.iPadState.currentPath encoding:NSUTF8StringEncoding], selectedKey];
+                            NSString *newPath = [NSString stringWithFormat:@"%@%@", [NSString stringWithCString:self.iPadState.currentPath encoding:NSUTF8StringEncoding], text];
 
                             if ([self strOkay:selectedKey ForTag:RENAME_ALERT_TAG IsDir:isDir] &&
                                 [self strOkay:text ForTag:RENAME_ALERT_TAG IsDir:isDir]) {
