@@ -54,10 +54,9 @@
 }
 
 -(DBFS *)openDatabase:(NSString *)name {
-    char *dbName = [self nsStringToCString:name];
+    const char *dbName = [name UTF8String];
     DBFS *dbfs = dbfs_open(dbName);
-    free(dbName);
-    dbName = NULL;
+
     return dbfs;
 }
 
@@ -68,7 +67,7 @@
 -(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out withSize:(int *)size {
     
     DBFS_Blob blob;
-    char *name = [self nsStringToCString:fname];
+    const char *name = [fname UTF8String];
     int result = dbfs_get(dbfs, (DBFS_FileName){name}, &blob);
     
     if(result == DBFS_OKAY) {
@@ -76,40 +75,33 @@
         fwrite(blob.data, 1, blob.size, out);
     }
 
-    free(name);
-    name = NULL;
     return result;
 }
 
 -(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in withSize:(int)size {
     DBFS_Blob blob;
-    char *name = [self nsStringToCString:fname];
+    const char *name = [fname UTF8String];
    
     blob = [self slurp:in];
     int r = dbfs_put(dbfs, (DBFS_FileName){name}, blob);
-    free(name);
-    name = NULL;
+
     return r;
 }
 
 -(int)overwriteFile:(NSString *)fname inDatabase:(DBFS *)dbfs from:(FILE *)in {
     
     DBFS_Blob blob;
-    char *name = [self nsStringToCString:fname];
+    const char *name = [fname UTF8String];
    
     blob = [self slurp:in];
     int r = dbfs_ovr(dbfs, (DBFS_FileName){name}, blob);
-    free(name);
-    name = NULL;
     return r;
 }
 
 -(int)deleteFile:(NSString *)fname fromDatabase:(DBFS *)dbfs {
     
-    char *name = [self nsStringToCString:fname];
+    const char *name = [fname UTF8String];
     int r = dbfs_del(dbfs, (DBFS_FileName){name});
-    free(name);
-    name = NULL;
     return r;
 
 }
@@ -147,15 +139,13 @@
 
 -(DBFS_FileList)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs {
     
-    char *dname = [self nsStringToCString:dirName];
+    const char *dname = [dirName UTF8String];
     DBFS_FileList flist;
     flist.count = 0;
     flist.files = NULL;
     if (DBFS_OKAY != dbfs_lsf(dbfs, (DBFS_DirName){dname}, &flist)) {
         NSLog(@"Error getting file list");
     }
-    free(dname);
-    dname = NULL;
     
     return flist;
 }
@@ -170,12 +160,11 @@
         NSLog(@"Error: No name");
         return dlist;
     }
-    char *dName = [self nsStringToCString:dirName];
+    const char *dName = [dirName UTF8String];
     if (DBFS_OKAY != dbfs_lsd(dbfs, (DBFS_DirName){dName}, &dlist)) {
         NSLog(@"Error listing directories");
     }
-    free(dName);
-    dName = NULL;
+
     return dlist;
 }
 
