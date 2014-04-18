@@ -84,6 +84,8 @@
    
     blob = [self slurp:in];
     int r = dbfs_put(dbfs, (DBFS_FileName){name}, blob);
+    
+    free(blob.data);
 
     return r;
 }
