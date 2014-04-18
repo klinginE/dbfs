@@ -88,7 +88,9 @@
         return [[NSData alloc] initWithBytes: blob.data length:blob.size];
         //        *size = blob.size;
 //        fwrite(blob.data, 1, blob.size, out);
+        dbfs_free_blob(blob);
     }
+    
     return nil;
 }
 
