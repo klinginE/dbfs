@@ -142,18 +142,18 @@ body {
 }
 
 
-#create-directory-window {
-
+.modal-window {
     border: #c0c0c0 1px solid;
 }
 
 
-#create-directory-form {
+.modal-window div {
   clear:both;
   display: block;
   width: 100%;
   text-align: center;
 }
+
 
 #create-directory-form input {
   margin-left: 15px;
@@ -165,6 +165,23 @@ label {
   float: left;
   position: relative;
   top: 5px;
+}
+
+
+#upload-progress {
+  float: right;
+  background-color: #d4d4d4;
+  border-radius: 13px;
+  padding: 3px;
+  width: 100px;
+}
+
+
+#upload-progress > div {
+  background-color: #007aff;
+  width: 0%;
+  height:12px;
+  border-radius: 10px;
 }
 
 

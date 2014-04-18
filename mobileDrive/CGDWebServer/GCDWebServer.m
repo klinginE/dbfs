@@ -34,11 +34,6 @@
 
 #import "GCDWebServerPrivate.h"
 
-#if TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR
-#define kDefaultPort 80
-#else
-#define kDefaultPort 8080
-#endif
 #define kMaxPendingConnections 16
 
 @interface GCDWebServer () {

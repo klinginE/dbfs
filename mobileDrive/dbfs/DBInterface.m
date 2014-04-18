@@ -18,19 +18,9 @@
 }
 
 -(char *)nsStringToCString:(NSString *)s {
-    
-    int len = [s length];
-    char *c = (char *)malloc(len + 1);
-    int i = 0;
-    for (; i < len; i++) {
-        
-        c[i] = [s characterAtIndex:i];
-        
-    }
-    c[i] = '\0';
-    
-    return c;
-    
+
+    return strdup([s UTF8String]);
+
 }
 
 -(DBFS_Blob)slurp:(FILE *)in {
@@ -64,8 +54,9 @@
 }
 
 -(DBFS *)openDatabase:(NSString *)name {
-    char *dbName = [self nsStringToCString:name];
+    const char *dbName = [name UTF8String];
     DBFS *dbfs = dbfs_open(dbName);
+
     return dbfs;
 }
 
@@ -76,37 +67,42 @@
 -(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out withSize:(int *)size {
     
     DBFS_Blob blob;
-    char *name = [self nsStringToCString:fname];
+    const char *name = [fname UTF8String];
     int result = dbfs_get(dbfs, (DBFS_FileName){name}, &blob);
     
     if(result == DBFS_OKAY) {
         *size = blob.size;
         fwrite(blob.data, 1, blob.size, out);
     }
+
     return result;
 }
 
 -(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in withSize:(int)size {
     DBFS_Blob blob;
-    char *name = [self nsStringToCString:fname];
+    const char *name = [fname UTF8String];
    
     blob = [self slurp:in];
-    return dbfs_put(dbfs, (DBFS_FileName){name}, blob);
+    int r = dbfs_put(dbfs, (DBFS_FileName){name}, blob);
+
+    return r;
 }
 
 -(int)overwriteFile:(NSString *)fname inDatabase:(DBFS *)dbfs from:(FILE *)in {
     
     DBFS_Blob blob;
-    char *name = [self nsStringToCString:fname];
+    const char *name = [fname UTF8String];
    
     blob = [self slurp:in];
-    return dbfs_ovr(dbfs, (DBFS_FileName){name}, blob);
+    int r = dbfs_ovr(dbfs, (DBFS_FileName){name}, blob);
+    return r;
 }
 
 -(int)deleteFile:(NSString *)fname fromDatabase:(DBFS *)dbfs {
     
-    char *name = [self nsStringToCString:fname];
-    return dbfs_del(dbfs, (DBFS_FileName){name});
+    const char *name = [fname UTF8String];
+    int r = dbfs_del(dbfs, (DBFS_FileName){name});
+    return r;
 
 }
 
@@ -114,36 +110,36 @@
 // Asks to overwrite?
 -(int)renameFile:(NSString *)fname to:(NSString *)newName fromDatabase:(DBFS *)dbfs {
 	DBFS_FileName oldName;
-    oldName.name = [self nsStringToCString:fname];
+    oldName.name = [fname UTF8String];
 	DBFS_FileName name;
-    name.name = [self nsStringToCString:newName];
-    
+    name.name = [newName UTF8String];
+
     return dbfs_mvf(dbfs, oldName, name);
 }
 
 -(int)createDirectory:(NSString *)dirName fromDatabase:(DBFS *)dbfs {
     DBFS_DirName name;
-    name.name = [self nsStringToCString:dirName];
+    name.name = [dirName UTF8String];
     return dbfs_mkd(dbfs, name);
 }
 
 -(int)deleteDirectory:(NSString *)dirName fromDatabase:(DBFS *)dbfs {
     DBFS_DirName name;
-    name.name = [self nsStringToCString:dirName];
+    name.name = [dirName UTF8String];
     return dbfs_rmd(dbfs, name);
 }
 
 -(int)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDatabase:(DBFS *)dbfs{
     DBFS_DirName name;
-    name.name = [self nsStringToCString:dirName];
+    name.name = [dirName UTF8String];
     DBFS_DirName dest;
-    dest.name = [self nsStringToCString:destName];
+    dest.name = [destName UTF8String];
     return dbfs_mvd(dbfs, name, dest);
 }
 
 -(DBFS_FileList)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs {
     
-    char *dname = [self nsStringToCString:dirName];
+    const char *dname = [dirName UTF8String];
     DBFS_FileList flist;
     flist.count = 0;
     flist.files = NULL;
@@ -164,11 +160,11 @@
         NSLog(@"Error: No name");
         return dlist;
     }
-    char *dName = [self nsStringToCString:dirName];
+    const char *dName = [dirName UTF8String];
     if (DBFS_OKAY != dbfs_lsd(dbfs, (DBFS_DirName){dName}, &dlist)) {
         NSLog(@"Error listing directories");
     }
-    
+
     return dlist;
 }
 

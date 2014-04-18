@@ -16,9 +16,8 @@
 
 // Private Properties
 // State
-@property (weak, nonatomic) MobileDriveAppDelegate *appDelegate;
-@property (strong, nonatomic) NSDictionary *filesDictionary;
-@property (strong, nonatomic) NSArray *fileKeys;
+@property (weak, atomic) MobileDriveAppDelegate *appDelegate;
+@property (strong, nonatomic) NSArray *filesArray;
 
 // Views
 @property (strong, atomic) NSMutableArray *alertViews;
@@ -61,6 +60,7 @@
 -(void)buttonPressed:(UIBarButtonItem *)sender;
 -(void)detailedVeiwButtonPressed:(UIButton *)sender;
 -(void)handleLongPress:(UILongPressGestureRecognizer*)sender;
+-(void)reloadTableViewData;
 -(void)viewDidLoad;
 
 // Display Views
@@ -88,7 +88,8 @@
 #pragma mark - Initers
 
 -(id)initWithPath:(NSString *)currentPath
-         ipAddress:(NSString *)ip
+        ipAddress:(NSString *)ip
+             port:(NSString *)port
      switchAction:(SEL)sAction
         forEvents:(UIControlEvents)sEvents
        pathAction:(SEL)pAction
@@ -98,9 +99,9 @@
     if (self) {
 
         // init State
-        [self initState:&_iPadState WithPath:currentPath Address:ip];
+        [self initState:&_iPadState WithPath:currentPath Address:ip Port:port];
         _appDelegate = (MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate;
-        self.title = [NSString stringWithUTF8String:_iPadState.currentDir];
+        self.title = [NSString stringWithCString:_iPadState.currentDir encoding:NSISOLatin1StringEncoding];//[NSString stringWithUTF8String:_iPadState.currentDir];
         selectedDict = nil;
         selectedKey = nil;
 
@@ -132,10 +133,16 @@
 
 }
 
--(void)initState:(State *)state WithPath:(NSString *)path Address:(NSString *)ip {
+-(void)initState:(State *)state
+        WithPath:(NSString *)path
+         Address:(NSString *)ip
+            Port:(NSString *)port {
+
+    [self freeState:state];
 
     state->currentPath = [self nsStringToCString:path];
     state->ipAddress = [self nsStringToCString:ip];
+    state->port = [self nsStringToCString:port];
     NSUInteger len = [path length];
     NSUInteger index = len - 1;
 
@@ -145,7 +152,6 @@
     if (index)
         for (; [path characterAtIndex:index - 1] != '/'; index--);
     state->currentDir = [self nsStringToCString:[path substringFromIndex:index]];
-
     state->depth = 0;
     for (int i = 0; i < (len - 1); i++)
         if ([path characterAtIndex:i] == '/')
@@ -154,6 +160,8 @@
     NSLog(@"dir= %s", state->currentDir);
     NSLog(@"path= %s", state->currentPath);
     NSLog(@"depth= %d", state->depth);
+    NSLog(@"ip= %s", state->ipAddress);
+    NSLog(@"port= %s", state->port);
 
 }
 
@@ -201,7 +209,7 @@
                 break;
             case CONFIRM_ALERT_TAG:
                 [alert setDelegate:self];
-                [alert setTitle:@"This action is permanent!"];
+                [alert setTitle:@"Confirm Change"];
                 [alert setMessage:@"Are you sure you want to perform this action?"];
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
@@ -237,7 +245,7 @@
 -(void)initPathViewWithAction:(SEL)action ForEvents:(UIControlEvents)events {
 
     UIFont *textFont = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
-    CGSize currentPathSize = [self sizeOfString:[NSString stringWithUTF8String:self.iPadState.currentPath]
+    CGSize currentPathSize = [self sizeOfString:[NSString stringWithCString:self.iPadState.currentPath encoding:NSISOLatin1StringEncoding]//[NSString stringWithUTF8String:self.iPadState.currentPath]
                                        withFont:textFont];
 
     UILabel *pathLabel = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -259,12 +267,15 @@
                                             currentPathSize.height)];
     
 
-    NSString *title = @"/";
+    NSString *title = @" / ";
     NSInteger len = 0;
     for (int i = 1; i <= (self.iPadState.depth + 1); i++) {
 
         title = [self dirAtDepth:(i - 1)
-                          InPath:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+                          InPath:[NSString stringWithCString:self.iPadState.currentPath encoding:NSISOLatin1StringEncoding]];//[NSString stringWithUTF8String:self.iPadState.currentPath]];
+
+        if ([title isEqualToString:@"/"] && i == 1)
+            title = @"  /  ";
 
         UIButton *pathButton = [self makeButtonWithTitle:title
                                                      Tag:(i - 1)
@@ -457,7 +468,7 @@
     [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
 
     // Set up back button
-    [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:self.title
+    [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:@"Back"
                                                                        Tag:BACK_BUTTON_TAG
                                                                     Target:nil
                                                                     Action:nil]];
@@ -472,15 +483,22 @@
 
 #pragma mark - Deallocs
 
--(void)freeState:(State)state {
+-(void)freeState:(State *)state {
 
     //This assumes that the strings were created on the heap
-    if (state.currentDir != NULL)
-        free(state.currentDir);
-    if (state.currentPath != NULL)
-        free(state.currentPath);
-    if (state.ipAddress != NULL)
-        free(state.ipAddress);
+    if (state->currentDir != NULL)
+        free(state->currentDir);// = NULL;
+    if (state->currentPath != NULL)
+        free(state->currentPath);// = NULL;
+    if (state->ipAddress != NULL)
+        free(state->ipAddress);// = NULL;
+    if (state->port != NULL)
+        free(state->port);// = NULL;
+    
+    state->currentDir = NULL;
+    state->currentPath = NULL;
+    state->ipAddress = NULL;
+    state->port = NULL;
 
 }
 
@@ -488,9 +506,8 @@
 
     //NSLog(@"dealloc");
     // Free state
-    [self freeState:self.iPadState];
-    self.filesDictionary = nil;
-    self.fileKeys = nil;
+    [self freeState:(&_iPadState)];
+    self.filesArray = nil;
 
     // Free Views
     self.alertViews = nil;
@@ -511,16 +528,18 @@
 
 #pragma mark - Setters
 
--(void)setIPAdress:(NSString *)ip {
+-(void)setIPAdress:(NSString *)ip WithPort:(NSString *)port{
 
     free(_iPadState.ipAddress);
+    free(_iPadState.port);
     _iPadState.ipAddress = [self nsStringToCString:ip];
+    _iPadState.port = [self nsStringToCString:port];
     for (UIViewController *vc in [self.navigationController viewControllers])
         for (UIBarButtonItem *bi in vc.toolbarItems)
             if (bi.tag == IP_TAG) {
 
                 UILabel *newLabel = [[UILabel alloc] init];
-                newLabel.text = [NSString stringWithFormat:@"IP Address: %@", ip];
+                newLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", ip, port];
                 newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
                 newLabel.frame = CGRectMake(0,
                                             0,
@@ -588,16 +607,9 @@
 #pragma mark - Converters
 
 -(char *)nsStringToCString:(NSString *)s {
-    
-    NSInteger len = [s length];
-    char *c = (char *)malloc(len + 1);
-    NSInteger i = 0;
-    for (; i < len; i++)
-        c[i] = [s characterAtIndex:i];
-    c[i] = '\0';
-    
-    return c;
-    
+
+    return strdup([s cStringUsingEncoding:NSISOLatin1StringEncoding]);
+
 }
 
 #pragma mark - Event Handelers
@@ -606,14 +618,14 @@
 
     [super viewWillAppear:animated];
     self.conectSwitchView.on = self.appDelegate.isConnected;
-    
-    if (self.filesDictionary && self.fileKeys && self.mainTableView) {
 
-        self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-        self.fileKeys = [self.filesDictionary allKeys];
-        [self.mainTableView reloadData];
+}
 
-    }
+-(void)viewDidAppear:(BOOL)animated {
+
+    [super viewWillAppear:animated];
+    if (self.filesArray && self.mainTableView)
+        [self reloadTableViewData];
 
 }
 
@@ -705,19 +717,16 @@
                             err = [self.appDelegate.model deleteDirectory:path];
                         else
                             err = [self.appDelegate.model deleteFile:path];
-                        if (err == DBFS_OKAY) {
-
-                            self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String: self.iPadState.currentPath]];
-                            self.fileKeys = [self.filesDictionary allKeys];
-                            [self.mainTableView reloadData];
-
-                        }
+                        if (err == DBFS_OKAY)
+                            [self reloadTableViewData];
                         else {
+
                             NSLog(@"DBFS Not OK with DELETE");
                             //FIXME add code here to deal with DBFS_Error
                             UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                             [alert setMessage:[self.appDelegate.model dbError:err]];
                             [alert show];
+
                         }
 
                     }
@@ -784,18 +793,15 @@
                         if ([self strOkay:path ForTag:ADD_ALERT_TAG IsDir:YES]) {
 
                             DBFS_Error err = [self.appDelegate.model createDirectory:path];
-                            if (err == DBFS_OKAY) {
-
-                                self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                                self.fileKeys = [self.filesDictionary allKeys];
-                                [self.mainTableView reloadData];
-                            }
+                            if (err == DBFS_OKAY)
+                                [self reloadTableViewData];
                             else {
+
                                 NSLog(@"DBFS Not OK with ADD");
-                                //FIXME add code here to deal with DBFS_Error
                                 UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                                 [alert setMessage:[self.appDelegate.model dbError:err]];
                                 [alert show];
+
                             }
 
                         }
@@ -818,15 +824,16 @@
                             else
                                 newPath = text;
                             BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
-                            if (isDir && [newPath characterAtIndex:([newPath length] - 1)] != '/')
-                                newPath = [NSString stringWithFormat:@"%@/", newPath];
-
                             NSInteger index = [newPath length] - [selectedKey length];
-                            if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
-                                newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+                            if ((isDir || index < 0) && [newPath characterAtIndex:([newPath length] - 1)] != '/')
+                                newPath = [NSString stringWithFormat:@"%@/", newPath];
 
                             NSInteger oldLen = [oldPath length];
                             NSInteger newLen = [newPath length];
+                            
+                            if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
+                                newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+                            newLen = [newPath length];
 
                             if ([self strOkay:oldPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
                                 [self strOkay:newPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
@@ -837,19 +844,15 @@
                                     err = [self.appDelegate.model moveDirectory:oldPath to:newPath];
                                 else
                                     err = [self.appDelegate.model moveFile:oldPath to:newPath];
-                                if (err == DBFS_OKAY) {
-
-                                    self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                                    self.fileKeys = [self.filesDictionary allKeys];
-                                    [self.mainTableView reloadData];
-
-                                }
+                                if (err == DBFS_OKAY)
+                                    [self reloadTableViewData];
                                 else {
+
                                     NSLog(@"DBFS Not OK with MOVE");
-                                    //FIXME add code here to deal with DBFS_Error
                                     UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                                     [alert setMessage:[self.appDelegate.model dbError:err]];
                                     [alert show];
+
                                 }
 
                             }
@@ -876,7 +879,7 @@
                         if (selectedDict && selectedKey) {
 
                             BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
-                            if (isDir && [text characterAtIndex:([text length] - 1)] != '/')
+                            if (isDir&& [text characterAtIndex:([text length] - 1)] != '/')
                                 text = [NSString stringWithFormat:@"%@/", text];
 
                             NSString *oldPath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
@@ -890,19 +893,15 @@
                                     err = [self.appDelegate.model renameDirectory:oldPath to:newPath];
                                 else
                                     err = [self.appDelegate.model renameFile:oldPath to:newPath];
-                                if (err == DBFS_OKAY) {
-
-                                    self.filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-                                    self.fileKeys = [self.filesDictionary allKeys];
-                                    [self.mainTableView reloadData];
-
-                                }
+                                if (err == DBFS_OKAY)
+                                    [self reloadTableViewData];
                                 else {
+
                                     NSLog(@"DBFS Not OK With RENAME");
-                                    //FIXME add code here to deal with DBFS_Error
                                     UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                                     [alert setMessage:[self.appDelegate.model dbError:err]];
                                     [alert show];
+
                                 }
 
                             }
@@ -945,7 +944,6 @@
 
 -(void)buttonPressed:(UIBarButtonItem *)sender {
 
-    //NSLog(@"buttonPressed: %d", sender.tag);
     switch (sender.tag) {
 
         case HELP_BUTTON_TAG:
@@ -967,7 +965,7 @@
     if ([sender.titleLabel.text isEqualToString:@"Move"]) {
 
         UIAlertView *alert = [self objectInArray:self.alertViews WithTag:MOVE_ALERT_TAG];
-        [[alert textFieldAtIndex:0] setPlaceholder:[NSString stringWithUTF8String:self.iPadState.currentPath]];
+        [[alert textFieldAtIndex:0] setPlaceholder:[NSString stringWithCString:self.iPadState.currentPath encoding:NSISOLatin1StringEncoding]];//[NSString stringWithUTF8String:self.iPadState.currentPath]];
         [alert show];
 
     }
@@ -988,11 +986,31 @@
 
     CGPoint location = [sender locationInView:self.mainTableView];
     NSIndexPath *indexPath = [self.mainTableView indexPathForRowAtPoint:location];
-    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [self.filesDictionary objectForKey:key];
+    NSDictionary *dict = [self.filesArray objectAtIndex:indexPath.row];
+    NSString *key = [dict objectForKey:@"Name"];
 
     if (sender.state == UIGestureRecognizerStateBegan)
         [self displayDetailedViwForItem:dict WithKey:key];
+
+}
+
+-(void)refreshWithArray:(NSArray *)a {
+
+    assert(a);
+    assert([a count] >= 2);
+    modelUpdateTag tag = ((NSNumber *)a[0]).intValue;
+    NSString *from = a[1];
+    NSString *to = nil;
+    if ([a count] >= 3)
+        to = a[2];
+    [self refreshForTag:tag From:from To:to];
+
+}
+
+-(void)reloadTableViewData {
+
+    self.filesArray = [self.appDelegate.model getContentsArrayIn:[NSString stringWithCString:self.iPadState.currentPath encoding:NSISOLatin1StringEncoding]];//[NSString stringWithUTF8String:self.iPadState.currentPath]];
+    [self.mainTableView reloadData];
 
 }
 
@@ -1002,7 +1020,7 @@
     NSInteger oldLen = [oldPath length];
     assert(oldLen >= 2);
     NSInteger newLen = [newPath length];
-    NSString *currentPath = [NSString stringWithUTF8String:self.iPadState.currentPath];
+    NSString *currentPath = [NSString stringWithCString:self.iPadState.currentPath encoding:NSISOLatin1StringEncoding];//[NSString stringWithUTF8String:self.iPadState.currentPath];
     NSInteger currentLen = [currentPath length];
 
     NSInteger index = oldLen - 1;
@@ -1014,38 +1032,56 @@
     NSString *serverPath = [oldPath substringToIndex:(index + 1)];
     NSInteger serverLen = [serverPath length];
 
-    if (self.filesDictionary && self.fileKeys && self.mainTableView && oldLen <= currentLen)
+    NSString *oldName = [oldPath substringFromIndex:(index + 1)];
+
+    NSLog(@"refresh currentPath= %@", currentPath);
+    NSLog(@"refresh oldPath= %@", oldPath);
+    NSLog(@"refresh oldName= %@", oldName);
+    NSLog(@"refresh newPath= %@", newPath);
+    NSLog(@"refresh serverPath= %@", serverPath);
+    NSLog(@"refresh tag= %u", tag);
+
+    if (self.filesArray && self.mainTableView && serverLen <= currentLen)
         switch (tag) {
             case ADD_MODEL_TAG:
-                if ([serverPath isEqualToString:currentPath]) {
-
-                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
-                    self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView reloadData];
-
-                }
+                if ([serverPath isEqualToString:currentPath])
+                    [self reloadTableViewData];
                 break;
             case MOVE_MODEL_TAG:
             case RENAME_MODEL_TAG:
                 if ([serverPath isEqualToString:currentPath]) {
 
-                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
-                    self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView reloadData];
+                    if (self.detailView &&
+                        !self.detailView.isHidden &&
+                        [self.detailView.title length] >= [oldName length] &&
+                        [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
+                        [self.detailView hideAnimated:NO];
+
+                    [self reloadTableViewData];
 
                 }
-                else if ([oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
+                else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [newPath characterAtIndex:(newLen - 1)] == '/') {
+
+                    if (self.detailView && !self.detailView.isHidden)
+                        [self.detailView hideAnimated:NO];
+
+                    for (int d = (self.iPadState.depth - 1); d >= 0; d--)
+                        [self.navigationController.viewControllers[d] refreshForTag:tag From:oldPath To:newPath];
 
                     NSString *newIpadPath = newPath;
                     if (oldLen < currentLen)
                         newIpadPath = [NSString stringWithFormat:@"%@%@", newIpadPath, [currentPath substringFromIndex:oldLen]];
-                    NSString *newAddress = [NSString stringWithUTF8String:self.iPadState.ipAddress];
-                    [self freeState:self.iPadState];
-                    [self initState:&_iPadState WithPath:newIpadPath Address:newAddress];
-                    if ([oldPath isEqualToString:currentPath])
-                        self.title = [NSString stringWithUTF8String:self.iPadState.currentDir];
 
+                    NSString *newAddress = [NSString stringWithCString:self.iPadState.ipAddress encoding:NSISOLatin1StringEncoding];//[NSString stringWithUTF8String:self.iPadState.ipAddress];
+                    NSString *newPort = [NSString stringWithCString:self.iPadState.port encoding:NSISOLatin1StringEncoding];//[NSString stringWithUTF8String:self.iPadState.port];
+                    [self freeState:(&_iPadState)];
+                    [self initState:&_iPadState WithPath:newIpadPath Address:newAddress Port:newPort];
+                    if ([oldPath isEqualToString:currentPath])
+                        self.title = [NSString stringWithCString:self.iPadState.currentDir encoding:NSISOLatin1StringEncoding];//[NSString stringWithUTF8String:self.iPadState.currentDir];
+
+                    [self.pathScrollView removeFromSuperview];
+                    [self.pathLabelView removeFromSuperview];
                     self.pathScrollView = nil;
                     self.pathLabelView = nil;
                     _pathScrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
@@ -1060,27 +1096,29 @@
                     _pathLabelView.numberOfLines = 1;
                     [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
                     [self makeFrameForViews];
+                    [self.view addSubview:self.pathScrollView];
 
-                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
-                    self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView reloadData];
-
-                    for (int d = (self.iPadState.depth - 1); d >= 0; d--)
-                        [self.navigationController.viewControllers[d] refreshForTag:tag From:oldPath To:newPath];
+                    [self reloadTableViewData];
 
                 }
                 break;
             case DELETE_MODEL_TAG:
                 if ([serverPath isEqualToString:currentPath]) {
-                    
-                    self.filesDictionary = [self.appDelegate.model getContentsIn:currentPath];
-                    self.fileKeys = [self.filesDictionary allKeys];
-                    [self.mainTableView reloadData];
+
+                    if (self.detailView &&
+                        !self.detailView.isHidden &&
+                        [self.detailView.title length] >= [oldName length] &&
+                        [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
+                        [self.detailView hideAnimated:NO];
+
+                    [self reloadTableViewData];
                     
                 }
-                else if ([oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
+                else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [oldPath characterAtIndex:(oldLen - 1)] == '/') {
 
+                    if (self.detailView && !self.detailView.isHidden)
+                        [self.detailView hideAnimated:NO];
                     NSInteger depth = -1;
                     for (int i = 0; i < serverLen; i++)
                         if ([serverPath characterAtIndex:i] == '/')
@@ -1105,16 +1143,8 @@
                                                object:[UIDevice currentDevice]];
 
     // Set up directory Contents
-    if(_filesDictionary == nil) {
-
-        //NSString *path = [[NSBundle mainBundle] pathForResource:@"files" ofType:@"plist"];
-        //_filesDictionary = [[NSDictionary alloc] initWithContentsOfFile:path];
-        //_fileKeys = [[_filesDictionary allKeys] sortedArrayUsingSelector:@selector(compare:)];
-
-        _filesDictionary = [self.appDelegate.model getContentsIn:[NSString stringWithUTF8String:self.iPadState.currentPath]];
-        _fileKeys = [_filesDictionary allKeys];
-
-    }
+    if(_filesArray == nil)
+        _filesArray = [self.appDelegate.model getContentsArrayIn:[NSString stringWithCString:self.iPadState.currentPath encoding:NSISOLatin1StringEncoding]];//[NSString stringWithUTF8String:self.iPadState.currentPath]];
 
     // Add a help button to the top right
     UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"Need help?"
@@ -1133,17 +1163,18 @@
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
                                                                           target:nil
                                                                           action:nil];
-    UIBarButtonItem *flex2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
+    UIBarButtonItem *fixed = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace
                                                                            target:nil
                                                                            action:nil];
 
     UILabel *ipLabel = [[UILabel alloc] init];
-    ipLabel.text = [NSString stringWithFormat:@"IP Address: %@", [NSString stringWithUTF8String:self.iPadState.ipAddress]];
+    ipLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", [NSString stringWithCString:self.iPadState.ipAddress encoding:NSISOLatin1StringEncoding]/*[NSString stringWithUTF8String:self.iPadState.ipAddress]*/, [NSString stringWithCString:self.iPadState.port encoding:NSISOLatin1StringEncoding]/*[NSString stringWithUTF8String:self.iPadState.port]*/];
     ipLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     ipLabel.frame = CGRectMake(0,
                                0,
                                [self sizeOfString:ipLabel.text withFont:ipLabel.font].width,
                                MEDIAN_FONT_SIZE);
+    [ipLabel setBackgroundColor:[UIColor clearColor]];
     UIBarButtonItem *ipButtonItem = [[UIBarButtonItem alloc] initWithCustomView:ipLabel];
     ipButtonItem.tag = IP_TAG;
 
@@ -1153,7 +1184,7 @@
                                                                      0,
                                                                      [self sizeOfString:switchString
                                                                                withFont:[UIFont systemFontOfSize: MEDIAN_FONT_SIZE]].width,
-                                                                     CELL_HEIGHT)];
+                                                                     MEDIAN_FONT_SIZE)];
     switchLable.text = switchString;
     switchLable.backgroundColor = [UIColor clearColor];
     switchLable.textColor = [UIColor blackColor];
@@ -1165,7 +1196,7 @@
     UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:self.conectSwitchView];
 
     // put objects in toolbar
-    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:addDirButton, flex, ipButtonItem, flex2, switchButtonItem, cSwitch, nil];
+    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:flex, addDirButton, flex, ipButtonItem, flex, switchButtonItem, fixed, cSwitch, flex, nil];
     self.toolbarItems = toolBarItems;
 
     // set tool bar settings
@@ -1177,7 +1208,7 @@
     self.navigationController.navigationBar.tintColor = self.buttonColor;
     [self.navigationController setToolbarHidden:NO animated:YES];
 
-    [self.tableView reloadData];
+    [self.mainTableView reloadData];
     // Uncomment the following line to preserve selection between presentations.
     // self.clearsSelectionOnViewWillAppear = NO;
 
@@ -1214,40 +1245,59 @@
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
     UIScrollView *custom = [[UIScrollView alloc] initWithFrame:CGRectZero];
-    UILabel *nameLabel = [[UILabel alloc] init];
-    nameLabel.text = [NSString stringWithFormat:@"Name: %@", key];
-    nameLabel.frame = CGRectMake(0, 0, [self sizeOfString:nameLabel.text withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width, SMALL_FONT_SIZE);
-    [nameLabel setTextColor:[UIColor whiteColor]];
-    [nameLabel setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
-    
     [custom setBackgroundColor:[UIColor clearColor]];
     [custom setBounces:NO];
 
-    [custom addSubview:nameLabel];
-
-    int i = 1;
-    CGFloat maxWidth = [self sizeOfString:nameLabel.text withFont:nameLabel.font].width;
+    int i = 0;
+    CGFloat maxWidth = 0;
     for (NSString *k in [dict keyEnumerator]) {
-        
-        UILabel *l = [[UILabel alloc] init];
-        l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
-        [l setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
-        CGFloat width = [self sizeOfString:l.text
-                                  withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width;
-        l.frame = CGRectMake(0, SMALL_FONT_SIZE * i, width, SMALL_FONT_SIZE);
-        [l setTextColor:[UIColor whiteColor]];
-        [custom addSubview:l];
-        
-        if (width > maxWidth)
-            maxWidth = width;
-        i++;
+
+        if (((![k isEqualToString:@"Modified"]) || ([k isEqualToString:@"Modified"] && ![[dict objectForKey:@"Type"] boolValue])) &&
+            ((![k isEqualToString:@"Size"])     || ([k isEqualToString:@"Size"] &&     ![[dict objectForKey:@"Type"] boolValue]))) {
+
+            UILabel *l = [[UILabel alloc] init];
+            if ([k isEqualToString:@"Modified"]) {
+
+                NSInteger dateSec = [[dict objectForKey:k] integerValue];
+                NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+                dateFormatter.dateFormat = @"yyyy-MM-dd HH:mm:ss";
+                dateFormatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"PST"];
+                NSDate *date = [[NSDate alloc] initWithTimeIntervalSince1970:dateSec];
+                l.text = [NSString stringWithFormat:@"%@: %@", k, [dateFormatter stringFromDate:date]];
+
+            }
+            else if ([k isEqualToString:@"Type"]) {
+
+                if ([[dict objectForKey:k] boolValue])
+                    l.text = [NSString stringWithFormat:@"%@: Directory", k];
+                else
+                    l.text = [NSString stringWithFormat:@"%@: File", k];
+
+            }
+            else if ([k isEqualToString:@"Size"])
+                l.text = [NSString stringWithFormat:@"%@: %@ Byte(s)", k, [dict objectForKey:k]];
+            else
+                l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
+
+            [l setFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]];
+            CGFloat width = [self sizeOfString:l.text
+                                      withFont:[UIFont systemFontOfSize:SMALL_FONT_SIZE]].width;
+            l.frame = CGRectMake(0, SMALL_FONT_SIZE * i, width, SMALL_FONT_SIZE + 5);
+            [l setTextColor:[UIColor whiteColor]];
+
+            [custom addSubview:l];
+
+            if (width > maxWidth)
+                maxWidth = width;
+            i++;
+
+        }
         
     }
 
     if (!self.detailView) {
 
         _detailView = [[CODialog alloc] initWithWindow:[[[UIApplication sharedApplication] delegate] window]];
-        [_detailView setTitle:@"File/Directory details:"];
         _detailView.dialogStyle = CODialogStyleCustomView;
 
         for (NSString *b in self.actionSheetButtons)
@@ -1256,9 +1306,11 @@
                                        selector:@selector(detailedVeiwButtonPressed:)];
 
     }
-    custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, (i + 1) * SMALL_FONT_SIZE);
+    [self.detailView setTitle:[NSString stringWithFormat:@"File/Directory details for: %@", key]];
+    custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, i * (SMALL_FONT_SIZE + 5));
     custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);
     self.detailView.customView = custom;
+    
 
     selectedDict = dict;
     selectedKey = key;
@@ -1270,7 +1322,7 @@
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 
-    return [self.fileKeys count];
+    return [self.filesArray count];
 
 }
 
@@ -1295,8 +1347,8 @@
     }
 
     // fecthc key and dict info
-    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [self.filesDictionary objectForKey:key];
+    NSDictionary *dict = [self.filesArray objectAtIndex:indexPath.row];
+    NSString *key = [dict objectForKey:@"Name"];
 
     // set up cell text and other atributes
     //cell.detailTextLabel.text = [NSString stringWithUTF8String:self.iPadState.currentPath];
@@ -1306,8 +1358,12 @@
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 
     }
-    else
+    else {
+
         cell.textLabel.text = [NSString stringWithFormat:@"📄 %@", key];
+        cell.accessoryType = UITableViewCellAccessoryNone;
+
+    }
     cell.textLabel.font = [UIFont boldSystemFontOfSize:LARGE_FONT_SIZE];
     cell.detailTextLabel.font = [UIFont systemFontOfSize:SMALL_FONT_SIZE];
 
@@ -1322,8 +1378,8 @@
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
 
     // Fetch data from keys and dictionary
-    NSString *key = [self.fileKeys objectAtIndex:indexPath.row];
-    NSDictionary *dict = [self.filesDictionary objectForKey:key];
+    NSDictionary *dict = [self.filesArray objectAtIndex:indexPath.row];
+    NSString *key = [dict objectForKey:@"Name"];
 
     // if the dict object is a directory then...
     if ([[dict objectForKey:@"Type"] boolValue]) {
@@ -1333,7 +1389,8 @@
 
         // Make subTableviewcontroller to push onto nav stack
         IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithPath:subPath
-                                                                                               ipAddress:[NSString stringWithUTF8String:self.iPadState.ipAddress]
+                                                                                               ipAddress:[NSString stringWithCString:self.iPadState.ipAddress encoding:NSISOLatin1StringEncoding]//[NSString stringWithUTF8String:self.iPadState.ipAddress]
+                                                                                                   port:[NSString stringWithCString:self.iPadState.port encoding:NSISOLatin1StringEncoding]//[NSString stringWithUTF8String:self.iPadState.port]
                                                                                             switchAction:self.switchAction
                                                                                               forEvents:self.switchEvents pathAction:self.pathAction pathEvents:self.pathEvents];
 

@@ -13,13 +13,22 @@
   </head>
   <body>
     <div class="ow-overlay ow-closed"></div>
-    <div id="create-directory-window" class="modal ow-closed">
+    <div id="create-directory-window" class="modal ow-closed modal-window">
       <h1 class="title">Create Directory</h1>
       <a class="close-button" href="#"><img src="img/cross.png" /></a>
       <div id="create-directory-form">
         <label for="dir-name">Name</label>
         <input type="text" id="dir-name" name="dir-name" />
         <a href="#" class="button icon log">Create</a>
+      </div>
+    </div>
+    <div id="rename-file-window" class="modal ow-closed modal-window">
+      <h1 class="title">Rename File</h1>
+      <a class="close-button" href="#"><img src="img/cross.png" /></a>
+      <div id="rename-file-form">
+        <label for="new-name">New Name</label>
+        <input type="text" id="new-name" name="new-name" />
+        <a href="#" class="button icon log">Rename</a>
       </div>
     </div>
     <div id="content">
@@ -38,16 +47,19 @@
           <a id="create-directory-button" href="#" class="button icon log">Create Directory</a>
         </div>
         <div id="file-actions" class="button-group">
-          <a href="#" class="button danger icon remove disable">Delete</a>
-          <a href="#" class="button icon edit disable">Rename</a>
-          <a href="#" class="button icon arrowdown disable">Download</a>
+          <a href="#" id="delete-button" class="button danger icon remove disable">Delete</a>
+          <a href="#" id="rename-button" class="button icon edit disable">Rename</a>
+          <a href="#" id="open-button" class="button icon arrowdown disable">Open</a>
         </div>
         <div class="button-group">
-          <form id="upload-form">
+          <form id="upload-form" enctype="multipart/form-data">
             <input type="file" id="upload-file" name="upload-file" />
             <a href="#" id="select-file-button" class="button icon tag">Select File...</a>
             <a href="#" id="upload-button" class="button icon arrowup disable">Upload</a>
           </form>
+        </div>
+        <div id="upload-progress">
+          <div><div>
         </div>
       </div>
     </div>

@@ -55,6 +55,8 @@ struct DBFS_FileList
 struct DBFS_FileName
 {
     const char *name;
+    int timestamp;
+    int size;
 };
 
 struct DBFS_DirList

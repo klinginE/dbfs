@@ -11,7 +11,7 @@
 
 @interface DBInterface : NSObject
 
--(char *)nsStringToCString:(NSString *)s;
+//-(char *)nsStringToCString:(NSString *)s;
 -(DBFS_Blob)slurp:(FILE *)in;
 -(NSString *)dbError:(int)err;
 -(DBFS *)openDatabase:(NSString *)name;

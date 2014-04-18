@@ -52,27 +52,6 @@
             
         }];
         
-        //NSString* myFile = [[NSBundle mainBundle] pathForResource:@"arrow_down" ofType:@"png" inDirectory:@"Website/img"];
-        /*
-        [webServer addHandlerForMethod:@"GET" path:@"/download" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
-            
-            // Called from GCD thread
-            GCDWebServerResponse* response = nil;
-            
-            NSMutableString* content = [[NSMutableString alloc] init];
-            //[_appDelegate.model getJsonContentsIn: "/"];
-            //[getJsonContentsIn
-         
-//            [content appendFormat:@"<html><body><p>/download?id=%@&name=%@</p></body></html>",
-//             [request.query objectForKey:@"id"],
-//             [request.query objectForKey:@"name"]
-//             ];
-            //response = [GCDWebServerFileResponse responseWithFile:myFile isAttachment:YES];
-            //response = [GCDWebServerResponse responseWithStatusCode:403];
-            //return response;
-            return [GCDWebServerDataResponse :[_appDelegate.model getJsonContentsIn: @"/"]];
-        }];*/
-        
         [webServer addHandlerForMethod:@"GET" path:@"/directory.json" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
             
             // Called from GCD thread
@@ -97,7 +76,7 @@
                                 [content appendFormat:@"<html><body><p>Folder %@ was created.</p></body></html>",
                                   pathArg
                                 ];
-                    
+                    NSLog(@"Server added to model");
                     // Calling Refresh Function
                     [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: ADD_MODEL_TAG
                                                                                                        From: pathArg To: nil];
@@ -109,31 +88,139 @@
                 return [GCDWebServerDataResponse responseWithHTML:content];
             }
         }];
+
         [webServer addHandlerForMethod:@"GET" path:@"/rename.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
-            
+
+            MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
+
             // Called from GCD thread
             NSString * oldPath = [request.query objectForKey:@"old"];
             NSString * newPath = [request.query objectForKey:@"new"];
             
             if ( oldPath == NULL || newPath == NULL ){
                 return [GCDWebServerResponse responseWithStatusCode:403];
-            }else{
-                NSMutableString* content = [[NSMutableString alloc] init];
-                if ( ![[(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] renameDirectory:oldPath to:newPath] ){
-                    [content appendFormat:@"<html><body><p>Path %@ was renamed to %@.</p></body></html>",
-                     oldPath, newPath];
-                    
-                    // Calling Refresh Function
-                    [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: RENAME_MODEL_TAG
-                                                                                                       From: oldPath To: newPath];
-                }else{
-                    [content appendFormat:@"<html><body><p>Path %@ was NOT renamed to %@.</p></body></html>",
-                     oldPath, newPath];
-                }
-                return [GCDWebServerDataResponse responseWithHTML:content];
             }
+            NSMutableString* content = [[NSMutableString alloc] init];
+
+            int dbResponse = 0;
+            if ([oldPath hasSuffix:@"/"]) {
+                dbResponse = [model renameDirectory:oldPath to:newPath];
+            } else {
+                dbResponse = [model renameFile:oldPath to:newPath];
+            }
+
+            if (dbResponse == DBFS_OKAY){
+                [content appendFormat:@"<html><body><p>Path %@ was renamed to %@.</p></body></html>", oldPath, newPath];
+                    
+                // Calling Refresh Function
+                [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: RENAME_MODEL_TAG
+                                                                                                       From: oldPath To: newPath];
+            } else {
+                [content appendFormat:@"<html><body><p>Path %@ was NOT renamed to %@.</p></body></html>", oldPath, newPath];
+            }
+
+            return [GCDWebServerDataResponse responseWithHTML:content];
+
         }];
-        
+
+        [webServer addHandlerForMethod:@"POST" path:@"/upload.html" requestClass:[GCDWebServerMultiPartFormRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest * request) {
+            GCDWebServerMultiPartFormRequest *mpReq = (GCDWebServerMultiPartFormRequest *)request;
+            GCDWebServerMultiPartFile *file = [mpReq.files objectForKey:@"upload-file"];
+            NSString *uploadDir = [[mpReq.arguments objectForKey:@"upload-dir"] string];
+            NSString *fileName = [file fileName];
+            NSString *filePath = [NSString stringWithFormat:@"%@%@", uploadDir, fileName];
+
+            FILE *fp = fopen([[file temporaryPath] cStringUsingEncoding:NSASCIIStringEncoding], "r");
+
+            // If temp file wasn't uploaded, respond with error JSON
+            if (!fp) {
+                NSString *response = @"{\n\t\"type\": \"error\",\n\t\"msg\": \"Upload failed\"\n}";
+                return [GCDWebServerDataResponse responseWithData: [response dataUsingEncoding:NSUTF8StringEncoding] contentType: @"application/json"];
+            }
+
+            // Get file size
+            fseek(fp, 0, SEEK_END);
+            int sz = ftell(fp);
+            rewind(fp);
+
+            // Overwrite/put file
+            MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
+            NSDictionary *contents = [model getDirectoryListIn:uploadDir];
+            if ([contents objectForKey:fileName]) {
+                [model overwriteFile:filePath from:fp];
+            } else {
+                [model putFile:filePath from:fp withSize:sz];
+            }
+
+            fclose(fp);
+
+            // Refresh the iPad view
+            [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: ADD_MODEL_TAG
+                                                                                               From: filePath To: nil];
+
+            // Respond with success JSON
+            NSString *response = @"{\n\t\"type\": \"success\",\n\t\"msg\": \"Upload succeeded\"\n}";
+            return [GCDWebServerDataResponse responseWithData: [response dataUsingEncoding:NSUTF8StringEncoding] contentType: @"application/json"];
+        }];
+
+        [webServer addHandlerForMethod:@"GET" path:@"/download.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+
+            MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
+
+            NSString *uuid = [[NSUUID UUID] UUIDString];
+            NSString *path = [request.query objectForKey:@"path"];
+            NSString *tempPath = NSTemporaryDirectory();
+            NSString *tempFile = [tempPath stringByAppendingPathComponent:uuid];
+
+            FILE *fp = fopen([tempFile cStringUsingEncoding:NSASCIIStringEncoding], "w");
+            if (!fp) {
+                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>Failed to create temporary file.</body></html>"];
+            }
+            
+            int sz;
+            if ([model getFile:path to:fp withSize:&sz] != DBFS_OKAY) {
+                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>Failed to get file from DB.</body></html>"];
+            }
+
+            fclose(fp);
+
+            NSData *data = [[NSFileManager defaultManager] contentsAtPath:tempFile];
+            NSString *fnHeader = [NSString stringWithFormat:@"attachment; filename=%@", [path lastPathComponent]];
+            //NSError *error;
+            [[NSFileManager defaultManager] removeItemAtPath:tempFile error:NULL];
+
+            GCDWebServerDataResponse *response = [GCDWebServerDataResponse responseWithData:data contentType:@"application/octet-stream"];
+            [response setValue:fnHeader forAdditionalHeader:@"Content-Disposition"];
+            return response;
+        }];
+
+        [webServer addHandlerForMethod:@"GET" path:@"/delete.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+            NSString *path = [request.query objectForKey:@"path"];
+            MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
+
+            int dbResponse = 0;
+
+            if ([path hasSuffix:@"/"]) {
+                dbResponse = [model deleteDirectory:path];
+            } else {
+                dbResponse = [model deleteFile:path];
+            }
+
+            if (dbResponse != DBFS_OKAY) {
+                // Respond with error JSON
+                NSString *response = @"{\n\t\"type\": \"error\",\n\t\"msg\": \"Delete failed\"\n}";
+                return [GCDWebServerDataResponse responseWithData: [response dataUsingEncoding:NSUTF8StringEncoding] contentType: @"application/json"];
+            }
+
+            // Refresh the iPad view
+            [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: DELETE_MODEL_TAG
+                                                                                               From: path To: nil];
+
+            // Respond with success JSON
+            NSString *response = @"{\n\t\"type\": \"success\",\n\t\"msg\": \"Delete succeeded\"\n}";
+            return [GCDWebServerDataResponse responseWithData: [response dataUsingEncoding:NSUTF8StringEncoding] contentType: @"application/json"];
+        }];
+
         [webServer start];
         
     }

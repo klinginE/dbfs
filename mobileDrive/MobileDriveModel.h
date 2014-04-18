@@ -51,6 +51,13 @@
 // Organization: directories first followed by files, both are alphabetical.
 -(NSDictionary *)getContentsIn:(NSString *)dirName;
 
+-(NSArray *)getFileArrayIn:(NSString *)dirName;
+-(NSArray *)getDirectoryArrayIn:(NSString *)dirName;
+
+// Returns a dictionary containing the contents of dirName.
+// Organization: directories first followed by files, both are alphabetical.
+-(NSArray *)getContentsArrayIn:(NSString *)dirName;
+
 // Returns NSString containing the list of current contents in JSON format.
 -(NSString *)getJsonContentsIn:(NSString *)dirName;
 @end

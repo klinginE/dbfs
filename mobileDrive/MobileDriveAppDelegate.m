@@ -9,6 +9,7 @@
 #import "MobileDriveAppDelegate.h"
 #import "ServerViewController.h"
 #import "IPadTableViewController.h"
+#import "CGDWebServer/GCDWebServer.h"
 
 
 @interface MobileDriveAppDelegate() <IPadTableViewControllerDelegate>
@@ -18,13 +19,17 @@
 @end
 
 @implementation MobileDriveAppDelegate{
-   __block NSString * ipAddress;
+    NSString *ipAddress;
     id lockIpAddress;
 }
 
 -(void)switchChanged:(UISwitch *)sender {
 
-    self.isConnected = [sender isOn];
+    BOOL switchState = [sender isOn];
+    if (self.isConnected != switchState)
+        self.isConnected = switchState;
+    else
+        return;
 
     NSLog(@"switchChanged %d", self.isConnected);
     if(self.isConnected){
@@ -48,11 +53,13 @@
 
 -(void)refreshIpadForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
 
-    NSLog(@"Tag: %u", tag);
-    NSLog(oldPath);
-    NSLog(newPath);
-    
-    [self.iPadTableViewController refreshForTag:tag From:oldPath To:newPath];
+//    NSLog(@"Tag: %u", tag);
+//    NSLog(oldPath);
+//    NSLog(newPath);
+
+    NSNumber *n = [[NSNumber alloc] initWithInt:tag];
+    NSArray *a = [[NSArray alloc] initWithObjects:n, oldPath, newPath, nil];
+    [((IPadTableViewController *)self.iPadNavController.topViewController) performSelector:@selector(refreshWithArray:) onThread:[NSThread mainThread] withObject:a waitUntilDone:YES];
 
 }
 
@@ -60,11 +67,13 @@
 
     assert(depth >= 0);
     assert([self.iPadNavController.viewControllers count] - 1 >= depth);
+
     [self.iPadNavController popToViewController:self.iPadNavController.viewControllers[depth] animated:animate];
+
     if (message) {
 
         UIAlertView *alert = [[UIAlertView alloc] init];
-        [alert setTitle:@"Had to redirect to new current directory because:"];
+        [alert setTitle:@"Had to redirect to new directory because:"];
         [alert setMessage:message];
         [alert addButtonWithTitle:@"OK"];
         [alert show];
@@ -75,16 +84,16 @@
 
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.isConnected = YES;
     self.serverController = [[ServerViewController alloc] init];
     self.model = [[MobileDriveModel alloc] init];
 
     ipAddress = [self.serverController getIPAddress];
-    
+
     // init root table view controler
     self.iPadTableViewController = [[IPadTableViewController alloc] initWithPath:@"/"
                                                                         ipAddress:ipAddress
+                                                                            port:[NSString stringWithFormat:@"%d", (NSInteger)kDefaultPort]
                                                                     switchAction:@selector(switchChanged:)
                                                                        forEvents:UIControlEventValueChanged
                                                                       pathAction:@selector(pathButtonPressed:)
@@ -92,13 +101,12 @@
 
     // init nav controller
     _iPadNavController = [[UINavigationController alloc] initWithRootViewController:self.iPadTableViewController];
-    _iPadNavController.title = @"NavController";
     [_iPadNavController.navigationBar setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIFont systemFontOfSize:LARGE_FONT_SIZE],
                                                             NSFontAttributeName,
                                                             nil]];
 
     // set up window
-    
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = _iPadNavController;
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];

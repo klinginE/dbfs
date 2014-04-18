@@ -327,12 +327,14 @@ DBFS_Error query_lsf1(DBFS *db, int indir, DBFS_FileName **out_files, size_t *ou
             debug_result(query);
             const char *text = (const char *)(sqlite3_column_text(query, 0));
             text = strdup(text);
+            int timestamp = sqlite3_column_int(query, 1);
+            int filesize = sqlite3_column_int(query, 2);
             if (out_cap == *out_size)
             {
                 out_cap *= 2;
                 *out_files = realloc(*out_files, out_cap * sizeof(**out_files));
             }
-            (*out_files)[(*out_size)++] = (DBFS_FileName){text};
+            (*out_files)[(*out_size)++] = (DBFS_FileName){text, timestamp, filesize};
             continue;
         }
         sqlite3_reset(query);
