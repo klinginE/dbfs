@@ -107,8 +107,16 @@
         return nil;
     }
 //    int result = [self.dbInterface getFile:fname fromDatabase:self->dbfs to:out withSize:size];
-    
-    return [self.dbInterface getFile_NSDATA:fname fromDatabase:self->dbfs];
+    __block NSData *result;
+    __block NSString *fname_t = fname.copy;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface getFile_NSDATA:fname_t fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+    return result;
 }
 
 -(int)putFile:(NSString *)fname from:(FILE *)in withSize:(int)size {

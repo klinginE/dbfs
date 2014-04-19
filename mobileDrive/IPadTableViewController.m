@@ -206,7 +206,7 @@
 
 -(void)initActionSheetButtons:(NSMutableArray *)buttons {
 
-//    [buttons addObject:@"Open"];
+    [buttons addObject:@"Open"];
     [buttons addObject:@"Move"];
     [buttons addObject:@"Rename"];
     [buttons addObject:@"Delete"];
@@ -911,6 +911,7 @@
 
     NSString* listExtensions = extTuple[0];
     char codeExtension = [ (NSNumber*) extTuple[1] charValue ];
+    fileExtension = [fileExtension lowercaseString];
     
     NSArray *singleImageExtensions = [listExtensions componentsSeparatedByString: @" "];
     
@@ -984,13 +985,13 @@
 }
 
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
+
     NSLog(@"detailedVeiwButtonPressed");
     [self.detailView hideAnimated:NO];
-    
+    self.detailView = nil;
     if ([sender.titleLabel.text isEqualToString:@"Open"]) {
         // Display file according to type
-        NSString *filePath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, selectedKey];
-
+        NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
         if ( !(extensionTypeFound & UNKNOWN_EXTENSION) ) {
                [self displayFileWithfilePath: filePath fileName:selectedKey];
         }
@@ -1277,7 +1278,6 @@
 
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
-    NSMutableArray *actionSheetButtonsTemp = self.actionSheetButtons;
     UIScrollView *custom = [[UIScrollView alloc] initWithFrame:CGRectZero];
     [custom setBackgroundColor:[UIColor clearColor]];
     [custom setBounces:NO];
@@ -1329,24 +1329,25 @@
         
     }
 
-//    if (!self.detailView) {
+    _detailView = [[CODialog alloc] initWithWindow:[[[UIApplication sharedApplication] delegate] window]];
+    _detailView.dialogStyle = CODialogStyleCustomView;
 
-        _detailView = [[CODialog alloc] initWithWindow:[[[UIApplication sharedApplication] delegate] window]];
-        _detailView.dialogStyle = CODialogStyleCustomView;
+    extensionTypeFound = UNKNOWN_EXTENSION;
+    extensionTypeFound = [self findFileType: [key pathExtension]]; // testing to see if file can be open
 
-        extensionTypeFound = UNKNOWN_EXTENSION;
-        extensionTypeFound = [self findFileType: [key pathExtension]]; // testing to see if file can be open
-        if ( !(extensionTypeFound & UNKNOWN_EXTENSION) ){ // if file can be open
-            //[self.actionSheetButtons insertObject:@"Open" atIndex:0];
-            actionSheetButtonsTemp = [ [NSMutableArray alloc] initWithArray:@[@"Open", @"Move", @"Rename", @"Delete", @"Cancel" ]];
-        }
+    for (NSString *b in self.actionSheetButtons) {
         
-        for (NSString *b in actionSheetButtonsTemp)
+        NSLog(@"%@", b);
+        if ([b isEqualToString:@"Open"] && !(extensionTypeFound & UNKNOWN_EXTENSION))
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];
+        else if (![b isEqualToString:@"Open"])
+            [self.detailView addButtonWithTitle:b
+                                         target:self
+                                       selector:@selector(detailedVeiwButtonPressed:)];
+    }
 
-  //  }
     [self.detailView setTitle:[NSString stringWithFormat:@"File/Directory details for: %@", key]];
     custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, i * (SMALL_FONT_SIZE + 5));
     custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);
