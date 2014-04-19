@@ -1002,7 +1002,15 @@
     NSLog(@"detailedVeiwButtonPressed");
     [self.detailView hideAnimated:NO];
     self.detailView = nil;
-    if ([sender.titleLabel.text isEqualToString:@"Open"] && selectedKey) {
+
+    if (selectedKey == nil || selectedDict == nil) {
+
+        NSLog(@"Fatal error in alertView:clickedButtonAtIndex:, selectedDict or selectedKey are NULL.");
+        abort();
+
+    }
+
+    if ([sender.titleLabel.text isEqualToString:@"Open"]) {
         // Display file according to type
         NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
         if (!(extensionTypeFound & UNKNOWN_EXTENSION))
