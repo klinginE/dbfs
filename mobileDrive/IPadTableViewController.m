@@ -915,13 +915,13 @@
         NSString *imageName = [imagePath lastPathComponent];
         NSString * extention = [[imageName lastPathComponent] lowercaseString];
         
-        if ([extention isEqualToString:@"jpg"] || [extention isEqualToString:@"jpeg"]) {
-            imageData = UIImageJPEGRepresentation(imagePicked, 1.0);
-        }else{ // It's assumed to be png
+        if ([extention isEqualToString:@"png"]) {
             imageData = UIImagePNGRepresentation(imagePicked);
+        }else{ // It's assumed to be jpg and jpeg
+            imageData = UIImageJPEGRepresentation(imagePicked, 1.0);
         }
 
-        NSString *filePath = [NSString stringWithFormat:@"%s%@", self.iPadState.currentPath, imageName];
+        NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, imageName];
         [self.appDelegate.model putFile_NSDATA: filePath BLOB:imageData];
         imageData = nil;
     }
