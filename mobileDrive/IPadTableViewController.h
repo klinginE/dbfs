@@ -36,7 +36,7 @@ enum{
 
 
 // Protocol
-@protocol IPadTableViewControllerDelegate <NSObject>
+@protocol IPadTableViewControllerDelegate <NSObject, UIDocumentInteractionControllerDelegate>
 
 @required
 @property (atomic) BOOL isConnected;
@@ -87,7 +87,7 @@ enum{
 -(UIAlertView *)objectInArray:(NSArray *)a WithTag:(NSInteger)tag;
 
 // Public converter
--(char *)nsStringToCString:(NSString *)str;
+//-(char *)nsStringToCString:(NSString *)str;
 
 // Events
 -(void)refreshWithArray:(NSArray *)a;

@@ -19,6 +19,9 @@
 @property (weak, atomic) MobileDriveAppDelegate *appDelegate;
 @property (strong, nonatomic) NSArray *filesArray;
 
+// Controllers
+@property (retain) UIDocumentInteractionController *documentInteractionController;
+
 // Views
 @property (strong, atomic) NSMutableArray *alertViews;
 @property (strong, nonatomic) NSMutableArray *actionSheetButtons;
@@ -76,9 +79,9 @@
 // Table View Delegate
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
--(char) findFileType: (NSString*) fileExtension;
+// Convenience
+-(char)findFileType:(NSString *)fileExtension;
 
-@property (retain) UIDocumentInteractionController *documentInteractionController;
 @end
 
 @implementation IPadTableViewController {
@@ -86,6 +89,7 @@
     NSDictionary *selectedDict;
     NSString *selectedKey;
     char extensionTypeFound; // used for opening files on iPad
+
 }
 
 #pragma mark - Initers
@@ -443,8 +447,7 @@
     [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:@"Back"
                                                                        Tag:BACK_BUTTON_TAG
                                                                     Target:self
-                                                                    Action:@selector(buttonPressed:)
-                                                                    ]];
+                                                                    Action:@selector(buttonPressed:)]];
 
     self.view = [[UIView alloc] initWithFrame:CGRectZero];
 
@@ -493,7 +496,7 @@
             if (bi.tag == IP_TAG) {
 
                 UILabel *newLabel = [[UILabel alloc] init];
-                newLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", ip, port];
+                newLabel.text = [NSString stringWithFormat:@"http://%@:%@", ip, port];
                 newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
                 newLabel.frame = CGRectMake(0,
                                             0,
@@ -558,13 +561,13 @@
 
 }
 
-#pragma mark - Converters
-
--(char *)nsStringToCString:(NSString *)s {
-
-    return strdup([s cStringUsingEncoding:NSUTF8StringEncoding]);
-
-}
+//#pragma mark - Converters
+//
+//-(char *)nsStringToCString:(NSString *)s {
+//
+//    return strdup([s cStringUsingEncoding:NSUTF8StringEncoding]);
+//
+//}
 
 #pragma mark - Event Handelers
 
@@ -670,7 +673,6 @@
                         else {
 
                             NSLog(@"DBFS Not OK with DELETE");
-                            //FIXME add code here to deal with DBFS_Error
                             UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                             [alert setMessage:[self.appDelegate.model dbError:err]];
                             [alert show];
@@ -778,9 +780,16 @@
 
                             NSInteger oldLen = [oldPath length];
                             NSInteger newLen = [newPath length];
-                            
-                            if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
-                                newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+
+                            index = newLen - [selectedKey length];
+                            if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey]) {
+
+                                if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
+                                    newPath = [NSString stringWithFormat:@"%@/%@", newPath, selectedKey];
+                                else
+                                    newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+
+                            }
                             newLen = [newPath length];
 
                             if ([self strOkay:oldPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
@@ -827,7 +836,7 @@
                         if (selectedDict && selectedKey) {
 
                             BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
-                            if (isDir&& [text characterAtIndex:([text length] - 1)] != '/')
+                            if (isDir && [text characterAtIndex:([text length] - 1)] != '/')
                                 text = [NSString stringWithFormat:@"%@/", text];
 
                             NSString *oldPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
@@ -891,7 +900,8 @@
 }
 
 -(void)buttonPressed:(UIBarButtonItem *)sender {
-    NSLog(@"buttonPressed");
+
+    //NSLog(@"buttonPressed");
     switch (sender.tag) {
 
         case HELP_BUTTON_TAG:
@@ -907,79 +917,82 @@
 
 }
 
--(char) check_list_ext: (NSArray*) extTuple findFileType: (NSString*) fileExtension {
+-(char)check_list_ext:(NSArray *)extTuple findFileType:(NSString*)fileExtension {
 
     NSString* listExtensions = extTuple[0];
-    char codeExtension = [ (NSNumber*) extTuple[1] charValue ];
+    char codeExtension = [ (NSNumber *) extTuple[1] charValue ];
     fileExtension = [fileExtension lowercaseString];
-    
+
     NSArray *singleImageExtensions = [listExtensions componentsSeparatedByString: @" "];
     
     // Looking to see if file is an image
-    for ( NSString* ext in singleImageExtensions){
-        if ([fileExtension isEqualToString:ext]) {
+    for (NSString *ext in singleImageExtensions)
+        if ([fileExtension isEqualToString:ext])
             return codeExtension;
-        }
-    }
+
     return UNKNOWN_EXTENSION;
+
 }
 
--(char) findFileType: (NSString*) fileExtension{
+-(char)findFileType:(NSString *)fileExtension {
     // identifying extension
     char extensionTypeFound_temp = UNKNOWN_EXTENSION;
 
-    NSString * imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
-    NSString * docExtensions = @"doc docx xlsx xls ppt pptx";
-    NSString * audioExtensions = @"mp3 wav";
-    NSString * generalExtensions = @"zip pdf";
-    
-    NSMutableArray *allExtensions = [ [NSMutableArray alloc] init];
-    
+    NSString *imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
+    NSString *docExtensions = @"doc docx xlsx xls ppt pptx";
+    NSString *audioExtensions = @"mp3 wav";
+    NSString *generalExtensions = @"zip tar.bz tar.gz pdf";
+
+    NSMutableArray *allExtensions = [[NSMutableArray alloc] init];
+
     [allExtensions addObject: @[imageExtensions, [[NSNumber alloc] initWithChar:IMAGE_EXTENSION]] ];
     [allExtensions addObject: @[docExtensions, [[NSNumber alloc] initWithChar:DOC_EXTENSION]] ];
     [allExtensions addObject: @[audioExtensions, [[NSNumber alloc] initWithChar:AUDIO_EXTENSION]] ];
     [allExtensions addObject: @[generalExtensions, [[NSNumber alloc] initWithChar:GENERAL_EXTENSION]] ];
 
-    for ( NSArray * tempTuple in allExtensions){
-        if (extensionTypeFound_temp & UNKNOWN_EXTENSION) {
+    for (NSArray *tempTuple in allExtensions) {
+
+        if (extensionTypeFound_temp & UNKNOWN_EXTENSION)
             extensionTypeFound_temp = [self check_list_ext:tempTuple findFileType:fileExtension];
-        }else{
+        else
             break;
-        }
+
     }
 
     return extensionTypeFound_temp;
+
 }
 
--(void) displayFileWithfilePath: (NSString *) filePath fileName: (NSString*) filename{
-    
-        NSData * blob = [self.appDelegate.model getFile_NSDATA:filePath];
-        NSString * tempfilename = [NSString stringWithFormat:@"temp.%@", [filename pathExtension]];
-//        NSString * tempfilename = filename;
-        
-        NSString* filePath_t = [NSTemporaryDirectory() stringByAppendingString:tempfilename];
-        
-        NSURL* url = [NSURL fileURLWithPath:filePath_t];
-        NSError * writeError = nil;
-        [blob writeToURL:url options:0 error:&writeError];
-        if (writeError){
-            NSLog(@"Error write file to disk to display it");
-            return;
-        }
-        blob = nil;
-        self.documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:url];
-        self.documentInteractionController.name = filename;
-        [self.documentInteractionController setDelegate:self];
-        // Preview PDF
-        [self.documentInteractionController presentPreviewAnimated:YES];
-    
+-(void)displayFileWithfilePath:(NSString *)filePath fileName:(NSString *)filename {
+
+    NSData *blob = [self.appDelegate.model getFile_NSDATA:filePath];
+    NSString *tempfilename = [NSString stringWithFormat:@"temp.%@", [filename pathExtension]];
+//  NSString *tempfilename = filename;
+
+    NSString *filePath_t = [NSTemporaryDirectory() stringByAppendingString:tempfilename];
+    NSURL *url = [NSURL fileURLWithPath:filePath_t];
+    NSError *writeError = nil;
+    [blob writeToURL:url options:0 error:&writeError];
+    if (writeError) {
+
+        NSLog(@"Error write file to disk to display it");
+        return;
+
+    }
+    blob = nil;
+    self.documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:url];
+    self.documentInteractionController.name = filename;
+    [self.documentInteractionController setDelegate:self];
+    // Preview PDF
+    [self.documentInteractionController presentPreviewAnimated:YES];
+
 }
 
-- (UIViewController *) documentInteractionControllerViewControllerForPreview: (UIDocumentInteractionController *) controller{
+-(UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *) controller {
     return self;
 }
 
-- (void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController *)controller{
+-(void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController *)controller {
     NSLog(@"End Document viewer");
     self.documentInteractionController = nil;
 }
@@ -989,12 +1002,12 @@
     NSLog(@"detailedVeiwButtonPressed");
     [self.detailView hideAnimated:NO];
     self.detailView = nil;
-    if ([sender.titleLabel.text isEqualToString:@"Open"]) {
+    if ([sender.titleLabel.text isEqualToString:@"Open"] && selectedKey) {
         // Display file according to type
         NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
-        if ( !(extensionTypeFound & UNKNOWN_EXTENSION) ) {
-               [self displayFileWithfilePath: filePath fileName:selectedKey];
-        }
+        if (!(extensionTypeFound & UNKNOWN_EXTENSION))
+            [self displayFileWithfilePath:filePath fileName:selectedKey];
+
     }
     else if ([sender.titleLabel.text isEqualToString:@"Move"]) {
 
@@ -1170,6 +1183,8 @@
 -(void)viewDidLoad {
 
     [super viewDidLoad];
+
+    // Set up self to be observer over a orientation change
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(orientationChanged:)
@@ -1202,7 +1217,7 @@
                                                                            action:nil];
 
     UILabel *ipLabel = [[UILabel alloc] init];
-    ipLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", self.iPadState.ipAddress, self.iPadState.port];
+    ipLabel.text = [NSString stringWithFormat:@"http://%@:%@", self.iPadState.ipAddress, self.iPadState.port];
     ipLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     ipLabel.frame = CGRectMake(0,
                                0,
@@ -1337,7 +1352,7 @@
 
     for (NSString *b in self.actionSheetButtons) {
         
-        NSLog(@"%@", b);
+        //NSLog(@"%@", b);
         if ([b isEqualToString:@"Open"] && !(extensionTypeFound & UNKNOWN_EXTENSION))
             [self.detailView addButtonWithTitle:b
                                          target:self
@@ -1346,13 +1361,13 @@
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];
+
     }
 
     [self.detailView setTitle:[NSString stringWithFormat:@"File/Directory details for: %@", key]];
     custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, i * (SMALL_FONT_SIZE + 5));
     custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);
     self.detailView.customView = custom;
-    
 
     selectedDict = dict;
     selectedKey = key;
