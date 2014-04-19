@@ -83,6 +83,17 @@
     
 }
 
+-(int)putFile_NSDATA:(NSString *)fname BLOB: (NSData*) blob {
+    if (fname == nil || blob == nil) {
+        return DBFS_NOT_FILENAME;
+    }
+    else if ([fname isEqualToString:@""]) {
+        return DBFS_NOT_FILENAME;
+    }
+    return [self.dbInterface putFile_NSDATA:fname Blob:blob fromDatabase:self->dbfs];
+//    return [self.dbInterface putFile:fname fromDatabase:self->dbfs from:in withSize:size];
+}
+
 -(int)renameFile:(NSString *)oldName to:(NSString *)newName {
     if (oldName == nil || newName == nil) {
         return DBFS_NOT_FILENAME;
