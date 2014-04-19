@@ -11,7 +11,7 @@
 
 @interface MobileDriveModel : NSObject
 
-@property (strong, atomic) DBInterface *dbInterface;
+@property (strong, atomic) __block DBInterface *dbInterface;
 
 -(DBFS_Blob)slurp:(FILE *)in;
 

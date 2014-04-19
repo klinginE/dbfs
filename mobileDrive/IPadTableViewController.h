@@ -9,6 +9,7 @@
 // Imports
 #import <UIKit/UIKit.h>
 #import "MobileDriveAppDelegate.h"
+#import "IPadState.h"
 
 // Defines
 #define LARGE_FONT_SIZE 30.0
@@ -50,19 +51,8 @@ enum{
 
 @interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIDocumentInteractionControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
 
-// Structs
-typedef struct {
-
-    char *currentDir;
-    char *currentPath;
-    char *ipAddress;
-    char *port;
-    int depth;
-
-}State;
-
 // Properties
-@property (assign) State iPadState;
+@property (strong, atomic) IPadState *iPadState;
 
 // Methods
 // Public inits
@@ -73,7 +63,6 @@ typedef struct {
         forEvents:(UIControlEvents)sEvents
        pathAction:(SEL)pAction
        pathEvents:(UIControlEvents)pEvents;
--(void)initState:(State *)state WithPath:(NSString *)path Address:(NSString *)ip Port:(NSString *)port;
 
 // Public allocs
 -(UIBarButtonItem *)makeBarButtonWithTitle:(NSString *)title
@@ -87,7 +76,6 @@ typedef struct {
                        ForEvents:(UIControlEvents)events;
 
 // Public dealloc
--(void)freeState:(State *)state;
 -(void)dealloc;
 
 // Public setter

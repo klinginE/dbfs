@@ -59,7 +59,7 @@
 
     NSNumber *n = [[NSNumber alloc] initWithInt:tag];
     NSArray *a = [[NSArray alloc] initWithObjects:n, oldPath, newPath, nil];
-    [((IPadTableViewController *)self.iPadNavController.topViewController) performSelector:@selector(refreshWithArray:) onThread:[NSThread mainThread] withObject:a waitUntilDone:YES];
+    [((IPadTableViewController *)self.iPadNavController.topViewController) performSelectorOnMainThread:@selector(refreshWithArray:) withObject:a waitUntilDone:YES];
 
 }
 
@@ -85,8 +85,9 @@
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     self.isConnected = YES;
-    self.serverController = [[ServerViewController alloc] init];
     self.model = [[MobileDriveModel alloc] init];
+    self.serverController = [[ServerViewController alloc] init];
+    
 
     ipAddress = [self.serverController getIPAddress];
 
