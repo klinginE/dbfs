@@ -292,6 +292,9 @@
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "Eric Klinginsmith";
 				TargetAttributes = {
+					DE0FDF5E18C963CB00843686 = {
+						DevelopmentTeam = 266548894Y;
+					};
 					DE0FDF7918C963CB00843686 = {
 						TestTargetID = DE0FDF5E18C963CB00843686;
 					};
@@ -477,10 +480,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "mobileDrive/mobileDrive-Prefix.pch";
 				INFOPLIST_FILE = "mobileDrive/mobileDrive-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -490,10 +496,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "mobileDrive/mobileDrive-Prefix.pch";
 				INFOPLIST_FILE = "mobileDrive/mobileDrive-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
