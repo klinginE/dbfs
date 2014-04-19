@@ -141,6 +141,26 @@
 
 }
 
+-(int)putFile_NSDATA:(NSString *)fname BLOB: (NSData*) blob {
+    if (fname == nil || blob == nil) {
+        return DBFS_NOT_FILENAME;
+    }
+    else if ([fname isEqualToString:@""]) {
+        return DBFS_NOT_FILENAME;
+    }
+    __block int result;
+    __block NSData * myData = blob;
+    __block NSString *fname_t = fname.copy;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface putFile_NSDATA:fname_t Blob:myData fromDatabase:self->dbfs];
+    };
+    if ([NSThread isMainThread])
+        block();
+    else
+        dispatch_sync(dispatch_get_main_queue(), block);
+    return result;
+}
+
 -(int)renameFile:(NSString *)oldName to:(NSString *)newName {
     if (oldName == nil || newName == nil) {
         return DBFS_NOT_FILENAME;

@@ -11,6 +11,7 @@
 #import <string.h>
 #import <assert.h>
 #import "CODialog.h"
+#import <UIKit/UIKit.h>
 
 @interface IPadTableViewController ()
 
@@ -899,13 +900,49 @@
 
 }
 
+-(void) displayPhotoPicker{
+    self.eImagePickerController = [[UIImagePickerController alloc] init];
+    self.eImagePickerController.delegate = self;
+    
+    self.eImagePickerController.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+    self.eImagePickerController.navigationBarHidden = NO;
+    
+    [self presentViewController:self.eImagePickerController animated:YES completion:nil];
+    
+}
+
+-(void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info{
+    
+    //extracting image from the picker and saving it
+    NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
+    if ([mediaType isEqualToString:@"public.image"]){
+        UIImage *imagePicked = [info objectForKey:UIImagePickerControllerOriginalImage];
+        NSData *imageData;
+
+        NSURL *imagePath = [info objectForKey:@"UIImagePickerControllerReferenceURL"];
+        NSString *imageName = [imagePath lastPathComponent];
+        NSString * extention = [[imageName lastPathComponent] lowercaseString];
+        
+        if ([extention isEqualToString:@"png"]) {
+            imageData = UIImagePNGRepresentation(imagePicked);
+        }else{ // It's assumed to be jpg and jpeg
+            imageData = UIImageJPEGRepresentation(imagePicked, 1.0);
+        }
+
+        NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, imageName];
+        [self.appDelegate.model putFile_NSDATA: filePath BLOB:imageData];
+        imageData = nil;
+    }
+    [self dismissViewControllerAnimated:YES completion:^{}];
+}
 -(void)buttonPressed:(UIBarButtonItem *)sender {
 
     //NSLog(@"buttonPressed");
     switch (sender.tag) {
 
         case HELP_BUTTON_TAG:
-            [self displayHelpPage];
+//            [self displayHelpPage];
+            [self displayPhotoPicker];
             break;
         case ADD_DIR_BUTTON_TAG:
             [self displayAddDirPage];
