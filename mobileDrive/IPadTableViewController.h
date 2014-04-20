@@ -8,6 +8,7 @@
 
 // Imports
 #import <UIKit/UIKit.h>
+#import <MessageUI/MFMailComposeViewController.h>
 #import "MobileDriveAppDelegate.h"
 #import "IPadState.h"
 
@@ -36,7 +37,7 @@ enum{
 
 
 // Protocol
-@protocol IPadTableViewControllerDelegate <NSObject, UIDocumentInteractionControllerDelegate>
+@protocol IPadTableViewControllerDelegate <NSObject, UIDocumentInteractionControllerDelegate, MFMailComposeViewControllerDelegate>
 
 @required
 @property (atomic) BOOL isConnected;

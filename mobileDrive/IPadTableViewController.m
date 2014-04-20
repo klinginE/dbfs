@@ -21,7 +21,9 @@
 @property (strong, nonatomic) NSArray *filesArray;
 
 // Controllers
-@property (retain) UIDocumentInteractionController *documentInteractionController;
+@property (strong, nonatomic) UIDocumentInteractionController *documentInteractionController;
+@property (strong, nonatomic) UIImagePickerController *eImagePickerController;
+@property (strong, nonatomic) MFMailComposeViewController *mailComposeViewController;
 
 // Views
 @property (strong, atomic) NSMutableArray *alertViews;
@@ -212,6 +214,7 @@
 -(void)initActionSheetButtons:(NSMutableArray *)buttons {
 
     [buttons addObject:@"Open"];
+    [buttons addObject:@"Email"];
     [buttons addObject:@"Move"];
     [buttons addObject:@"Rename"];
     [buttons addObject:@"Delete"];
@@ -578,6 +581,7 @@
     self.conectSwitchView.on = self.appDelegate.isConnected;
     if (self.filesArray && self.mainTableView)
         [self reloadTableViewData];
+    [self makeFrameForViews];
 
 }
 
@@ -769,29 +773,84 @@
                         if (selectedDict && selectedKey) {
 
                             NSString *oldPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
-                            NSString *newPath = @"";
-                            if ([text characterAtIndex:0] != '/')
-                                newPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, text];
-                            else
-                                newPath = text;
+                            NSString *newPath = text;
                             BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
+
+                            // add absoulte path if needed
+                            if ([newPath characterAtIndex:0] != '/')
+                                newPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, newPath];
+
+                            // add selectedKey to end if left off
                             NSInteger index = [newPath length] - [selectedKey length];
-                            if ((isDir || index < 0) && [newPath characterAtIndex:([newPath length] - 1)] != '/')
-                                newPath = [NSString stringWithFormat:@"%@/", newPath];
-
-                            NSInteger oldLen = [oldPath length];
-                            NSInteger newLen = [newPath length];
-
-                            index = newLen - [selectedKey length];
                             if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey]) {
 
-                                if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
-                                    newPath = [NSString stringWithFormat:@"%@/%@", newPath, selectedKey];
-                                else
-                                    newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+                                NSString *temp = newPath;
+                                if (!isDir) {
+
+                                    NSString *oldext = [oldPath pathExtension];
+                                    NSString *newext = [temp pathExtension];
+                                    if (oldext && [oldext length] && (!newext || [newext length] <= 0))
+                                        temp = [NSString stringWithFormat:@"%@.%@", temp, oldext];
+
+                                    index = [temp length] - [selectedKey length];
+                                    if (index >= 0 && [[temp substringFromIndex:index] isEqualToString:selectedKey])
+                                        newPath = temp;
+                                    else {
+
+                                        if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
+                                            newPath = [NSString stringWithFormat:@"%@/", newPath];
+                                        newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+
+                                    }
+
+                                }
+                                else {
+
+                                    if ([temp characterAtIndex:([temp length] - 1)] != '/')
+                                        temp = [NSString stringWithFormat:@"%@/", temp];
+
+                                    index = [temp length] - [selectedKey length];
+                                    if (index >= 0 && [[temp substringFromIndex:index] isEqualToString:selectedKey])
+                                        newPath = temp;
+                                    else {
+
+                                        if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
+                                            newPath = [NSString stringWithFormat:@"%@/", newPath];
+                                        newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+
+                                    }
+
+                                }
+                                
+//                                // add extension to end if file and not there and there is an old extension
+//                                if (!isDir) {
+//
+//                                    NSString *oldext = [oldPath pathExtension];
+//                                    NSString *newext = [temp pathExtension];
+//
+//                                    if (oldext && [oldext length] && (!newext || [newext length] <= 0))
+//                                        temp = [NSString stringWithFormat:@"%@.%@", temp, oldext];
+//                                    
+//                                    NSInteger index = [temp length] - [selectedKey length];
+//                                    if (index >= 0 && [[temp substringFromIndex:index] isEqualToString:selectedKey])
+//                                        newPath = temp;
+//
+//                                }
+//
+//                                if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
+//                                    newPath = [NSString stringWithFormat:@"%@/", newPath];
+//
+//                                index = [newPath length] - [selectedKey length];
+//                                if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
+//                                    newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
 
                             }
-                            newLen = [newPath length];
+
+//                            NSLog(@"oldpath= %@", oldPath);
+//                            NSLog(@"newpath= %@", newPath);
+
+                            NSInteger newLen = [newPath length];
+                            NSInteger oldLen = [oldPath length];
 
                             if ([self strOkay:oldPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
                                 [self strOkay:newPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
@@ -842,6 +901,16 @@
 
                             NSString *oldPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
                             NSString *newPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, text];
+
+                            if (!isDir) {
+
+                                NSString *oldext = [oldPath pathExtension];
+                                NSString *newext = [newPath pathExtension];
+
+                                if (oldext && [oldext length] && (!newext || [newext length] <= 0))
+                                    newPath = [NSString stringWithFormat:@"%@.%@", newPath, oldext];
+
+                            }
 
                             if ([self strOkay:selectedKey ForTag:RENAME_ALERT_TAG IsDir:isDir] &&
                                 [self strOkay:text ForTag:RENAME_ALERT_TAG IsDir:isDir]) {
@@ -900,18 +969,19 @@
 
 }
 
--(void) displayPhotoPicker{
+-(void)displayPhotoPicker {
+
     self.eImagePickerController = [[UIImagePickerController alloc] init];
     self.eImagePickerController.delegate = self;
-    
+
     self.eImagePickerController.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
     self.eImagePickerController.navigationBarHidden = NO;
-    
+
     [self presentViewController:self.eImagePickerController animated:YES completion:nil];
-    
+
 }
 
--(void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info{
+-(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
     
     //extracting image from the picker and saving it
     NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
@@ -934,6 +1004,7 @@
         imageData = nil;
     }
     [self dismissViewControllerAnimated:YES completion:^{}];
+
 }
 -(void)buttonPressed:(UIBarButtonItem *)sender {
 
@@ -976,8 +1047,8 @@
     char extensionTypeFound_temp = UNKNOWN_EXTENSION;
 
     NSString *imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
-    NSString *docExtensions = @"doc docx xlsx xls ppt pptx";
-    NSString *audioExtensions = @"mp3 wav";
+    NSString *docExtensions = @"doc docx xlsx xls ppt pptx txt";
+    NSString *audioExtensions = @"mp3 m4p wav";
     NSString *generalExtensions = @"zip tar.bz tar.gz pdf";
 
     NSMutableArray *allExtensions = [[NSMutableArray alloc] init];
@@ -1020,7 +1091,8 @@
     self.documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:url];
     self.documentInteractionController.name = filename;
     [self.documentInteractionController setDelegate:self];
-    // Preview PDF
+
+    // Preview File
     [self.documentInteractionController presentPreviewAnimated:YES];
 
 }
@@ -1032,6 +1104,47 @@
 -(void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController *)controller {
     NSLog(@"End Document viewer");
     self.documentInteractionController = nil;
+}
+
+-(void)displayEmailForAttachmentWithPath:(NSString *)path Name:(NSString *)name {
+
+    self.mailComposeViewController = [[MFMailComposeViewController alloc] init];
+    [self.mailComposeViewController setMailComposeDelegate:(id)self];
+
+    // Attach an id to the email
+    NSData *myData = [self.appDelegate.model getFile_NSDATA:path];
+    [self.mailComposeViewController addAttachmentData:myData mimeType:[path pathExtension] fileName:name];
+
+    // Fill out the email body text
+    [self.mailComposeViewController setMessageBody:@"" isHTML:NO];
+    [self presentViewController:self.mailComposeViewController animated:YES completion:^(void){}];
+
+}
+
+-(void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error {
+
+    // Notifies users about errors associated with the interface
+    switch (result) {
+
+        case MFMailComposeResultCancelled:
+            NSLog(@"Result: canceled");
+            break;
+        case MFMailComposeResultSaved:
+            NSLog(@"Result: saved");
+            break;
+        case MFMailComposeResultSent:
+            NSLog(@"Result: sent");
+            break;
+        case MFMailComposeResultFailed:
+            NSLog(@"Result: failed");
+            break;
+        default:
+            NSLog(@"Result: not sent");
+            break;
+
+    }
+    [self dismissViewControllerAnimated:YES completion:^(void){}];
+
 }
 
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
@@ -1052,6 +1165,12 @@
         NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
         if (!(extensionTypeFound & UNKNOWN_EXTENSION))
             [self displayFileWithfilePath:filePath fileName:selectedKey];
+
+    }
+    else if ([sender.titleLabel.text isEqualToString:@"Email"]) {
+
+        NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
+        [self displayEmailForAttachmentWithPath:filePath Name:selectedKey];
 
     }
     else if ([sender.titleLabel.text isEqualToString:@"Move"]) {
@@ -1211,6 +1330,9 @@
 
                     if (self.detailView && !self.detailView.isHidden)
                         [self.detailView hideAnimated:NO];
+                    if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
+                        [self dismissViewControllerAnimated:YES completion:^(void){}];
+                    
                     NSInteger depth = -1;
                     for (int i = 0; i < serverLen; i++)
                         if ([serverPath characterAtIndex:i] == '/')
@@ -1402,10 +1524,16 @@
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];
-        else if (![b isEqualToString:@"Open"])
-            [self.detailView addButtonWithTitle:b
-                                         target:self
-                                       selector:@selector(detailedVeiwButtonPressed:)];
+        else if (![b isEqualToString:@"Open"]) {
+            if ([b isEqualToString:@"Email"] && ![[dict objectForKey:@"Type"] boolValue])
+                [self.detailView addButtonWithTitle:b
+                                             target:self
+                                           selector:@selector(detailedVeiwButtonPressed:)];
+            else if (![b isEqualToString:@"Email"])
+                [self.detailView addButtonWithTitle:b
+                                             target:self
+                                           selector:@selector(detailedVeiwButtonPressed:)];
+        }
 
     }
 
