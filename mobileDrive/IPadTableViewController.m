@@ -35,6 +35,7 @@
 @property (strong, nonatomic) UIScrollView *pathScrollView;
 @property (strong, nonatomic) UILabel *pathLabelView;
 @property (strong, nonatomic) CODialog *detailView;
+@property (strong, nonatomic) UISwitch *extSwitch;
 
 // Actions
 @property (assign) SEL switchAction;
@@ -177,13 +178,35 @@
                 alert.tag = MOVE_ALERT_TAG;
                 break;
             case RENAME_ALERT_TAG:
+            {
                 alert.alertViewStyle = UIAlertViewStylePlainTextInput;
                 [alert setDelegate:self];
                 [alert setTitle:@"Renaming a File/Directory"];
                 [alert setMessage:@"Give it a new name:"];
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
+
+                UIView *subView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 250, 17)];
+                [subView setBackgroundColor:[UIColor clearColor]];
+
+                UILabel *extLable = [[UILabel alloc] init];
+                extLable.text = @"Add extension: ";
+                extLable.font = [UIFont systemFontOfSize:VERY_SMALL_FONT_SIZE];
+                extLable.frame = CGRectMake(10, -5, [self sizeOfString:extLable.text withFont:extLable.font].width, [self sizeOfString:extLable.text withFont:extLable.font].height);
+
+                _extSwitch = [[UISwitch alloc] init];
+                self.extSwitch.transform = CGAffineTransformMakeScale(0.65, 0.65);
+                self.extSwitch.frame = CGRectMake(extLable.frame.size.width + extLable.frame.origin.x, -3, self.extSwitch.frame.size.width, self.extSwitch.frame.size.height);
+                self.extSwitch.on = YES;
+                [self.extSwitch setTintColor:[UIColor grayColor]];
+
+                [subView addSubview:extLable];
+                [subView addSubview:self.extSwitch];
+
+                [alert setValue:subView forKey:@"accessoryView"];
                 alert.tag = RENAME_ALERT_TAG;
+
+            }
                 break;
             case CONFIRM_ALERT_TAG:
                 [alert setDelegate:self];
@@ -470,6 +493,11 @@
     self.iPadState = nil;
     self.filesArray = nil;
 
+    // Free controllers
+    self.documentInteractionController = nil;
+    self.eImagePickerController = nil;
+    self.mailComposeViewController = nil;
+
     // Free Views
     self.alertViews = nil;
     self.actionSheetButtons = nil;
@@ -479,6 +507,7 @@
     self.mainTableView = nil;
     self.pathScrollView = nil;
     self.detailView = nil;
+    self.extSwitch = nil;
 
     // Free Colors
     self.barColor = nil;
@@ -902,7 +931,7 @@
                             NSString *oldPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
                             NSString *newPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, text];
 
-                            if (!isDir) {
+                            if (!isDir && self.extSwitch && [self.extSwitch isOn]) {
 
                                 NSString *oldext = [oldPath pathExtension];
                                 NSString *newext = [newPath pathExtension];
@@ -1184,6 +1213,8 @@
 
         UIAlertView *alert = [self objectInArray:self.alertViews WithTag:RENAME_ALERT_TAG];
         [[alert textFieldAtIndex:0] setPlaceholder:selectedKey];
+        if (self.extSwitch)
+            self.extSwitch.on = YES;
         [alert show];
 
 
