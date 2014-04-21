@@ -20,23 +20,15 @@
     self = [super init];
     if (self) {
 
-//        id block1 = [^{NSLog(@"Hello, world");} copy];
-//        _interfaceQueue = [[NSOperationQueue alloc] init];
-//        _interfaceOperation = [[NSInvocationOperation alloc] initWithTarget:block1                                                                                                                                   selector:@selector(invoke) object:nil];
-//        [self.interfaceQueue addOperation:self.interfaceOperation];
-//        [self.interfaceQueue waitUntilAllOperationsAreFinished];
-//
-//        _interfaceOperation = [[NSInvocationOperation alloc] initWithTarget:block1                                                                                                                                   selector:@selector(invoke) object:nil];
-//        [self.interfaceQueue addOperation:self.interfaceOperation];
-//        [self.interfaceQueue waitUntilAllOperationsAreFinished];
-        
+        _interfaceQueue = dispatch_queue_create("interfaceThread", DISPATCH_QUEUE_SERIAL);
+        _interfaceLock = [[NSLock alloc] init];
+
         dispatch_block_t block = ^{
             self.dbInterface = [[DBInterface alloc] init];
         };
-        if ([NSThread isMainThread])
-            block();
-        else
-            dispatch_sync(dispatch_get_main_queue(), block);
+        [self.interfaceLock lock];
+        dispatch_sync(self.interfaceQueue, block);
+        [self.interfaceLock unlock];
 
 //        [block1 performSelector:@selector(invoke) onThread:self.interfaceThread withObject:nil waitUntilDone:YES];
         //[self.interfaceThread ]
@@ -48,10 +40,9 @@
         block = ^{
             dbfs = [self.dbInterface openDatabase:dbPath];
         };
-        if ([NSThread isMainThread])
-            block();
-        else
-            dispatch_sync(dispatch_get_main_queue(), block);
+        [self.interfaceLock lock];
+        dispatch_sync(self.interfaceQueue, block);
+        [self.interfaceLock unlock];
 
     }
 
@@ -65,10 +56,9 @@
     dispatch_block_t block = ^{
         r = [self.dbInterface dbError:err_t];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
 
     return r;
 
@@ -79,10 +69,9 @@
     dispatch_block_t block = ^{
         [self.dbInterface closeDatabase:dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
 
 }
 
@@ -108,10 +97,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface getFile:fname_t fromDatabase:self->dbfs to:out_t withSize:size_t];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
 
     return result;
 
@@ -132,10 +120,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface getFile_NSDATA:fname_t fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
     return result;
 }
 
@@ -153,10 +140,9 @@
     dispatch_block_t block = ^{
         result =  [self.dbInterface putFile:fname_t fromDatabase:self->dbfs from:in_t withSize:size_t];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
     return result;
 
 }
@@ -174,10 +160,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface putFile_NSDATA:fname_t Blob:myData fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
     return result;
 }
 
@@ -194,10 +179,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface renameFile:oldName_t to:newName_t fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
 
     return result;
 
@@ -216,10 +200,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface renameFile:oldName_t to:newName_t fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
     return result;
 }
 
@@ -236,10 +219,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface overwriteFile:fname_t inDatabase:self->dbfs from:in_t];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
     return result;
 
 }
@@ -257,10 +239,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface deleteFile:fname_t fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
     return result;
 
 }
@@ -278,10 +259,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface createDirectory:dirName_t fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
     return result;
 
 }
@@ -298,10 +278,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface deleteDirectory:dirName_t fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
     return result;
 }
 
@@ -318,10 +297,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface moveDirectory:dirName_t to:destName_t fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
     return result;
 
 }
@@ -339,10 +317,9 @@
     dispatch_block_t block = ^{
         result = [self.dbInterface moveDirectory:dirName_t to:newName_t fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
     return result;
 }
 
@@ -352,10 +329,9 @@
     dispatch_block_t block = ^{
         fileList = [self.dbInterface getFileListIn:dirName_t fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
 
     NSMutableDictionary *fileDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
@@ -383,10 +359,9 @@
     dispatch_block_t block = ^{
         dirList = [self.dbInterface getDirectoryListIn:dirName_t inDatabase:dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
 
     NSMutableDictionary *dirDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
@@ -428,10 +403,9 @@
     dispatch_block_t block = ^{
         fileList = [self.dbInterface getFileListIn:dirName_t fromDatabase:self->dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+        dispatch_sync(self.interfaceQueue, block);
+        [self.interfaceLock unlock];
 
     NSMutableDictionary *fileDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
@@ -459,10 +433,9 @@
     dispatch_block_t block = ^{
         dirList = [self.dbInterface getDirectoryListIn:dirName_t inDatabase:dbfs];
     };
-    if ([NSThread isMainThread])
-        block();
-    else
-        dispatch_sync(dispatch_get_main_queue(), block);
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
 
     NSMutableDictionary *dirDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];

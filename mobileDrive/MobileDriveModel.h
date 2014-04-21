@@ -12,8 +12,8 @@
 @interface MobileDriveModel : NSObject
 
 @property (strong, atomic) __block DBInterface *dbInterface;
-//@property (strong, atomic) NSOperationQueue *interfaceQueue;
-//@property (strong, atomic) NSInvocationOperation *interfaceOperation;
+@property (strong, atomic) dispatch_queue_t interfaceQueue;
+@property (strong, atomic) NSLock *interfaceLock;
 
 -(DBFS_Blob)slurp:(FILE *)in;
 
