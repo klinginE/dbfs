@@ -47,10 +47,12 @@
 }
 
 -(NSString *)dbError:(int)err {
+
     NSString *error;
     const char *c = dbfs_err(err);
     error = [NSString stringWithUTF8String:c];
     return error;
+
 }
 
 -(DBFS *)openDatabase:(NSString *)name {
@@ -78,6 +80,20 @@
     return result;
 }
 
+-(NSData *) getFile_NSDATA:(NSString *)fname fromDatabase:(DBFS *)dbfs{
+    
+    DBFS_Blob blob;
+    const char *name = [fname UTF8String];
+    int result = dbfs_get(dbfs, (DBFS_FileName){name}, &blob);
+    
+    if(result == DBFS_OKAY) {
+        NSData * tempBlob = [[NSData alloc] initWithBytes: blob.data length:blob.size];
+        dbfs_free_blob(blob);
+        return tempBlob;
+    }
+    return nil;
+}
+
 -(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in withSize:(int)size {
     DBFS_Blob blob;
     char *name = [self nsStringToCString:fname];//[fname UTF8String];
@@ -87,6 +103,16 @@
     
     free(blob.data);
 
+    return r;
+}
+
+-(int)putFile_NSDATA: (NSString *)fname Blob: (NSData*) blob fromDatabase:(DBFS *)dbfs{
+    DBFS_Blob blob_temp = (DBFS_Blob){[blob bytes], (int) [blob length]};
+    const char *name = [fname UTF8String];
+    
+//    blob_temp = [self slurp:in];
+    int r = dbfs_put(dbfs, (DBFS_FileName){name}, blob_temp);
+    
     return r;
 }
 

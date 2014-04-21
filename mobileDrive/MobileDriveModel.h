@@ -11,7 +11,9 @@
 
 @interface MobileDriveModel : NSObject
 
-@property (strong, atomic) DBInterface *dbInterface;
+@property (strong, atomic) __block DBInterface *dbInterface;
+@property (strong, atomic) dispatch_queue_t interfaceQueue;
+@property (strong, atomic) NSLock *interfaceLock;
 
 -(DBFS_Blob)slurp:(FILE *)in;
 
@@ -60,4 +62,9 @@
 
 // Returns NSString containing the list of current contents in JSON format.
 -(NSString *)getJsonContentsIn:(NSString *)dirName;
+-(NSData *)getFile_NSDATA:(NSString *)fname;
+-(int)putFile_NSDATA:(NSString *)fname BLOB: (NSData*) blob;
+
+@property (nonatomic) UIImagePickerController *imagePickerController;
+
 @end

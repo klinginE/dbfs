@@ -59,7 +59,9 @@
             if ( pathArg == NULL){
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }else{
-                NSData * json_in_NSData =[[ [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model] getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
+                
+                MobileDriveModel *model = [((MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate) model];
+                NSData * json_in_NSData =[[model getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
                 return [GCDWebServerDataResponse responseWithData: json_in_NSData contentType: @"application/json"];
             }
         }];
@@ -121,6 +123,40 @@
 
             return [GCDWebServerDataResponse responseWithHTML:content];
 
+        }];
+        
+        [webServer addHandlerForMethod:@"GET" path:@"/move.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+            
+            MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
+            
+            // Called from GCD thread
+            NSString * oldPath = [request.query objectForKey:@"old"];
+            NSString * newPath = [request.query objectForKey:@"new"];
+            
+            if ( oldPath == NULL || newPath == NULL ){
+                return [GCDWebServerResponse responseWithStatusCode:403];
+            }
+            NSMutableString* content = [[NSMutableString alloc] init];
+            
+            int dbResponse = 0;
+            if ([oldPath hasSuffix:@"/"]) {
+                dbResponse = [model moveDirectory:oldPath to:newPath];
+            } else {
+                dbResponse = [model moveFile:oldPath to:newPath];
+            }
+            
+            if (dbResponse == DBFS_OKAY){
+                [content appendFormat:@"<html><body><p>Path %@ was moved to %@.</p></body></html>", oldPath, newPath];
+                
+                // Calling Refresh Function
+                [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: MOVE_MODEL_TAG
+                                                                                                   From: oldPath To: newPath];
+            } else {
+                [content appendFormat:@"<html><body><p>Path %@ was NOT moved to %@.</p></body></html>", oldPath, newPath];
+            }
+            
+            return [GCDWebServerDataResponse responseWithHTML:content];
+            
         }];
 
         [webServer addHandlerForMethod:@"POST" path:@"/upload.html" requestClass:[GCDWebServerMultiPartFormRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest * request) {

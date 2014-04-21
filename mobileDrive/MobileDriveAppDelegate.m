@@ -85,8 +85,9 @@
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     self.isConnected = YES;
-    self.serverController = [[ServerViewController alloc] init];
     self.model = [[MobileDriveModel alloc] init];
+    self.serverController = [[ServerViewController alloc] init];
+    
 
     ipAddress = [self.serverController getIPAddress];
 

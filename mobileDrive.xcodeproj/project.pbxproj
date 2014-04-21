@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		8A014E8018CF8FF600C83490 /* MobileDriveModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */; };
-		8AFF3ECC18D24CB300FB8A21 /* files.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8AFF3ECB18D24CB300FB8A21 /* files.plist */; };
 		9564623E18D0DEBC00AA845A /* ServerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9564623D18D0DEBC00AA845A /* ServerViewController.m */; };
 		CE40078918E546110025C0B0 /* GCDWebServer.m in Sources */ = {isa = PBXBuildFile; fileRef = CE40078118E546110025C0B0 /* GCDWebServer.m */; };
 		CE40078A18E546110025C0B0 /* GCDWebServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = CE40078318E546110025C0B0 /* GCDWebServerConnection.m */; };
@@ -53,7 +52,6 @@
 		8A014E7618CF825600C83490 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		8A014E7E18CF8FF600C83490 /* MobileDriveModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MobileDriveModel.h; sourceTree = "<group>"; };
 		8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MobileDriveModel.m; sourceTree = "<group>"; };
-		8AFF3ECB18D24CB300FB8A21 /* files.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = files.plist; sourceTree = "<group>"; };
 		9564623C18D0DEBC00AA845A /* ServerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ServerViewController.h; path = mobileDrive/ServerViewController.h; sourceTree = SOURCE_ROOT; };
 		9564623D18D0DEBC00AA845A /* ServerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ServerViewController.m; path = mobileDrive/ServerViewController.m; sourceTree = SOURCE_ROOT; };
 		CE40078018E546110025C0B0 /* GCDWebServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GCDWebServer.h; sourceTree = "<group>"; };
@@ -147,7 +145,6 @@
 				DEF84A5F18E0FCF3009AC0CC /* README.md */,
 				DE0FDF6818C963CB00843686 /* mobileDrive */,
 				DE0FDF8118C963CB00843686 /* mobileDriveTests */,
-				DE0FDF6118C963CB00843686 /* Frameworks */,
 				DE0FDF6018C963CB00843686 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -172,12 +169,12 @@
 				DE0FDF7B18C963CB00843686 /* XCTest.framework */,
 			);
 			name = Frameworks;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		DE0FDF6818C963CB00843686 /* mobileDrive */ = {
 			isa = PBXGroup;
 			children = (
-				8AFF3ECB18D24CB300FB8A21 /* files.plist */,
 				CEF41B3818E79B5500073D0F /* Website */,
 				CE40077F18E546110025C0B0 /* CGDWebServer */,
 				DE7F71D118EB6AC3002CC799 /* dbfs */,
@@ -193,7 +190,6 @@
 				9564623D18D0DEBC00AA845A /* ServerViewController.m */,
 				8A014E7E18CF8FF600C83490 /* MobileDriveModel.h */,
 				8A014E7F18CF8FF600C83490 /* MobileDriveModel.m */,
-				8AFF3ECB18D24CB300FB8A21 /* files.plist */,
 				DE9833C818C96BBC003CEA5B /* Makefile */,
 				DE96FBC118CE618B008553D8 /* helpPage.txt */,
 				DE0FDF7418C963CB00843686 /* Images.xcassets */,
@@ -216,6 +212,7 @@
 		DE0FDF8118C963CB00843686 /* mobileDriveTests */ = {
 			isa = PBXGroup;
 			children = (
+				DE0FDF6118C963CB00843686 /* Frameworks */,
 				DE0FDF8718C963CB00843686 /* mobileDriveTests.m */,
 				DE0FDF8218C963CB00843686 /* Supporting Files */,
 			);
@@ -235,8 +232,8 @@
 			isa = PBXGroup;
 			children = (
 				DE7F71D218EB6AC3002CC799 /* dbfs-demo.c */,
-				DE7F71D318EB6AC3002CC799 /* dbfs.c */,
 				DE7F71D418EB6AC3002CC799 /* dbfs.h */,
+				DE7F71D318EB6AC3002CC799 /* dbfs.c */,
 				DE7F71D518EB6AC3002CC799 /* dbfs__literals.h */,
 				DE7F71D618EB6AC3002CC799 /* DBInterface.h */,
 				DE7F71D718EB6AC3002CC799 /* DBInterface.m */,
@@ -292,6 +289,9 @@
 				LastUpgradeCheck = 0510;
 				ORGANIZATIONNAME = "Eric Klinginsmith";
 				TargetAttributes = {
+					DE0FDF5E18C963CB00843686 = {
+						DevelopmentTeam = 266548894Y;
+					};
 					DE0FDF7918C963CB00843686 = {
 						TestTargetID = DE0FDF5E18C963CB00843686;
 					};
@@ -322,7 +322,6 @@
 			files = (
 				DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */,
 				DEF84A6018E0FCF3009AC0CC /* README.md in Resources */,
-				8AFF3ECC18D24CB300FB8A21 /* files.plist in Resources */,
 				DE0FDF6D18C963CB00843686 /* InfoPlist.strings in Resources */,
 				CEF41B3918E79B5500073D0F /* Website in Resources */,
 				DEF5A1F518E0F2BC0006D1AE /* (null) in Resources */,
@@ -477,10 +476,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "mobileDrive/mobileDrive-Prefix.pch";
 				INFOPLIST_FILE = "mobileDrive/mobileDrive-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -490,10 +492,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "mobileDrive/mobileDrive-Prefix.pch";
 				INFOPLIST_FILE = "mobileDrive/mobileDrive-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

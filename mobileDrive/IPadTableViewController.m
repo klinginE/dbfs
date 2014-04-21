@@ -11,6 +11,7 @@
 #import <string.h>
 #import <assert.h>
 #import "CODialog.h"
+#import <UIKit/UIKit.h>
 
 @interface IPadTableViewController ()
 
@@ -18,6 +19,11 @@
 // State
 @property (weak, atomic) MobileDriveAppDelegate *appDelegate;
 @property (strong, nonatomic) NSArray *filesArray;
+
+// Controllers
+@property (strong, nonatomic) UIDocumentInteractionController *documentInteractionController;
+@property (strong, nonatomic) UIImagePickerController *eImagePickerController;
+@property (strong, nonatomic) MFMailComposeViewController *mailComposeViewController;
 
 // Views
 @property (strong, atomic) NSMutableArray *alertViews;
@@ -29,6 +35,7 @@
 @property (strong, nonatomic) UIScrollView *pathScrollView;
 @property (strong, nonatomic) UILabel *pathLabelView;
 @property (strong, nonatomic) CODialog *detailView;
+@property (strong, nonatomic) UISwitch *extSwitch;
 
 // Actions
 @property (assign) SEL switchAction;
@@ -76,12 +83,16 @@
 // Table View Delegate
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
+// Convenience
+-(char)findFileType:(NSString *)fileExtension;
+
 @end
 
 @implementation IPadTableViewController {
 
     NSDictionary *selectedDict;
     NSString *selectedKey;
+    char extensionTypeFound; // used for opening files on iPad
 
 }
 
@@ -167,13 +178,35 @@
                 alert.tag = MOVE_ALERT_TAG;
                 break;
             case RENAME_ALERT_TAG:
+            {
                 alert.alertViewStyle = UIAlertViewStylePlainTextInput;
                 [alert setDelegate:self];
                 [alert setTitle:@"Renaming a File/Directory"];
                 [alert setMessage:@"Give it a new name:"];
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
+
+                UIView *subView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 250, 17)];
+                [subView setBackgroundColor:[UIColor clearColor]];
+
+                UILabel *extLable = [[UILabel alloc] init];
+                extLable.text = @"Add extension: ";
+                extLable.font = [UIFont systemFontOfSize:VERY_SMALL_FONT_SIZE];
+                extLable.frame = CGRectMake(10, -5, [self sizeOfString:extLable.text withFont:extLable.font].width, [self sizeOfString:extLable.text withFont:extLable.font].height);
+
+                _extSwitch = [[UISwitch alloc] init];
+                self.extSwitch.transform = CGAffineTransformMakeScale(0.65, 0.65);
+                self.extSwitch.frame = CGRectMake(extLable.frame.size.width + extLable.frame.origin.x, -3, self.extSwitch.frame.size.width, self.extSwitch.frame.size.height);
+                self.extSwitch.on = YES;
+                [self.extSwitch setTintColor:[UIColor grayColor]];
+
+                [subView addSubview:extLable];
+                [subView addSubview:self.extSwitch];
+
+                [alert setValue:subView forKey:@"accessoryView"];
                 alert.tag = RENAME_ALERT_TAG;
+
+            }
                 break;
             case CONFIRM_ALERT_TAG:
                 [alert setDelegate:self];
@@ -203,6 +236,8 @@
 
 -(void)initActionSheetButtons:(NSMutableArray *)buttons {
 
+    [buttons addObject:@"Open"];
+    [buttons addObject:@"Email"];
     [buttons addObject:@"Move"];
     [buttons addObject:@"Rename"];
     [buttons addObject:@"Delete"];
@@ -438,8 +473,8 @@
     // Set up back button
     [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:@"Back"
                                                                        Tag:BACK_BUTTON_TAG
-                                                                    Target:nil
-                                                                    Action:nil]];
+                                                                    Target:self
+                                                                    Action:@selector(buttonPressed:)]];
 
     self.view = [[UIView alloc] initWithFrame:CGRectZero];
 
@@ -458,6 +493,11 @@
     self.iPadState = nil;
     self.filesArray = nil;
 
+    // Free controllers
+    self.documentInteractionController = nil;
+    self.eImagePickerController = nil;
+    self.mailComposeViewController = nil;
+
     // Free Views
     self.alertViews = nil;
     self.actionSheetButtons = nil;
@@ -467,6 +507,7 @@
     self.mainTableView = nil;
     self.pathScrollView = nil;
     self.detailView = nil;
+    self.extSwitch = nil;
 
     // Free Colors
     self.barColor = nil;
@@ -488,7 +529,7 @@
             if (bi.tag == IP_TAG) {
 
                 UILabel *newLabel = [[UILabel alloc] init];
-                newLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", ip, port];
+                newLabel.text = [NSString stringWithFormat:@"http://%@:%@", ip, port];
                 newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
                 newLabel.frame = CGRectMake(0,
                                             0,
@@ -553,13 +594,13 @@
 
 }
 
-#pragma mark - Converters
-
--(char *)nsStringToCString:(NSString *)s {
-
-    return strdup([s cStringUsingEncoding:NSUTF8StringEncoding]);
-
-}
+//#pragma mark - Converters
+//
+//-(char *)nsStringToCString:(NSString *)s {
+//
+//    return strdup([s cStringUsingEncoding:NSUTF8StringEncoding]);
+//
+//}
 
 #pragma mark - Event Handelers
 
@@ -569,6 +610,7 @@
     self.conectSwitchView.on = self.appDelegate.isConnected;
     if (self.filesArray && self.mainTableView)
         [self reloadTableViewData];
+    [self makeFrameForViews];
 
 }
 
@@ -665,7 +707,6 @@
                         else {
 
                             NSLog(@"DBFS Not OK with DELETE");
-                            //FIXME add code here to deal with DBFS_Error
                             UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                             [alert setMessage:[self.appDelegate.model dbError:err]];
                             [alert show];
@@ -761,22 +802,84 @@
                         if (selectedDict && selectedKey) {
 
                             NSString *oldPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
-                            NSString *newPath = @"";
-                            if ([text characterAtIndex:0] != '/')
-                                newPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, text];
-                            else
-                                newPath = text;
+                            NSString *newPath = text;
                             BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
-                            NSInteger index = [newPath length] - [selectedKey length];
-                            if ((isDir || index < 0) && [newPath characterAtIndex:([newPath length] - 1)] != '/')
-                                newPath = [NSString stringWithFormat:@"%@/", newPath];
 
-                            NSInteger oldLen = [oldPath length];
+                            // add absoulte path if needed
+                            if ([newPath characterAtIndex:0] != '/')
+                                newPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, newPath];
+
+                            // add selectedKey to end if left off
+                            NSInteger index = [newPath length] - [selectedKey length];
+                            if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey]) {
+
+                                NSString *temp = newPath;
+                                if (!isDir) {
+
+                                    NSString *oldext = [oldPath pathExtension];
+                                    NSString *newext = [temp pathExtension];
+                                    if (oldext && [oldext length] && (!newext || [newext length] <= 0))
+                                        temp = [NSString stringWithFormat:@"%@.%@", temp, oldext];
+
+                                    index = [temp length] - [selectedKey length];
+                                    if (index >= 0 && [[temp substringFromIndex:index] isEqualToString:selectedKey])
+                                        newPath = temp;
+                                    else {
+
+                                        if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
+                                            newPath = [NSString stringWithFormat:@"%@/", newPath];
+                                        newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+
+                                    }
+
+                                }
+                                else {
+
+                                    if ([temp characterAtIndex:([temp length] - 1)] != '/')
+                                        temp = [NSString stringWithFormat:@"%@/", temp];
+
+                                    index = [temp length] - [selectedKey length];
+                                    if (index >= 0 && [[temp substringFromIndex:index] isEqualToString:selectedKey])
+                                        newPath = temp;
+                                    else {
+
+                                        if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
+                                            newPath = [NSString stringWithFormat:@"%@/", newPath];
+                                        newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+
+                                    }
+
+                                }
+                                
+//                                // add extension to end if file and not there and there is an old extension
+//                                if (!isDir) {
+//
+//                                    NSString *oldext = [oldPath pathExtension];
+//                                    NSString *newext = [temp pathExtension];
+//
+//                                    if (oldext && [oldext length] && (!newext || [newext length] <= 0))
+//                                        temp = [NSString stringWithFormat:@"%@.%@", temp, oldext];
+//                                    
+//                                    NSInteger index = [temp length] - [selectedKey length];
+//                                    if (index >= 0 && [[temp substringFromIndex:index] isEqualToString:selectedKey])
+//                                        newPath = temp;
+//
+//                                }
+//
+//                                if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
+//                                    newPath = [NSString stringWithFormat:@"%@/", newPath];
+//
+//                                index = [newPath length] - [selectedKey length];
+//                                if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
+//                                    newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
+
+                            }
+
+//                            NSLog(@"oldpath= %@", oldPath);
+//                            NSLog(@"newpath= %@", newPath);
+
                             NSInteger newLen = [newPath length];
-                            
-                            if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
-                                newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
-                            newLen = [newPath length];
+                            NSInteger oldLen = [oldPath length];
 
                             if ([self strOkay:oldPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
                                 [self strOkay:newPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
@@ -822,11 +925,21 @@
                         if (selectedDict && selectedKey) {
 
                             BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
-                            if (isDir&& [text characterAtIndex:([text length] - 1)] != '/')
+                            if (isDir && [text characterAtIndex:([text length] - 1)] != '/')
                                 text = [NSString stringWithFormat:@"%@/", text];
 
                             NSString *oldPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
                             NSString *newPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, text];
+
+                            if (!isDir && self.extSwitch && [self.extSwitch isOn]) {
+
+                                NSString *oldext = [oldPath pathExtension];
+                                NSString *newext = [newPath pathExtension];
+
+                                if (oldext && [oldext length] && (!newext || [newext length] <= 0))
+                                    newPath = [NSString stringWithFormat:@"%@.%@", newPath, oldext];
+
+                            }
 
                             if ([self strOkay:selectedKey ForTag:RENAME_ALERT_TAG IsDir:isDir] &&
                                 [self strOkay:text ForTag:RENAME_ALERT_TAG IsDir:isDir]) {
@@ -885,12 +998,51 @@
 
 }
 
+-(void)displayPhotoPicker {
+
+    self.eImagePickerController = [[UIImagePickerController alloc] init];
+    self.eImagePickerController.delegate = self;
+
+    self.eImagePickerController.sourceType = UIImagePickerControllerSourceTypeSavedPhotosAlbum;
+    self.eImagePickerController.navigationBarHidden = NO;
+
+    [self presentViewController:self.eImagePickerController animated:YES completion:nil];
+
+}
+
+-(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
+    
+    //extracting image from the picker and saving it
+    NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
+    if ([mediaType isEqualToString:@"public.image"]){
+        UIImage *imagePicked = [info objectForKey:UIImagePickerControllerOriginalImage];
+        NSData *imageData;
+
+        NSURL *imagePath = [info objectForKey:@"UIImagePickerControllerReferenceURL"];
+        NSString *imageName = [imagePath lastPathComponent];
+        NSString * extention = [[imageName lastPathComponent] lowercaseString];
+        
+        if ([extention isEqualToString:@"png"]) {
+            imageData = UIImagePNGRepresentation(imagePicked);
+        }else{ // It's assumed to be jpg and jpeg
+            imageData = UIImageJPEGRepresentation(imagePicked, 1.0);
+        }
+
+        NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, imageName];
+        [self.appDelegate.model putFile_NSDATA: filePath BLOB:imageData];
+        imageData = nil;
+    }
+    [self dismissViewControllerAnimated:YES completion:^{}];
+
+}
 -(void)buttonPressed:(UIBarButtonItem *)sender {
 
+    //NSLog(@"buttonPressed");
     switch (sender.tag) {
 
         case HELP_BUTTON_TAG:
-            [self displayHelpPage];
+//            [self displayHelpPage];
+            [self displayPhotoPicker];
             break;
         case ADD_DIR_BUTTON_TAG:
             [self displayAddDirPage];
@@ -902,10 +1054,165 @@
 
 }
 
+-(char)check_list_ext:(NSArray *)extTuple findFileType:(NSString*)fileExtension {
+
+    NSString* listExtensions = extTuple[0];
+    char codeExtension = [ (NSNumber *) extTuple[1] charValue ];
+    fileExtension = [fileExtension lowercaseString];
+
+    NSArray *singleImageExtensions = [listExtensions componentsSeparatedByString: @" "];
+    
+    // Looking to see if file is an image
+    for (NSString *ext in singleImageExtensions)
+        if ([fileExtension isEqualToString:ext])
+            return codeExtension;
+
+    return UNKNOWN_EXTENSION;
+
+}
+
+-(char)findFileType:(NSString *)fileExtension {
+    // identifying extension
+    char extensionTypeFound_temp = UNKNOWN_EXTENSION;
+
+    NSString *imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
+    NSString *docExtensions = @"doc docx xlsx xls ppt pptx txt";
+    NSString *audioExtensions = @"mp3 m4p wav";
+    NSString *generalExtensions = @"pdf";
+
+    NSMutableArray *allExtensions = [[NSMutableArray alloc] init];
+
+    [allExtensions addObject: @[imageExtensions, [[NSNumber alloc] initWithChar:IMAGE_EXTENSION]] ];
+    [allExtensions addObject: @[docExtensions, [[NSNumber alloc] initWithChar:DOC_EXTENSION]] ];
+    [allExtensions addObject: @[audioExtensions, [[NSNumber alloc] initWithChar:AUDIO_EXTENSION]] ];
+    [allExtensions addObject: @[generalExtensions, [[NSNumber alloc] initWithChar:GENERAL_EXTENSION]] ];
+
+    for (NSArray *tempTuple in allExtensions) {
+
+        if (extensionTypeFound_temp & UNKNOWN_EXTENSION)
+            extensionTypeFound_temp = [self check_list_ext:tempTuple findFileType:fileExtension];
+        else
+            break;
+
+    }
+
+    return extensionTypeFound_temp;
+
+}
+
+-(void)displayFileWithfilePath:(NSString *)filePath fileName:(NSString *)filename {
+
+    NSData *blob = [self.appDelegate.model getFile_NSDATA:filePath];
+    NSString *tempfilename = [NSString stringWithFormat:@"temp.%@", [filename pathExtension]];
+//  NSString *tempfilename = filename;
+
+    NSString *filePath_t = [NSTemporaryDirectory() stringByAppendingString:tempfilename];
+    NSURL *url = [NSURL fileURLWithPath:filePath_t];
+    NSError *writeError = nil;
+    [blob writeToURL:url options:0 error:&writeError];
+    if (writeError) {
+
+        NSLog(@"Error write file to disk to display it");
+        return;
+
+    }
+    blob = nil;
+    self.documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:url];
+    self.documentInteractionController.name = filename;
+    [self.documentInteractionController setDelegate:self];
+
+    // Preview File
+    [self.documentInteractionController presentPreviewAnimated:YES];
+
+}
+
+-(UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *) controller {
+    return self;
+}
+
+-(void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController *)controller {
+    NSLog(@"End Document viewer");
+    self.documentInteractionController = nil;
+}
+
+-(void)displayEmailForAttachmentWithPath:(NSString *)path Name:(NSString *)name {
+
+    self.mailComposeViewController = [[MFMailComposeViewController alloc] init];
+    [self.mailComposeViewController setMailComposeDelegate:(id)self];
+
+    // Attach an id to the email
+    NSData *myData = [self.appDelegate.model getFile_NSDATA:path];
+    [self.mailComposeViewController addAttachmentData:myData mimeType:[path pathExtension] fileName:name];
+
+    // Fill out the email body text
+    [self.mailComposeViewController setMessageBody:@"" isHTML:NO];
+    [self presentViewController:self.mailComposeViewController animated:YES completion:^(void){}];
+
+}
+
+-(void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error {
+
+    // Notifies users about errors associated with the interface
+    switch (result) {
+
+        case MFMailComposeResultCancelled:
+            NSLog(@"Result: canceled");
+            break;
+        case MFMailComposeResultSaved:
+            NSLog(@"Result: saved");
+            break;
+        case MFMailComposeResultSent:
+            NSLog(@"Result: sent");
+            break;
+        case MFMailComposeResultFailed:
+        {
+            NSLog(@"Result: failed");
+            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+            alert.message = @"Email failed";
+            [alert show];
+        }
+            break;
+        default:
+        {
+            NSLog(@"Result: not sent");
+            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+            alert.message = @"Email failed to send";
+            [alert show];
+        }
+            break;
+
+    }
+    [self dismissViewControllerAnimated:YES completion:^(void){self.mailComposeViewController = nil;}];
+
+}
+
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
+    NSLog(@"detailedVeiwButtonPressed");
     [self.detailView hideAnimated:NO];
-    if ([sender.titleLabel.text isEqualToString:@"Move"]) {
+    self.detailView = nil;
+
+    if (selectedKey == nil || selectedDict == nil) {
+
+        NSLog(@"Fatal error in alertView:clickedButtonAtIndex:, selectedDict or selectedKey are NULL.");
+        abort();
+
+    }
+
+    if ([sender.titleLabel.text isEqualToString:@"Open"]) {
+        // Display file according to type
+        NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
+        if (!(extensionTypeFound & UNKNOWN_EXTENSION))
+            [self displayFileWithfilePath:filePath fileName:selectedKey];
+
+    }
+    else if ([sender.titleLabel.text isEqualToString:@"Email"]) {
+
+        NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
+        [self displayEmailForAttachmentWithPath:filePath Name:selectedKey];
+
+    }
+    else if ([sender.titleLabel.text isEqualToString:@"Move"]) {
 
         UIAlertView *alert = [self objectInArray:self.alertViews WithTag:MOVE_ALERT_TAG];
         [[alert textFieldAtIndex:0] setPlaceholder:self.iPadState.currentPath];
@@ -916,6 +1223,8 @@
 
         UIAlertView *alert = [self objectInArray:self.alertViews WithTag:RENAME_ALERT_TAG];
         [[alert textFieldAtIndex:0] setPlaceholder:selectedKey];
+        if (self.extSwitch)
+            self.extSwitch.on = YES;
         [alert show];
 
 
@@ -1062,6 +1371,9 @@
 
                     if (self.detailView && !self.detailView.isHidden)
                         [self.detailView hideAnimated:NO];
+                    if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
+                        [self dismissViewControllerAnimated:YES completion:^(void){}];
+                    
                     NSInteger depth = -1;
                     for (int i = 0; i < serverLen; i++)
                         if ([serverPath characterAtIndex:i] == '/')
@@ -1079,6 +1391,8 @@
 -(void)viewDidLoad {
 
     [super viewDidLoad];
+
+    // Set up self to be observer over a orientation change
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(orientationChanged:)
@@ -1111,7 +1425,7 @@
                                                                            action:nil];
 
     UILabel *ipLabel = [[UILabel alloc] init];
-    ipLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", self.iPadState.ipAddress, self.iPadState.port];
+    ipLabel.text = [NSString stringWithFormat:@"http://%@:%@", self.iPadState.ipAddress, self.iPadState.port];
     ipLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     ipLabel.frame = CGRectMake(0,
                                0,
@@ -1238,22 +1552,36 @@
         
     }
 
-    if (!self.detailView) {
+    _detailView = [[CODialog alloc] initWithWindow:[[[UIApplication sharedApplication] delegate] window]];
+    _detailView.dialogStyle = CODialogStyleCustomView;
 
-        _detailView = [[CODialog alloc] initWithWindow:[[[UIApplication sharedApplication] delegate] window]];
-        _detailView.dialogStyle = CODialogStyleCustomView;
+    extensionTypeFound = UNKNOWN_EXTENSION;
+    extensionTypeFound = [self findFileType: [key pathExtension]]; // testing to see if file can be open
 
-        for (NSString *b in self.actionSheetButtons)
+    for (NSString *b in self.actionSheetButtons) {
+        
+        //NSLog(@"%@", b);
+        if ([b isEqualToString:@"Open"] && !(extensionTypeFound & UNKNOWN_EXTENSION))
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];
+        else if (![b isEqualToString:@"Open"]) {
+            if ([b isEqualToString:@"Email"] && ![[dict objectForKey:@"Type"] boolValue])
+                [self.detailView addButtonWithTitle:b
+                                             target:self
+                                           selector:@selector(detailedVeiwButtonPressed:)];
+            else if (![b isEqualToString:@"Email"])
+                [self.detailView addButtonWithTitle:b
+                                             target:self
+                                           selector:@selector(detailedVeiwButtonPressed:)];
+        }
 
     }
+
     [self.detailView setTitle:[NSString stringWithFormat:@"File/Directory details for: %@", key]];
     custom.frame = CGRectMake(0, 0, self.detailView.bounds.size.width - LARGE_FONT_SIZE * 2, i * (SMALL_FONT_SIZE + 5));
     custom.contentSize = CGSizeMake(maxWidth + LARGE_FONT_SIZE, custom.frame.size.height);
     self.detailView.customView = custom;
-    
 
     selectedDict = dict;
     selectedKey = key;

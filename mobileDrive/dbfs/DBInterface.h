@@ -26,5 +26,7 @@
 -(int)moveDirectory:(NSString *)dirName to:(NSString *)destName fromDatabase:(DBFS *)dbfs;
 -(DBFS_FileList)getFileListIn:(NSString *)dirName fromDatabase:(DBFS *)dbfs;
 -(DBFS_DirList)getDirectoryListIn:(NSString *)dirName inDatabase:(DBFS *)dbfs;
-
+-(NSData *) getFile_NSDATA:(NSString *)fname fromDatabase:(DBFS *)dbfs;
+-(int)putFile_NSDATA: (NSString *)fname Blob: (NSData*) blob fromDatabase:(DBFS *)dbfs;
+    
 @end
