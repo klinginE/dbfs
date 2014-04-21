@@ -92,7 +92,7 @@
 
     NSDictionary *selectedDict;
     NSString *selectedKey;
-    char extensionTypeFound; // used for opening files on iPad
+    char extensionTypeFound;// used for opening files on iPad
 
 }
 
@@ -384,8 +384,15 @@
     if (self.pathScrollView && self.pathLabelView) {
 
         CGRect statusRect = [[UIApplication sharedApplication] statusBarFrame];
+        CGFloat statusBarOffset = 20.0;
+        if (statusRect.size.height <= statusRect.size.width)
+            statusBarOffset = statusRect.size.height;
+        else
+            statusBarOffset = statusRect.size.width;
+        
         self.pathScrollView.frame = CGRectMake(self.view.frame.origin.x,
-                                               statusRect.origin.y + statusRect.size.height + self.navigationController.navigationBar.frame.size.height,
+                                               statusBarOffset + self.navigationController.navigationBar.frame.size.height,
+                                               //statusRect.origin.y + statusRect.size.height + self.navigationController.navigationBar.frame.size.height,
                                                mainScreenWidth,
                                                PATH_VIEW_HEIGHT);
         self.pathScrollView.contentSize = CGSizeMake(self.pathLabelView.frame.size.width + (SMALL_FONT_SIZE * 2),
@@ -852,33 +859,8 @@
                                     }
 
                                 }
-                                
-//                                // add extension to end if file and not there and there is an old extension
-//                                if (!isDir) {
-//
-//                                    NSString *oldext = [oldPath pathExtension];
-//                                    NSString *newext = [temp pathExtension];
-//
-//                                    if (oldext && [oldext length] && (!newext || [newext length] <= 0))
-//                                        temp = [NSString stringWithFormat:@"%@.%@", temp, oldext];
-//                                    
-//                                    NSInteger index = [temp length] - [selectedKey length];
-//                                    if (index >= 0 && [[temp substringFromIndex:index] isEqualToString:selectedKey])
-//                                        newPath = temp;
-//
-//                                }
-//
-//                                if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
-//                                    newPath = [NSString stringWithFormat:@"%@/", newPath];
-//
-//                                index = [newPath length] - [selectedKey length];
-//                                if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
-//                                    newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
 
                             }
-
-//                            NSLog(@"oldpath= %@", oldPath);
-//                            NSLog(@"newpath= %@", newPath);
 
                             NSInteger newLen = [newPath length];
                             NSInteger oldLen = [oldPath length];
@@ -1043,8 +1025,9 @@
     switch (sender.tag) {
 
         case HELP_BUTTON_TAG:
-//            [self displayHelpPage];
-            [self displayPhotoPicker];
+            [self displayActionSheetViewFrom:sender];
+            //[self displayHelpPage];
+            //[self displayPhotoPicker];
             break;
         case ADD_DIR_BUTTON_TAG:
             [self displayAddDirPage];
@@ -1135,6 +1118,36 @@
 -(void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController *)controller {
     NSLog(@"End Document viewer");
     self.documentInteractionController = nil;
+
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+
+    switch (buttonIndex) {
+
+        case 0:
+            [self displayHelpPage];
+            break;
+        case 1:
+            [self displayAddDirPage];
+            break;
+        case 2:
+            [self displayPhotoPicker];
+        default:
+            break;
+
+    }
+
+}
+
+-(void)displayActionSheetViewFrom:(UIBarButtonItem *)button {
+
+    UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:@"Menu"
+                                                       delegate:self
+                                              cancelButtonTitle:@"Cancel"
+                                         destructiveButtonTitle:nil
+                                              otherButtonTitles:@"Need Help?", @"Add Directory", @"Import Image", nil];
+    [sheet showFromBarButtonItem:button animated:YES];
 
 }
 
@@ -1407,7 +1420,7 @@
         _filesArray = [self.appDelegate.model getContentsArrayIn:self.iPadState.currentPath];
 
     // Add a help button to the top right
-    UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"Need help?"
+    UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"≣"
                                                            Tag:HELP_BUTTON_TAG
                                                         Target:self
                                                         Action:@selector(buttonPressed:)];
@@ -1564,7 +1577,7 @@
     for (NSString *b in self.actionSheetButtons) {
         
         //NSLog(@"%@", b);
-        if ([b isEqualToString:@"Open"] && !(extensionTypeFound & UNKNOWN_EXTENSION))
+        if ([b isEqualToString:@"Open"] && !(extensionTypeFound & UNKNOWN_EXTENSION) && ![[dict objectForKey:@"Type"] boolValue])
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];

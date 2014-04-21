@@ -38,7 +38,7 @@ enum{
 
 
 // Protocol
-@protocol IPadTableViewControllerDelegate <NSObject, UIDocumentInteractionControllerDelegate, MFMailComposeViewControllerDelegate>
+@protocol IPadTableViewControllerDelegate <NSObject>
 
 @required
 @property (atomic) BOOL isConnected;
@@ -51,7 +51,7 @@ enum{
 
 @end
 
-@interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIDocumentInteractionControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+@interface IPadTableViewController : UITableViewController <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, UIDocumentInteractionControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, MFMailComposeViewControllerDelegate, UIActionSheetDelegate>
 
 // Properties
 @property (strong, atomic) IPadState *iPadState;
