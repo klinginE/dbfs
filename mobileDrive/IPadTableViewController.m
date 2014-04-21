@@ -1078,7 +1078,7 @@
     NSString *imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
     NSString *docExtensions = @"doc docx xlsx xls ppt pptx txt";
     NSString *audioExtensions = @"mp3 m4p wav";
-    NSString *generalExtensions = @"zip tar.bz tar.gz pdf";
+    NSString *generalExtensions = @"pdf";
 
     NSMutableArray *allExtensions = [[NSMutableArray alloc] init];
 
@@ -1165,14 +1165,24 @@
             NSLog(@"Result: sent");
             break;
         case MFMailComposeResultFailed:
+        {
             NSLog(@"Result: failed");
+            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+            alert.message = @"Email failed";
+            [alert show];
+        }
             break;
         default:
+        {
             NSLog(@"Result: not sent");
+            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+            alert.message = @"Email failed to send";
+            [alert show];
+        }
             break;
 
     }
-    [self dismissViewControllerAnimated:YES completion:^(void){}];
+    [self dismissViewControllerAnimated:YES completion:^(void){self.mailComposeViewController = nil;}];
 
 }
 
