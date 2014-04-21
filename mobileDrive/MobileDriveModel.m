@@ -13,19 +13,39 @@
     NSDictionary *_directoryContents;
     NSArray *_directoryKeys;
     __block DBFS *dbfs;
+
 }
 
 -(id)init {
     self = [super init];
     if (self) {
 
-        self.dbInterface = [[DBInterface alloc] init];
+//        id block1 = [^{NSLog(@"Hello, world");} copy];
+//        _interfaceQueue = [[NSOperationQueue alloc] init];
+//        _interfaceOperation = [[NSInvocationOperation alloc] initWithTarget:block1                                                                                                                                   selector:@selector(invoke) object:nil];
+//        [self.interfaceQueue addOperation:self.interfaceOperation];
+//        [self.interfaceQueue waitUntilAllOperationsAreFinished];
+//
+//        _interfaceOperation = [[NSInvocationOperation alloc] initWithTarget:block1                                                                                                                                   selector:@selector(invoke) object:nil];
+//        [self.interfaceQueue addOperation:self.interfaceOperation];
+//        [self.interfaceQueue waitUntilAllOperationsAreFinished];
+        
+        dispatch_block_t block = ^{
+            self.dbInterface = [[DBInterface alloc] init];
+        };
+        if ([NSThread isMainThread])
+            block();
+        else
+            dispatch_sync(dispatch_get_main_queue(), block);
+
+//        [block1 performSelector:@selector(invoke) onThread:self.interfaceThread withObject:nil waitUntilDone:YES];
+        //[self.interfaceThread ]
         
         NSArray *dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *docsDir = [dirPaths objectAtIndex:0];
 
         __block NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"database.sqlite"]];
-        dispatch_block_t block = ^{
+        block = ^{
             dbfs = [self.dbInterface openDatabase:dbPath];
         };
         if ([NSThread isMainThread])
