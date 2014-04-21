@@ -383,10 +383,11 @@
 
     if (self.pathScrollView && self.pathLabelView) {
 
+        CGRect statusRect = [[UIApplication sharedApplication] statusBarFrame];
         self.pathScrollView.frame = CGRectMake(self.view.frame.origin.x,
-                                           self.view.frame.origin.y + self.navigationController.navigationBar.frame.origin.y + self.navigationController.navigationBar.frame.size.height,
-                                           mainScreenWidth,
-                                           PATH_VIEW_HEIGHT);
+                                               statusRect.origin.y + statusRect.size.height + self.navigationController.navigationBar.frame.size.height,
+                                               mainScreenWidth,
+                                               PATH_VIEW_HEIGHT);
         self.pathScrollView.contentSize = CGSizeMake(self.pathLabelView.frame.size.width + (SMALL_FONT_SIZE * 2),
                                                      self.pathLabelView.frame.size.height);
 
@@ -394,9 +395,9 @@
 
     if (self.mainTableView)
         self.mainTableView.frame = CGRectMake(0,
-                                          self.pathScrollView.frame.origin.y + self.pathScrollView.frame.size.height,
-                                          mainScreenWidth,
-                                          mainScreenHeight - self.pathScrollView.frame.origin.y - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height);
+                                              self.pathScrollView.frame.origin.y + self.pathScrollView.frame.size.height,
+                                              mainScreenWidth,
+                                              mainScreenHeight - self.pathScrollView.frame.origin.y - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height);
     if (self.helpLabelView) {
 
         CGSize textSize = [self sizeOfString:self.helpLabelView.text withFont:self.helpLabelView.font];
@@ -606,11 +607,12 @@
 
 -(void)viewWillAppear:(BOOL)animated {
 
+    NSLog(@"view Will Appear");
     [super viewWillAppear:animated];
     self.conectSwitchView.on = self.appDelegate.isConnected;
+    [self makeFrameForViews];
     if (self.filesArray && self.mainTableView)
         [self reloadTableViewData];
-    [self makeFrameForViews];
 
 }
 
@@ -1076,9 +1078,9 @@
     char extensionTypeFound_temp = UNKNOWN_EXTENSION;
 
     NSString *imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
-    NSString *docExtensions = @"doc docx xlsx xls ppt pptx txt";
+    NSString *docExtensions = @"pdf doc docx xlsx xls ppt pptx txt";
     NSString *audioExtensions = @"mp3 m4p wav";
-    NSString *generalExtensions = @"pdf";
+    NSString *generalExtensions = @"";
 
     NSMutableArray *allExtensions = [[NSMutableArray alloc] init];
 
@@ -1133,6 +1135,7 @@
 -(void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController *)controller {
     NSLog(@"End Document viewer");
     self.documentInteractionController = nil;
+
 }
 
 -(void)displayEmailForAttachmentWithPath:(NSString *)path Name:(NSString *)name {
