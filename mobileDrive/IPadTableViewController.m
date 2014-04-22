@@ -223,6 +223,14 @@
                 [alert addButtonWithTitle:@"OK"];
                 alert.tag = ERROR_ALERT_TAG;
                 break;
+            case DELETE_ALL_ALERT_TAG:
+                [alert setDelegate:self];
+                [alert setTitle:@"Deleting all content from Mobile Drive!"];
+                [alert setMessage:@"Are you Sure?"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = DELETE_ALL_ALERT_TAG;
+                break;
             default:
                 break;
 
@@ -537,7 +545,7 @@
             if (bi.tag == IP_TAG) {
 
                 UILabel *newLabel = [[UILabel alloc] init];
-                newLabel.text = [NSString stringWithFormat:@"http://%@:%@", ip, port];
+                newLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", ip, port];
                 newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
                 newLabel.frame = CGRectMake(0,
                                             0,
@@ -970,6 +978,11 @@
                 }
                 previousTag = CONFIRM_ALERT_TAG;
                 break;
+            case DELETE_ALL_ALERT_TAG:
+                NSLog(@"delinting all");
+                [self.appDelegate.model deleteDatabaseRecreate:YES];
+                [self reloadTableViewData];
+                break;
             default:
                 previousTag = NONE;
                 break;
@@ -1024,13 +1037,8 @@
     //NSLog(@"buttonPressed");
     switch (sender.tag) {
 
-        case HELP_BUTTON_TAG:
+        case MENU_BUTTON_TAG:
             [self displayActionSheetViewFrom:sender];
-            //[self displayHelpPage];
-            //[self displayPhotoPicker];
-            break;
-        case ADD_DIR_BUTTON_TAG:
-            [self displayAddDirPage];
             break;
         default:
             break;
@@ -1126,13 +1134,24 @@
     switch (buttonIndex) {
 
         case 0:
+            [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
             [self displayHelpPage];
             break;
         case 1:
+            [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
             [self displayAddDirPage];
             break;
         case 2:
+            [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
             [self displayPhotoPicker];
+        case 3:
+        {
+            [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
+            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:DELETE_ALL_ALERT_TAG];
+            NSLog(@"alert= %@", alert);
+            [alert show];
+        }
+            break;
         default:
             break;
 
@@ -1146,7 +1165,7 @@
                                                        delegate:self
                                               cancelButtonTitle:@"Cancel"
                                          destructiveButtonTitle:nil
-                                              otherButtonTitles:@"Need Help?", @"Add Directory", @"Import Image", nil];
+                                              otherButtonTitles:@"Need Help?", @"Add Directory", @"Import Image", @"Delete All Content", nil];
     [sheet showFromBarButtonItem:button animated:YES];
 
 }
@@ -1421,16 +1440,10 @@
 
     // Add a help button to the top right
     UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"≣"
-                                                           Tag:HELP_BUTTON_TAG
+                                                           Tag:MENU_BUTTON_TAG
                                                         Target:self
                                                         Action:@selector(buttonPressed:)];
     self.navigationItem.rightBarButtonItem = helpButton;
-
-    // Add a add dir button to the bottom left
-    UIBarButtonItem *addDirButton = [self makeBarButtonWithTitle:@"Add Directory"
-                                                             Tag:ADD_DIR_BUTTON_TAG
-                                                          Target:self
-                                                          Action:@selector(buttonPressed:)];
 
     // flexiable space holder
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
@@ -1441,7 +1454,7 @@
                                                                            action:nil];
 
     UILabel *ipLabel = [[UILabel alloc] init];
-    ipLabel.text = [NSString stringWithFormat:@"http://%@:%@", self.iPadState.ipAddress, self.iPadState.port];
+    ipLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", self.iPadState.ipAddress, self.iPadState.port];
     ipLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     ipLabel.frame = CGRectMake(0,
                                0,
@@ -1469,7 +1482,7 @@
     UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:self.conectSwitchView];
 
     // put objects in toolbar
-    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:flex, addDirButton, flex, ipButtonItem, flex, switchButtonItem, fixed, cSwitch, flex, nil];
+    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:flex, ipButtonItem, flex, switchButtonItem, fixed, cSwitch, flex, nil];
     self.toolbarItems = toolBarItems;
 
     // set tool bar settings
