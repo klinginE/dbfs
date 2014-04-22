@@ -15,6 +15,7 @@
 
 #define kTrialMaxUploads 50
 
+
 @interface ServerViewController ()
 @end
 
@@ -190,7 +191,33 @@
             NSString *response = @"{\n\t\"type\": \"success\",\n\t\"msg\": \"Upload succeeded\"\n}";
             return [GCDWebServerDataResponse responseWithData: [response dataUsingEncoding:NSUTF8StringEncoding] contentType: @"application/json"];
         }];
+        
+        [webServer addHandlerForMethod:@"GET" path:@"/seeImage.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
 
+
+            MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
+            
+            NSString *path = [request.query objectForKey:@"path"];
+            NSData * tempData;
+            
+            NSString * fileExtension = [ [path lastPathComponent] pathExtension];
+            
+            BOOL validExt = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate isValidExtension:@"png jpeg jpg gif tiff" findFileType:fileExtension];
+
+            if (!validExt) {
+                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>File type is not allowed to be viewed.</body></html>"];
+            }
+            
+            tempData = [model getFile_NSDATA:path];
+            if ( tempData == nil) {
+                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>Failed to get file from DB.</body></html>"];
+            }
+            
+            NSString * contentTypeString = [NSString stringWithFormat:@"image/%@", fileExtension];
+            GCDWebServerDataResponse *response = [GCDWebServerDataResponse responseWithData:tempData contentType:contentTypeString];
+            return response;
+        }];
+        
         [webServer addHandlerForMethod:@"GET" path:@"/download.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
             
             MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];

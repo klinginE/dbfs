@@ -143,4 +143,19 @@
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
+-(BOOL) isValidExtension: (NSString*) listExtensions findFileType:(NSString*)fileExtension {
+    
+    fileExtension = [fileExtension lowercaseString];
+    
+    NSArray *singleImageExtensions = [listExtensions componentsSeparatedByString: @" "];
+    
+    // Looking to see if file is an image
+    for (NSString *ext in singleImageExtensions)
+        if ([fileExtension isEqualToString:ext])
+            return YES;
+    
+    return NO;
+    
+}
+
 @end
