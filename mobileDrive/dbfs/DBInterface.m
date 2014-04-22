@@ -117,6 +117,13 @@
     return r;
 }
 
+-(int)overwriteFile_NSDATA:(NSString *)fname Blob: (NSData*) blob fromDatabase:(DBFS *)dbfs{
+    DBFS_Blob blob_temp = (DBFS_Blob){[blob bytes], (int) [blob length]};
+    const char *name = [self nsStringToCString:fname];//[fname UTF8String];
+    int r = dbfs_ovr(dbfs, (DBFS_FileName){name}, blob_temp);
+    return r;
+}
+
 -(int)overwriteFile:(NSString *)fname inDatabase:(DBFS *)dbfs from:(FILE *)in {
     
     DBFS_Blob blob;

@@ -28,5 +28,6 @@
 -(DBFS_DirList)getDirectoryListIn:(NSString *)dirName inDatabase:(DBFS *)dbfs;
 -(NSData *) getFile_NSDATA:(NSString *)fname fromDatabase:(DBFS *)dbfs;
 -(int)putFile_NSDATA: (NSString *)fname Blob: (NSData*) blob fromDatabase:(DBFS *)dbfs;
-    
+-(int)overwriteFile_NSDATA:(NSString *)fname Blob: (NSData*) blob fromDatabase:(DBFS *)dbfs;
+
 @end

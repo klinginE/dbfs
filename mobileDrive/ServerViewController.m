@@ -15,6 +15,7 @@
 
 #define kTrialMaxUploads 50
 
+
 @interface ServerViewController ()
 @end
 
@@ -167,66 +168,72 @@
             NSString *fileName = [file fileName];
             NSString *filePath = [NSString stringWithFormat:@"%@%@", uploadDir, fileName];
 
-            FILE *fp = fopen([[file temporaryPath] cStringUsingEncoding:NSASCIIStringEncoding], "r");
+            NSData * tempData = [[NSFileManager defaultManager] contentsAtPath: [file temporaryPath]];
 
             // If temp file wasn't uploaded, respond with error JSON
-            if (!fp) {
+            if (tempData == nil) {
                 NSString *response = @"{\n\t\"type\": \"error\",\n\t\"msg\": \"Upload failed\"\n}";
                 return [GCDWebServerDataResponse responseWithData: [response dataUsingEncoding:NSUTF8StringEncoding] contentType: @"application/json"];
             }
-
-            // Get file size
-            fseek(fp, 0, SEEK_END);
-            int sz = ftell(fp);
-            rewind(fp);
 
             // Overwrite/put file
             MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
             NSDictionary *contents = [model getDirectoryListIn:uploadDir];
             if ([contents objectForKey:fileName]) {
-                [model overwriteFile:filePath from:fp];
+                [model overwriteFile_NSDATA:filePath BLOB:tempData];
             } else {
-                [model putFile:filePath from:fp withSize:sz];
+                [model putFile_NSDATA: filePath BLOB:tempData];
             }
-
-            fclose(fp);
 
             // Refresh the iPad view
             [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: ADD_MODEL_TAG
-                                                                                               From: filePath To: nil];
-
+                                                                                        From: filePath To: nil];
             // Respond with success JSON
             NSString *response = @"{\n\t\"type\": \"success\",\n\t\"msg\": \"Upload succeeded\"\n}";
             return [GCDWebServerDataResponse responseWithData: [response dataUsingEncoding:NSUTF8StringEncoding] contentType: @"application/json"];
         }];
+        
+        [webServer addHandlerForMethod:@"GET" path:@"/seeImage.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
 
-        [webServer addHandlerForMethod:@"GET" path:@"/download.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
 
             MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
-
-            NSString *uuid = [[NSUUID UUID] UUIDString];
+            
             NSString *path = [request.query objectForKey:@"path"];
-            NSString *tempPath = NSTemporaryDirectory();
-            NSString *tempFile = [tempPath stringByAppendingPathComponent:uuid];
+            NSData * tempData;
+            
+            NSString * fileExtension = [ [path lastPathComponent] pathExtension];
+            
+            NSString * imageExtensions =  [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate imageExtensions];
+            
+            BOOL validExt = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate isValidExtension:imageExtensions
+                                                                                                      findFileType:fileExtension];
 
-            FILE *fp = fopen([tempFile cStringUsingEncoding:NSASCIIStringEncoding], "w");
-            if (!fp) {
-                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>Failed to create temporary file.</body></html>"];
+            if (!validExt) {
+                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>File type is not allowed to be viewed.</body></html>"];
             }
             
-            int sz;
-            if ([model getFile:path to:fp withSize:&sz] != DBFS_OKAY) {
+            tempData = [model getFile_NSDATA:path];
+            if ( tempData == nil) {
                 return [GCDWebServerDataResponse responseWithHTML:@"<html><body>Failed to get file from DB.</body></html>"];
             }
-
-            fclose(fp);
-
-            NSData *data = [[NSFileManager defaultManager] contentsAtPath:tempFile];
+            
+            NSString * contentTypeString = [NSString stringWithFormat:@"image/%@", fileExtension];
+            GCDWebServerDataResponse *response = [GCDWebServerDataResponse responseWithData:tempData contentType:contentTypeString];
+            return response;
+        }];
+        
+        [webServer addHandlerForMethod:@"GET" path:@"/download.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
+            
+            MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
+                        NSString *path = [request.query objectForKey:@"path"];
+            NSData * tempData;
+            tempData = [model getFile_NSDATA:path];
+            if ( tempData == nil) {
+                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>Failed to get file from DB.</body></html>"];
+            }
+            
             NSString *fnHeader = [NSString stringWithFormat:@"attachment; filename=%@", [path lastPathComponent]];
-            //NSError *error;
-            [[NSFileManager defaultManager] removeItemAtPath:tempFile error:NULL];
-
-            GCDWebServerDataResponse *response = [GCDWebServerDataResponse responseWithData:data contentType:@"application/octet-stream"];
+            GCDWebServerDataResponse *response = [GCDWebServerDataResponse responseWithData:tempData contentType:@"application/octet-stream"];
             [response setValue:fnHeader forAdditionalHeader:@"Content-Disposition"];
             return response;
         }];
