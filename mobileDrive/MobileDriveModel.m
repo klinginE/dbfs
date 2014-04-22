@@ -176,6 +176,25 @@
     return result;
 
 }
+-(int)overwriteFile_NSDATA:(NSString *)fname BLOB: (NSData*) blob {
+    if (fname == nil) {
+        return DBFS_NOT_FILENAME;
+    }
+    else if ([fname isEqualToString:@""]) {
+        return DBFS_NOT_FILENAME;
+    }
+    __block int result;
+    __block NSString *fname_t = fname.copy;
+//    __block FILE *in_t = in;
+    dispatch_block_t block = ^{
+        result = [self.dbInterface overwriteFile_NSDATA:fname_t Blob:blob fromDatabase:self->dbfs];
+//        result = [self.dbInterface overwriteFile_NSDATA:fname_t inDatabase:self->dbfs from:in_t];
+    };
+    [self.interfaceLock lock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
+    return result;
+}
 
 -(int)putFile_NSDATA:(NSString *)fname BLOB: (NSData*) blob {
     if (fname == nil || blob == nil) {

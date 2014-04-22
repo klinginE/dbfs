@@ -67,6 +67,7 @@
 -(NSString *)getJsonContentsIn:(NSString *)dirName;
 -(NSData *)getFile_NSDATA:(NSString *)fname;
 -(int)putFile_NSDATA:(NSString *)fname BLOB: (NSData*) blob;
+-(int)overwriteFile_NSDATA:(NSString *)fname BLOB: (NSData*) blob;
 
 @property (nonatomic) UIImagePickerController *imagePickerController;
 
