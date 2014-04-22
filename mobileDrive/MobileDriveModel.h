@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "dbfs/DBInterface.h"
 
+#define DATABASE_NAME @"database.sqlite"
+
 @interface MobileDriveModel : NSObject
 
 @property (strong, atomic) __block DBInterface *dbInterface;

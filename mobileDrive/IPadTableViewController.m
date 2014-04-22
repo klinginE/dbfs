@@ -622,7 +622,6 @@
 
 -(void)viewWillAppear:(BOOL)animated {
 
-    NSLog(@"view Will Appear");
     [super viewWillAppear:animated];
     self.conectSwitchView.on = self.appDelegate.isConnected;
     [self makeFrameForViews];
@@ -979,9 +978,18 @@
                 previousTag = CONFIRM_ALERT_TAG;
                 break;
             case DELETE_ALL_ALERT_TAG:
-                NSLog(@"delinting all");
                 [self.appDelegate.model deleteDatabaseRecreate:YES];
-                [self reloadTableViewData];
+
+                if (self.detailView && !self.detailView.isHidden)
+                    [self.detailView hideAnimated:NO];
+                if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
+                    [self dismissViewControllerAnimated:YES completion:^(void){}];
+
+                if ([self.iPadState.currentDir isEqualToString:@"/"])
+                    [self reloadTableViewData];
+                else
+                    [self.appDelegate popToViewWithDepth:0 Anamated:NO WithMessage:@"Deleting entire database, navigating back to /."];
+
                 break;
             default:
                 previousTag = NONE;
@@ -1124,7 +1132,7 @@
 }
 
 -(void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController *)controller {
-    NSLog(@"End Document viewer");
+//    NSLog(@"End Document viewer");
     self.documentInteractionController = nil;
 
 }
@@ -1149,7 +1157,6 @@
         {
             [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
             UIAlertView *alert = [self objectInArray:self.alertViews WithTag:DELETE_ALL_ALERT_TAG];
-            NSLog(@"alert= %@", alert);
             [alert show];
         }
             break;
@@ -1224,7 +1231,7 @@
 
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
-    NSLog(@"detailedVeiwButtonPressed");
+//    NSLog(@"detailedVeiwButtonPressed");
     [self.detailView hideAnimated:NO];
     self.detailView = nil;
 
