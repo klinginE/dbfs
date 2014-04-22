@@ -186,7 +186,7 @@
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
 
-                UIView *subView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 250, 17)];
+                UIView *subView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 250, SMALL_FONT_SIZE)];
                 [subView setBackgroundColor:[UIColor clearColor]];
 
                 UILabel *extLable = [[UILabel alloc] init];
