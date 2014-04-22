@@ -1076,7 +1076,7 @@
     // identifying extension
     char extensionTypeFound_temp = UNKNOWN_EXTENSION;
 
-    NSString *imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
+    NSString *imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm tga";
     NSString *docExtensions = @"pdf doc docx xlsx xls ppt pptx txt";
     NSString *audioExtensions = @"mp3 m4p wav";
     //NSString *generalExtensions = @"";
