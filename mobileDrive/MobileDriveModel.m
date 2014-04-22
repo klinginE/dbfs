@@ -96,7 +96,7 @@
     
         __block NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:DATABASE_NAME]];
         dispatch_block_t block = ^{
-        dbfs = [self.dbInterface openDatabase:dbPath];
+            dbfs = [self.dbInterface openDatabase:dbPath];
         };
         [self.interfaceLock lock];
         dispatch_sync(self.interfaceQueue, block);
@@ -453,8 +453,8 @@
         fileList = [self.dbInterface getFileListIn:dirName_t fromDatabase:self->dbfs];
     };
     [self.interfaceLock lock];
-        dispatch_sync(self.interfaceQueue, block);
-        [self.interfaceLock unlock];
+    dispatch_sync(self.interfaceQueue, block);
+    [self.interfaceLock unlock];
 
     NSMutableDictionary *fileDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
