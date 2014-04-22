@@ -1144,6 +1144,7 @@
         case 2:
             [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
             [self displayPhotoPicker];
+            break;
         case 3:
         {
             [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
