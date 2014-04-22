@@ -253,12 +253,12 @@ $(function() {
       var entry = cwd[file];
       var rowClass = '';
       var size = '';
-
+  
       if (entry.type === "Directory") {
         rowClass = 'directory';
-      }
-
-      if (entry.size) {
+        entry.modified = "";
+      } else {
+        entry.modified = new Date(entry.modified * 1000).format("Y-m-d H:i:s");
         size = entry.size + ' bytes';
       }
 

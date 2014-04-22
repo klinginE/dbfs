@@ -12,6 +12,7 @@
 #import <assert.h>
 #import "CODialog.h"
 #import <UIKit/UIKit.h>
+#import <AssetsLibrary/AssetsLibrary.h>
 
 @interface IPadTableViewController ()
 
@@ -36,6 +37,7 @@
 @property (strong, nonatomic) UILabel *pathLabelView;
 @property (strong, nonatomic) CODialog *detailView;
 @property (strong, nonatomic) UISwitch *extSwitch;
+@property (strong, nonatomic) UIBarButtonItem *menuButton;
 
 // Actions
 @property (assign) SEL switchAction;
@@ -709,7 +711,7 @@
                 if (selectedDict && selectedKey) {
 
                     NSString *path = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
-                    BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
+                    BOOL isDir = [[selectedDict objectForKey:@"type"] boolValue];
 
                     if ([self strOkay:selectedKey ForTag:DELETE_ALERT_TAG IsDir:isDir]) {
 
@@ -819,7 +821,7 @@
 
                             NSString *oldPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
                             NSString *newPath = text;
-                            BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
+                            BOOL isDir = [[selectedDict objectForKey:@"type"] boolValue];
 
                             // add absoulte path if needed
                             if ([newPath characterAtIndex:0] != '/')
@@ -915,7 +917,7 @@
                     case RENAME_ALERT_TAG:
                         if (selectedDict && selectedKey) {
 
-                            BOOL isDir = [[selectedDict objectForKey:@"Type"] boolValue];
+                            BOOL isDir = [[selectedDict objectForKey:@"type"] boolValue];
                             if (isDir && [text characterAtIndex:([text length] - 1)] != '/')
                                 text = [NSString stringWithFormat:@"%@/", text];
 
@@ -1021,23 +1023,34 @@
     NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
     if ([mediaType isEqualToString:@"public.image"]){
         UIImage *imagePicked = [info objectForKey:UIImagePickerControllerOriginalImage];
-        NSData *imageData;
+        __block NSData *imageData;
+        NSURL *imagePath = [info valueForKey:UIImagePickerControllerReferenceURL];
+        __block NSString *imageName;
+        ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *myasset)
+        {
+            ALAssetRepresentation *representation = [myasset defaultRepresentation];
+            imageName = [representation filename];
+            NSString *extention = [[imageName lastPathComponent] lowercaseString];
 
-        NSURL *imagePath = [info objectForKey:@"UIImagePickerControllerReferenceURL"];
-        NSString *imageName = [imagePath lastPathComponent];
-        NSString * extention = [[imageName lastPathComponent] lowercaseString];
-        
-        if ([extention isEqualToString:@"png"]) {
-            imageData = UIImagePNGRepresentation(imagePicked);
-        }else{ // It's assumed to be jpg and jpeg
-            imageData = UIImageJPEGRepresentation(imagePicked, 1.0);
-        }
+            if ([extention isEqualToString:@"png"]) {
+                imageData = UIImagePNGRepresentation(imagePicked);
+            }else{ // It's assumed to be jpg and jpeg
+                imageData = UIImageJPEGRepresentation(imagePicked, 1.0);
+            }
 
-        NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, imageName];
-        [self.appDelegate.model putFile_NSDATA: filePath BLOB:imageData];
-        imageData = nil;
+            NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, imageName];
+            [self.appDelegate.model putFile_NSDATA: filePath BLOB:imageData];
+            imageData = nil;
+
+            [self dismissViewControllerAnimated:YES completion:^{}];
+
+        };
+        ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
+        [assetslibrary assetForURL:imagePath
+                       resultBlock:resultblock
+                      failureBlock:nil];
+
     }
-    [self dismissViewControllerAnimated:YES completion:^{}];
 
 }
 -(void)buttonPressed:(UIBarButtonItem *)sender {
@@ -1046,6 +1059,7 @@
     switch (sender.tag) {
 
         case MENU_BUTTON_TAG:
+            [self.menuButton setEnabled:NO];
             [self displayActionSheetViewFrom:sender];
             break;
         default:
@@ -1164,6 +1178,7 @@
             break;
 
     }
+    [self.menuButton setEnabled:YES];
 
 }
 
@@ -1294,7 +1309,7 @@
     CGPoint location = [sender locationInView:self.mainTableView];
     NSIndexPath *indexPath = [self.mainTableView indexPathForRowAtPoint:location];
     NSDictionary *dict = [self.filesArray objectAtIndex:indexPath.row];
-    NSString *key = [dict objectForKey:@"Name"];
+    NSString *key = [dict objectForKey:@"name"];
 
     if (sender.state == UIGestureRecognizerStateBegan)
         [self displayDetailedViwForItem:dict WithKey:key];
@@ -1459,11 +1474,11 @@
         _filesArray = [self.appDelegate.model getContentsArrayIn:self.iPadState.currentPath];
 
     // Add a help button to the top right
-    UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"≣"
-                                                           Tag:MENU_BUTTON_TAG
-                                                        Target:self
-                                                        Action:@selector(buttonPressed:)];
-    self.navigationItem.rightBarButtonItem = helpButton;
+    _menuButton = [self makeBarButtonWithTitle:@"≣"
+                                           Tag:MENU_BUTTON_TAG
+                                        Target:self
+                                        Action:@selector(buttonPressed:)];
+    self.navigationItem.rightBarButtonItem = self.menuButton;
 
     // flexiable space holder
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
@@ -1558,11 +1573,11 @@
     CGFloat maxWidth = 0;
     for (NSString *k in [dict keyEnumerator]) {
 
-        if (((![k isEqualToString:@"Modified"]) || ([k isEqualToString:@"Modified"] && ![[dict objectForKey:@"Type"] boolValue])) &&
-            ((![k isEqualToString:@"Size"])     || ([k isEqualToString:@"Size"] &&     ![[dict objectForKey:@"Type"] boolValue]))) {
+        if (((![k isEqualToString:@"modified"]) || ([k isEqualToString:@"modified"] && ![[dict objectForKey:@"type"] boolValue])) &&
+            ((![k isEqualToString:@"size"])     || ([k isEqualToString:@"size"] &&     ![[dict objectForKey:@"type"] boolValue]))) {
 
             UILabel *l = [[UILabel alloc] init];
-            if ([k isEqualToString:@"Modified"]) {
+            if ([k isEqualToString:@"modified"]) {
 
                 NSInteger dateSec = [[dict objectForKey:k] integerValue];
                 NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
@@ -1572,7 +1587,7 @@
                 l.text = [NSString stringWithFormat:@"%@: %@", k, [dateFormatter stringFromDate:date]];
 
             }
-            else if ([k isEqualToString:@"Type"]) {
+            else if ([k isEqualToString:@"type"]) {
 
                 if ([[dict objectForKey:k] boolValue])
                     l.text = [NSString stringWithFormat:@"%@: Directory", k];
@@ -1580,7 +1595,7 @@
                     l.text = [NSString stringWithFormat:@"%@: File", k];
 
             }
-            else if ([k isEqualToString:@"Size"])
+            else if ([k isEqualToString:@"size"])
                 l.text = [NSString stringWithFormat:@"%@: %@ Byte(s)", k, [dict objectForKey:k]];
             else
                 l.text = [NSString stringWithFormat:@"%@: %@", k, [dict objectForKey:k]];
@@ -1610,11 +1625,11 @@
     for (NSString *b in self.actionSheetButtons) {
         
         //NSLog(@"%@", b);
-        if ([b isEqualToString:@"Open"] && !(extensionTypeFound & UNKNOWN_EXTENSION) && ![[dict objectForKey:@"Type"] boolValue])
+        if ([b isEqualToString:@"Open"] && !(extensionTypeFound & UNKNOWN_EXTENSION) && ![[dict objectForKey:@"type"] boolValue])
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];
-        else if ([b isEqualToString:@"Email"] && ![[dict objectForKey:@"Type"] boolValue])
+        else if ([b isEqualToString:@"Email"] && ![[dict objectForKey:@"type"] boolValue])
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];
@@ -1622,7 +1637,6 @@
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];
-        
 
     }
 
@@ -1667,11 +1681,11 @@
 
     // fecthc key and dict info
     NSDictionary *dict = [self.filesArray objectAtIndex:indexPath.row];
-    NSString *key = [dict objectForKey:@"Name"];
+    NSString *key = [dict objectForKey:@"name"];
 
     // set up cell text and other atributes
     //cell.detailTextLabel.text = [NSString stringWithUTF8String:self.iPadState.currentPath];
-    if ([[dict objectForKey:@"Type"] boolValue]) {
+    if ([[dict objectForKey:@"type"] boolValue]) {
 
         cell.textLabel.text = [NSString stringWithFormat:@"📂 %@", key];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -1698,10 +1712,10 @@
 
     // Fetch data from keys and dictionary
     NSDictionary *dict = [self.filesArray objectAtIndex:indexPath.row];
-    NSString *key = [dict objectForKey:@"Name"];
+    NSString *key = [dict objectForKey:@"name"];
 
     // if the dict object is a directory then...
-    if ([[dict objectForKey:@"Type"] boolValue]) {
+    if ([[dict objectForKey:@"type"] boolValue]) {
 
         // set up state for subTableViewController
         NSString *subPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, key];

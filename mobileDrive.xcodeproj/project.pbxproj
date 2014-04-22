@@ -31,6 +31,7 @@
 		DE7F71D918EB6AC3002CC799 /* dbfs.c in Sources */ = {isa = PBXBuildFile; fileRef = DE7F71D318EB6AC3002CC799 /* dbfs.c */; };
 		DE7F71DA18EB6AC3002CC799 /* DBInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = DE7F71D718EB6AC3002CC799 /* DBInterface.m */; };
 		DE7F71DF18EB7056002CC799 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = DE7F71DD18EB6E20002CC799 /* libsqlite3.dylib */; };
+		DE8F7AEC1906FCBA000E7031 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE8F7AEB1906FCBA000E7031 /* AssetsLibrary.framework */; };
 		DE96FBC218CE618B008553D8 /* helpPage.txt in Resources */ = {isa = PBXBuildFile; fileRef = DE96FBC118CE618B008553D8 /* helpPage.txt */; };
 		DED6C4C118D2643900F50F97 /* IPadTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DED6C4C018D2643900F50F97 /* IPadTableViewController.m */; };
 		DEF5A1EA18E0F2BC0006D1AE /* (null) in Resources */ = {isa = PBXBuildFile; };
@@ -91,6 +92,7 @@
 		DE7F71D618EB6AC3002CC799 /* DBInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DBInterface.h; sourceTree = "<group>"; };
 		DE7F71D718EB6AC3002CC799 /* DBInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DBInterface.m; sourceTree = "<group>"; };
 		DE7F71DD18EB6E20002CC799 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
+		DE8F7AEB1906FCBA000E7031 /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
 		DE96FBC118CE618B008553D8 /* helpPage.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = helpPage.txt; sourceTree = "<group>"; };
 		DE9833C818C96BBC003CEA5B /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		DED6C4BF18D2643900F50F97 /* IPadTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IPadTableViewController.h; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 				DE0FDF6518C963CB00843686 /* CoreGraphics.framework in Frameworks */,
 				DE0FDF6718C963CB00843686 /* UIKit.framework in Frameworks */,
 				DE0FDF6318C963CB00843686 /* Foundation.framework in Frameworks */,
+				DE8F7AEC1906FCBA000E7031 /* AssetsLibrary.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -142,6 +145,7 @@
 		DE0FDF5618C963CA00843686 = {
 			isa = PBXGroup;
 			children = (
+				DE8F7AEB1906FCBA000E7031 /* AssetsLibrary.framework */,
 				DEF84A5F18E0FCF3009AC0CC /* README.md */,
 				DE0FDF6818C963CB00843686 /* mobileDrive */,
 				DE0FDF8118C963CB00843686 /* mobileDriveTests */,
