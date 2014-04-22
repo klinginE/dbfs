@@ -1079,14 +1079,14 @@
     NSString *imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
     NSString *docExtensions = @"pdf doc docx xlsx xls ppt pptx txt";
     NSString *audioExtensions = @"mp3 m4p wav";
-    NSString *generalExtensions = @"";
+    //NSString *generalExtensions = @"";
 
     NSMutableArray *allExtensions = [[NSMutableArray alloc] init];
 
     [allExtensions addObject: @[imageExtensions, [[NSNumber alloc] initWithChar:IMAGE_EXTENSION]] ];
     [allExtensions addObject: @[docExtensions, [[NSNumber alloc] initWithChar:DOC_EXTENSION]] ];
     [allExtensions addObject: @[audioExtensions, [[NSNumber alloc] initWithChar:AUDIO_EXTENSION]] ];
-    [allExtensions addObject: @[generalExtensions, [[NSNumber alloc] initWithChar:GENERAL_EXTENSION]] ];
+    //[allExtensions addObject: @[generalExtensions, [[NSNumber alloc] initWithChar:GENERAL_EXTENSION]] ];
 
     for (NSArray *tempTuple in allExtensions) {
 
@@ -1266,8 +1266,20 @@
 
         UIAlertView *alert = [self objectInArray:self.alertViews WithTag:RENAME_ALERT_TAG];
         [[alert textFieldAtIndex:0] setPlaceholder:selectedKey];
-        if (self.extSwitch)
-            self.extSwitch.on = YES;
+        if ([[selectedDict objectForKey:@"Type"] boolValue]) {
+
+            if (self.extSwitch)
+                self.extSwitch.on = NO;
+            [self.extSwitch setEnabled:NO];
+
+        }
+        else {
+
+            if (self.extSwitch)
+                self.extSwitch.on = YES;
+            [self.extSwitch setEnabled:YES];
+
+        }
         [alert show];
 
 
@@ -1602,16 +1614,15 @@
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];
-        else if (![b isEqualToString:@"Open"]) {
-            if ([b isEqualToString:@"Email"] && ![[dict objectForKey:@"Type"] boolValue])
-                [self.detailView addButtonWithTitle:b
-                                             target:self
-                                           selector:@selector(detailedVeiwButtonPressed:)];
-            else if (![b isEqualToString:@"Email"])
-                [self.detailView addButtonWithTitle:b
-                                             target:self
-                                           selector:@selector(detailedVeiwButtonPressed:)];
-        }
+        else if ([b isEqualToString:@"Email"] && ![[dict objectForKey:@"Type"] boolValue])
+            [self.detailView addButtonWithTitle:b
+                                         target:self
+                                       selector:@selector(detailedVeiwButtonPressed:)];
+        else if (![b isEqualToString:@"Open"] && ![b isEqualToString:@"Email"])
+            [self.detailView addButtonWithTitle:b
+                                         target:self
+                                       selector:@selector(detailedVeiwButtonPressed:)];
+        
 
     }
 
