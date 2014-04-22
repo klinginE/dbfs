@@ -61,7 +61,8 @@
             }else{
                 
                 MobileDriveModel *model = [((MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate) model];
-                NSData * json_in_NSData =[[model getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
+//                NSData * json_in_NSData =[[model getJsonContentsIn: pathArg ] dataUsingEncoding:NSUTF8StringEncoding];
+                NSData * json_in_NSData =[model getJsonContentsIn: pathArg];
                 return [GCDWebServerDataResponse responseWithData: json_in_NSData contentType: @"application/json"];
             }
         }];

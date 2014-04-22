@@ -75,6 +75,7 @@
     if(result == DBFS_OKAY) {
         *size = blob.size;
         fwrite(blob.data, 1, blob.size, out);
+        dbfs_free_blob(blob);
     }
 
     return result;
@@ -97,11 +98,12 @@
 -(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in withSize:(int)size {
     DBFS_Blob blob;
     char *name = [self nsStringToCString:fname];//[fname UTF8String];
-   
+
     blob = [self slurp:in];
     int r = dbfs_put(dbfs, (DBFS_FileName){name}, blob);
     
-    free(blob.data);
+    dbfs_free_blob(blob);
+//    free((void *)blob.data);
 
     return r;
 }

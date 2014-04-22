@@ -368,7 +368,7 @@
     
     for (int i = 0; i < fileList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((fileList.files)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:NO], @"Type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"Size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"Modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name", [[NSNumber alloc] initWithBool:NO], @"type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"modified", nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((fileList.files)+i)->name]];
         [fileDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -398,7 +398,7 @@
     
     for (int i = 0; i < dirList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:YES], @"Type", [[NSNumber alloc] initWithInt:0], @"Size", @"", @"Modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name", [[NSNumber alloc] initWithBool:YES], @"type", [[NSNumber alloc] initWithInt:0], @"size", @"", @"modified", nil];
         NSString *s = [NSString stringWithUTF8String:((dirList.dirs)+i)->name];
         [keys addObject:[[NSString alloc] initWithString:s]];
         [dirDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -442,7 +442,7 @@
 
     for (int i = 0; i < fileList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((fileList.files)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:NO], @"Type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"Size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"Modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name", [[NSNumber alloc] initWithBool:NO], @"type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"modified", nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((fileList.files)+i)->name]];
         [fileDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -472,7 +472,7 @@
  
     for (int i = 0; i < dirList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"Name", [[NSNumber alloc] initWithBool:YES], @"Type", [[NSNumber alloc] initWithInt:0], @"Size", @"", @"Modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name", [[NSNumber alloc] initWithBool:YES], @"type", [[NSNumber alloc] initWithInt:0], @"size", @"", @"modified", nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name]];
         [dirDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -502,7 +502,17 @@
     return contentDict;
 }
 
--(NSString *)getJsonContentsIn:(NSString *)dirName {
+-(NSData *)getJsonContentsIn:(NSString *)dirName {
+    
+    NSArray *contentArray = [self getContentsArrayIn:dirName];
+    NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:contentArray, @"contents", nil];
+    NSData *contents = [NSJSONSerialization dataWithJSONObject:dict options:0 error:nil];
+    NSString *s = [[NSString alloc] initWithBytes:[contents bytes] length:[contents length] encoding:NSUTF8StringEncoding];
+    NSLog(@"JSON contents: %@", s);
+    return contents;
+    
+    /*
+    
     NSString *temp = @"{\n\t\"contents\": [";
     NSString *json = [[NSString alloc] initWithString:temp];
     NSArray *dict = [self getContentsArrayIn:dirName];
@@ -526,6 +536,7 @@
     
     json = [json stringByAppendingString:@"\n\t]\n}"];
     return json;
+     */
 }
 
 @end

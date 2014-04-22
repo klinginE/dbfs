@@ -64,7 +64,7 @@
 -(NSArray *)getContentsArrayIn:(NSString *)dirName;
 
 // Returns NSString containing the list of current contents in JSON format.
--(NSString *)getJsonContentsIn:(NSString *)dirName;
+-(NSData *)getJsonContentsIn:(NSString *)dirName;
 -(NSData *)getFile_NSDATA:(NSString *)fname;
 -(int)putFile_NSDATA:(NSString *)fname BLOB: (NSData*) blob;
 
