@@ -12,6 +12,7 @@
 #import <assert.h>
 #import "CODialog.h"
 #import <UIKit/UIKit.h>
+#import <AssetsLibrary/AssetsLibrary.h>
 
 @interface IPadTableViewController ()
 
@@ -36,6 +37,7 @@
 @property (strong, nonatomic) UILabel *pathLabelView;
 @property (strong, nonatomic) CODialog *detailView;
 @property (strong, nonatomic) UISwitch *extSwitch;
+@property (strong, nonatomic) UIBarButtonItem *menuButton;
 
 // Actions
 @property (assign) SEL switchAction;
@@ -1021,23 +1023,34 @@
     NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
     if ([mediaType isEqualToString:@"public.image"]){
         UIImage *imagePicked = [info objectForKey:UIImagePickerControllerOriginalImage];
-        NSData *imageData;
+        __block NSData *imageData;
+        NSURL *imagePath = [info valueForKey:UIImagePickerControllerReferenceURL];
+        __block NSString *imageName;
+        ALAssetsLibraryAssetForURLResultBlock resultblock = ^(ALAsset *myasset)
+        {
+            ALAssetRepresentation *representation = [myasset defaultRepresentation];
+            imageName = [representation filename];
+            NSString *extention = [[imageName lastPathComponent] lowercaseString];
 
-        NSURL *imagePath = [info objectForKey:@"UIImagePickerControllerReferenceURL"];
-        NSString *imageName = [imagePath lastPathComponent];
-        NSString * extention = [[imageName lastPathComponent] lowercaseString];
-        
-        if ([extention isEqualToString:@"png"]) {
-            imageData = UIImagePNGRepresentation(imagePicked);
-        }else{ // It's assumed to be jpg and jpeg
-            imageData = UIImageJPEGRepresentation(imagePicked, 1.0);
-        }
+            if ([extention isEqualToString:@"png"]) {
+                imageData = UIImagePNGRepresentation(imagePicked);
+            }else{ // It's assumed to be jpg and jpeg
+                imageData = UIImageJPEGRepresentation(imagePicked, 1.0);
+            }
 
-        NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, imageName];
-        [self.appDelegate.model putFile_NSDATA: filePath BLOB:imageData];
-        imageData = nil;
+            NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, imageName];
+            [self.appDelegate.model putFile_NSDATA: filePath BLOB:imageData];
+            imageData = nil;
+
+            [self dismissViewControllerAnimated:YES completion:^{}];
+
+        };
+        ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
+        [assetslibrary assetForURL:imagePath
+                       resultBlock:resultblock
+                      failureBlock:nil];
+
     }
-    [self dismissViewControllerAnimated:YES completion:^{}];
 
 }
 -(void)buttonPressed:(UIBarButtonItem *)sender {
@@ -1046,6 +1059,7 @@
     switch (sender.tag) {
 
         case MENU_BUTTON_TAG:
+            [self.menuButton setEnabled:NO];
             [self displayActionSheetViewFrom:sender];
             break;
         default:
@@ -1164,6 +1178,7 @@
             break;
 
     }
+    [self.menuButton setEnabled:YES];
 
 }
 
@@ -1459,11 +1474,11 @@
         _filesArray = [self.appDelegate.model getContentsArrayIn:self.iPadState.currentPath];
 
     // Add a help button to the top right
-    UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"≣"
-                                                           Tag:MENU_BUTTON_TAG
-                                                        Target:self
-                                                        Action:@selector(buttonPressed:)];
-    self.navigationItem.rightBarButtonItem = helpButton;
+    _menuButton = [self makeBarButtonWithTitle:@"≣"
+                                           Tag:MENU_BUTTON_TAG
+                                        Target:self
+                                        Action:@selector(buttonPressed:)];
+    self.navigationItem.rightBarButtonItem = self.menuButton;
 
     // flexiable space holder
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
