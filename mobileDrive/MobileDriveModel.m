@@ -36,7 +36,7 @@
         NSArray *dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *docsDir = [dirPaths objectAtIndex:0];
 
-        __block NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"database.sqlite"]];
+        __block NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:DATABASE_NAME]];
         block = ^{
             dbfs = [self.dbInterface openDatabase:dbPath];
         };
@@ -80,16 +80,21 @@
     [self closeDatabase];
     NSArray *dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *docsDir = [dirPaths objectAtIndex:0];
-    NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"database.sqlite"]];
+    NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:DATABASE_NAME]];
     NSFileManager *fileMgr = [NSFileManager defaultManager];
-    [fileMgr removeItemAtPath:dbPath error:nil];
-    
-    if (flag) {
+    __autoreleasing NSError *error;
+    [fileMgr removeItemAtPath:dbPath error:&error];
 
-        NSArray *dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-        NSString *docsDir = [dirPaths objectAtIndex:0];
+    if (error) {
+
+        NSLog(@"Fatal error in removing database: %@ because: %@", dbPath, [error description]);
+        abort();
+
+    }
+
+    if (flag) {
     
-        __block NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"database.sqlite"]];
+        __block NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:DATABASE_NAME]];
         dispatch_block_t block = ^{
         dbfs = [self.dbInterface openDatabase:dbPath];
         };

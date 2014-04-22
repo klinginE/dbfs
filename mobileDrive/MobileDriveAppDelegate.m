@@ -31,7 +31,7 @@
     else
         return;
 
-    NSLog(@"switchChanged %d", self.isConnected);
+    //NSLog(@"switchChanged %d", self.isConnected);
     if(self.isConnected){
         [self.serverController turnOnServer];
         //NSLog( [self.serverController getIPAddress] );
