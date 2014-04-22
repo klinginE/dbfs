@@ -1,40 +1,84 @@
-To start using the web interface:
-    1) Open a web browser
-    2) Type in the iPad IP address, as it appears in the "IP" field at
-        the bottom of the screen, into the address bar.
+    -----iPad Help-----
 
-To change directories:
+Open a directory:
     1) Tap once on any directory
+    
+Open a file:
+    1) Tap once on any file
+    2) Tap "Open"
+    Note) If there is no "Open" option, the file cannot be opened
 
-To change to a previous directory in current path:
+Change to a previous directory in current path:
     1) Scroll over to the directory you want in the "Path" field at
-        the top
+        the top of the screen
     2) Tap once on the directory you want to navigate to
 
-To go back:
-    1) Tap once on the "<" button
+Go back:
+    1) Tap once on the "<Back" button
 
-To add a directory:
-    1) Tap once on the add directory button
-    2) Enter in a name
-    3) Tap "OK"
+Add a directory (into the current directory):
+    1) Tap once on the menu button
+    2) Tap "Add Directory"
+    3) Enter in a name
+    4) Tap "OK"
 
-To see a file's/directory's meta data:
+See a file's/directory's meta data:
     1) Tap and hold any file/directory
 
-To rename a file/directory:
+Rename a file/directory:
     1) Tap and hold the file/directory
     2) Tap the rename button
     3) Enter a new name
     4) Tap "OK"
 
-To move a file/directory:
+Move a file/directory:
     1) Tap and hold the file/directory
     2) Tap the move button
     3) Enter a new path
     4) Tap "OK"
 
-To delete a file/directory:
+Delete a file/directory:
     1) Tap and hold the file/directory
     2) Tap the delete button
     3) Tap "OK"
+
+    -----Browser Help-----
+
+To start using the web interface:
+    1) Open a web browser
+    2) In the address bar, type in the iPad IP address as it 
+        appears in the "IP" field at the bottom of the iPad screen
+
+Download a file:
+    1) Click on a file to highlight it
+    2) Click "Open"
+    3) File will be downloaded to the default download folder
+    
+Upload a file:
+    1) Click "Select file..."
+    2) Select a file to upload
+    3) Click "Choose"
+    4) Click "Upload"
+    Note) File will be uploaded to the current directory
+
+Open a directory:
+    1) Double-click on a directory
+    
+Change to a previous directory in current path:
+    1) Click once on the directory you want to navigate to
+    
+Add a directory (into current directory):
+    1) Click "Create Directory"
+    2) Enter a new name
+    3) Click "Create"
+    
+Rename a file/directory:
+    1) Click the file/directory to highlight it
+    2) Click "Rename"
+    3) Enter the new name
+    4) Click "Rename"
+    
+Delete a file/directory:
+    1) Click the file/directory to highlight it
+    2) Click "Delete"
+    Note) This action is irrevocable
