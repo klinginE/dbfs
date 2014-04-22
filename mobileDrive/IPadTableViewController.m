@@ -1090,16 +1090,13 @@
     // identifying extension
     char extensionTypeFound_temp = UNKNOWN_EXTENSION;
 
-    NSString *imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm tga";
-    NSString *docExtensions = @"pdf doc docx xlsx xls ppt pptx txt";
-    NSString *audioExtensions = @"mp3 m4p wav";
     //NSString *generalExtensions = @"";
 
     NSMutableArray *allExtensions = [[NSMutableArray alloc] init];
 
-    [allExtensions addObject: @[imageExtensions, [[NSNumber alloc] initWithChar:IMAGE_EXTENSION]] ];
-    [allExtensions addObject: @[docExtensions, [[NSNumber alloc] initWithChar:DOC_EXTENSION]] ];
-    [allExtensions addObject: @[audioExtensions, [[NSNumber alloc] initWithChar:AUDIO_EXTENSION]] ];
+    [allExtensions addObject: @[self.appDelegate.imageExtensions, [[NSNumber alloc] initWithChar:IMAGE_EXTENSION]] ];
+    [allExtensions addObject: @[self.appDelegate.docExtensions, [[NSNumber alloc] initWithChar:DOC_EXTENSION]] ];
+    [allExtensions addObject: @[self.appDelegate.audioExtensions, [[NSNumber alloc] initWithChar:AUDIO_EXTENSION]] ];
     //[allExtensions addObject: @[generalExtensions, [[NSNumber alloc] initWithChar:GENERAL_EXTENSION]] ];
 
     for (NSArray *tempTuple in allExtensions) {

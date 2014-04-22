@@ -84,6 +84,11 @@
 
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
+    _imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm tga";
+    _docExtensions = @"pdf doc docx xlsx xls ppt pptx txt";
+    _audioExtensions = @"mp3 m4p wav";
+
+
     self.isConnected = YES;
     self.model = [[MobileDriveModel alloc] init];
     self.serverController = [[ServerViewController alloc] init];

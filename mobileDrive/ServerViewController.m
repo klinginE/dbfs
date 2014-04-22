@@ -203,7 +203,10 @@
             
             NSString * fileExtension = [ [path lastPathComponent] pathExtension];
             
-            BOOL validExt = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate isValidExtension:@"png jpeg jpg gif tiff" findFileType:fileExtension];
+            NSString * imageExtensions =  [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate imageExtensions];
+            
+            BOOL validExt = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate isValidExtension:imageExtensions
+                                                                                                      findFileType:fileExtension];
 
             if (!validExt) {
                 return [GCDWebServerDataResponse responseWithHTML:@"<html><body>File type is not allowed to be viewed.</body></html>"];
