@@ -75,6 +75,7 @@
     if(result == DBFS_OKAY) {
         *size = (int)blob.size;
         fwrite(blob.data, 1, blob.size, out);
+        dbfs_free_blob(blob);
     }
 
     return result;
@@ -101,7 +102,7 @@
     blob = [self slurp:in];
     int r = dbfs_put(dbfs, (DBFS_FileName){name}, blob);
     
-    free((void *)blob.data);
+    dbfs_free_blob(blob);
 
     return r;
 }
