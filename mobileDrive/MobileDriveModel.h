@@ -22,6 +22,7 @@
 -(NSString *)dbError:(int)err;
 
 -(void)closeDatabase;
+-(void)deleteDatabaseRecreate:(BOOL)flag;
 
 // Retrieve contents of absolute path "fname" through file stream "out"
 -(int)getFile:(NSString *)fname to:(FILE *)out withSize:(int *)size;

@@ -75,6 +75,31 @@
 
 }
 
+-(void)deleteDatabaseRecreate:(BOOL)flag {
+
+    [self closeDatabase];
+    NSArray *dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *docsDir = [dirPaths objectAtIndex:0];
+    NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"database.sqlite"]];
+    NSFileManager *fileMgr = [NSFileManager defaultManager];
+    [fileMgr removeItemAtPath:dbPath error:nil];
+    
+    if (flag) {
+
+        NSArray *dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *docsDir = [dirPaths objectAtIndex:0];
+    
+        __block NSString *dbPath = [[NSString alloc] initWithString:[docsDir stringByAppendingPathComponent:@"database.sqlite"]];
+        dispatch_block_t block = ^{
+        dbfs = [self.dbInterface openDatabase:dbPath];
+        };
+        [self.interfaceLock lock];
+        dispatch_sync(self.interfaceQueue, block);
+        [self.interfaceLock unlock];
+
+    }
+
+}
 
 -(DBFS_Blob)slurp:(FILE *)in {
 

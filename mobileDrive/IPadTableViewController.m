@@ -92,7 +92,7 @@
 
     NSDictionary *selectedDict;
     NSString *selectedKey;
-    char extensionTypeFound; // used for opening files on iPad
+    char extensionTypeFound;// used for opening files on iPad
 
 }
 
@@ -222,6 +222,14 @@
                 [alert setMessage:@""];
                 [alert addButtonWithTitle:@"OK"];
                 alert.tag = ERROR_ALERT_TAG;
+                break;
+            case DELETE_ALL_ALERT_TAG:
+                [alert setDelegate:self];
+                [alert setTitle:@"Deleting all content from Mobile Drive!"];
+                [alert setMessage:@"Are you Sure?"];
+                [alert addButtonWithTitle:@"Cancel"];
+                [alert addButtonWithTitle:@"OK"];
+                alert.tag = DELETE_ALL_ALERT_TAG;
                 break;
             default:
                 break;
@@ -383,10 +391,18 @@
 
     if (self.pathScrollView && self.pathLabelView) {
 
+        CGRect statusRect = [[UIApplication sharedApplication] statusBarFrame];
+        CGFloat statusBarOffset = 20.0;
+        if (statusRect.size.height <= statusRect.size.width)
+            statusBarOffset = statusRect.size.height;
+        else
+            statusBarOffset = statusRect.size.width;
+        
         self.pathScrollView.frame = CGRectMake(self.view.frame.origin.x,
-                                           self.view.frame.origin.y + self.navigationController.navigationBar.frame.origin.y + self.navigationController.navigationBar.frame.size.height,
-                                           mainScreenWidth,
-                                           PATH_VIEW_HEIGHT);
+                                               statusBarOffset + self.navigationController.navigationBar.frame.size.height,
+                                               //statusRect.origin.y + statusRect.size.height + self.navigationController.navigationBar.frame.size.height,
+                                               mainScreenWidth,
+                                               PATH_VIEW_HEIGHT);
         self.pathScrollView.contentSize = CGSizeMake(self.pathLabelView.frame.size.width + (SMALL_FONT_SIZE * 2),
                                                      self.pathLabelView.frame.size.height);
 
@@ -394,9 +410,9 @@
 
     if (self.mainTableView)
         self.mainTableView.frame = CGRectMake(0,
-                                          self.pathScrollView.frame.origin.y + self.pathScrollView.frame.size.height,
-                                          mainScreenWidth,
-                                          mainScreenHeight - self.pathScrollView.frame.origin.y - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height);
+                                              self.pathScrollView.frame.origin.y + self.pathScrollView.frame.size.height,
+                                              mainScreenWidth,
+                                              mainScreenHeight - self.pathScrollView.frame.origin.y - PATH_VIEW_HEIGHT - self.navigationController.toolbar.frame.size.height);
     if (self.helpLabelView) {
 
         CGSize textSize = [self sizeOfString:self.helpLabelView.text withFont:self.helpLabelView.font];
@@ -529,7 +545,7 @@
             if (bi.tag == IP_TAG) {
 
                 UILabel *newLabel = [[UILabel alloc] init];
-                newLabel.text = [NSString stringWithFormat:@"http://%@:%@", ip, port];
+                newLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", ip, port];
                 newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
                 newLabel.frame = CGRectMake(0,
                                             0,
@@ -606,11 +622,12 @@
 
 -(void)viewWillAppear:(BOOL)animated {
 
+    NSLog(@"view Will Appear");
     [super viewWillAppear:animated];
     self.conectSwitchView.on = self.appDelegate.isConnected;
+    [self makeFrameForViews];
     if (self.filesArray && self.mainTableView)
         [self reloadTableViewData];
-    [self makeFrameForViews];
 
 }
 
@@ -850,33 +867,8 @@
                                     }
 
                                 }
-                                
-//                                // add extension to end if file and not there and there is an old extension
-//                                if (!isDir) {
-//
-//                                    NSString *oldext = [oldPath pathExtension];
-//                                    NSString *newext = [temp pathExtension];
-//
-//                                    if (oldext && [oldext length] && (!newext || [newext length] <= 0))
-//                                        temp = [NSString stringWithFormat:@"%@.%@", temp, oldext];
-//                                    
-//                                    NSInteger index = [temp length] - [selectedKey length];
-//                                    if (index >= 0 && [[temp substringFromIndex:index] isEqualToString:selectedKey])
-//                                        newPath = temp;
-//
-//                                }
-//
-//                                if ([newPath characterAtIndex:([newPath length] - 1)] != '/')
-//                                    newPath = [NSString stringWithFormat:@"%@/", newPath];
-//
-//                                index = [newPath length] - [selectedKey length];
-//                                if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey])
-//                                    newPath = [NSString stringWithFormat:@"%@%@", newPath, selectedKey];
 
                             }
-
-//                            NSLog(@"oldpath= %@", oldPath);
-//                            NSLog(@"newpath= %@", newPath);
 
                             NSInteger newLen = [newPath length];
                             NSInteger oldLen = [oldPath length];
@@ -986,6 +978,11 @@
                 }
                 previousTag = CONFIRM_ALERT_TAG;
                 break;
+            case DELETE_ALL_ALERT_TAG:
+                NSLog(@"delinting all");
+                [self.appDelegate.model deleteDatabaseRecreate:YES];
+                [self reloadTableViewData];
+                break;
             default:
                 previousTag = NONE;
                 break;
@@ -1040,12 +1037,8 @@
     //NSLog(@"buttonPressed");
     switch (sender.tag) {
 
-        case HELP_BUTTON_TAG:
-//            [self displayHelpPage];
-            [self displayPhotoPicker];
-            break;
-        case ADD_DIR_BUTTON_TAG:
-            [self displayAddDirPage];
+        case MENU_BUTTON_TAG:
+            [self displayActionSheetViewFrom:sender];
             break;
         default:
             break;
@@ -1076,9 +1069,9 @@
     char extensionTypeFound_temp = UNKNOWN_EXTENSION;
 
     NSString *imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm";
-    NSString *docExtensions = @"doc docx xlsx xls ppt pptx txt";
+    NSString *docExtensions = @"pdf doc docx xlsx xls ppt pptx txt";
     NSString *audioExtensions = @"mp3 m4p wav";
-    NSString *generalExtensions = @"pdf";
+    NSString *generalExtensions = @"";
 
     NSMutableArray *allExtensions = [[NSMutableArray alloc] init];
 
@@ -1133,6 +1126,49 @@
 -(void)documentInteractionControllerDidEndPreview:(UIDocumentInteractionController *)controller {
     NSLog(@"End Document viewer");
     self.documentInteractionController = nil;
+
+}
+
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+
+    switch (buttonIndex) {
+
+        case 0:
+            [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
+            [self displayHelpPage];
+            break;
+        case 1:
+            [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
+            [self displayAddDirPage];
+            break;
+        case 2:
+            [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
+            [self displayPhotoPicker];
+            break;
+        case 3:
+        {
+            [actionSheet dismissWithClickedButtonIndex:buttonIndex animated:YES];
+            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:DELETE_ALL_ALERT_TAG];
+            NSLog(@"alert= %@", alert);
+            [alert show];
+        }
+            break;
+        default:
+            break;
+
+    }
+
+}
+
+-(void)displayActionSheetViewFrom:(UIBarButtonItem *)button {
+
+    UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:@"Menu"
+                                                       delegate:self
+                                              cancelButtonTitle:@"Cancel"
+                                         destructiveButtonTitle:nil
+                                              otherButtonTitles:@"Need Help?", @"Add Directory", @"Import Image", @"Delete All Content", nil];
+    [sheet showFromBarButtonItem:button animated:YES];
+
 }
 
 -(void)displayEmailForAttachmentWithPath:(NSString *)path Name:(NSString *)name {
@@ -1404,17 +1440,11 @@
         _filesArray = [self.appDelegate.model getContentsArrayIn:self.iPadState.currentPath];
 
     // Add a help button to the top right
-    UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"Need help?"
-                                                           Tag:HELP_BUTTON_TAG
+    UIBarButtonItem *helpButton = [self makeBarButtonWithTitle:@"≣"
+                                                           Tag:MENU_BUTTON_TAG
                                                         Target:self
                                                         Action:@selector(buttonPressed:)];
     self.navigationItem.rightBarButtonItem = helpButton;
-
-    // Add a add dir button to the bottom left
-    UIBarButtonItem *addDirButton = [self makeBarButtonWithTitle:@"Add Directory"
-                                                             Tag:ADD_DIR_BUTTON_TAG
-                                                          Target:self
-                                                          Action:@selector(buttonPressed:)];
 
     // flexiable space holder
     UIBarButtonItem *flex = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace
@@ -1425,7 +1455,7 @@
                                                                            action:nil];
 
     UILabel *ipLabel = [[UILabel alloc] init];
-    ipLabel.text = [NSString stringWithFormat:@"http://%@:%@", self.iPadState.ipAddress, self.iPadState.port];
+    ipLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", self.iPadState.ipAddress, self.iPadState.port];
     ipLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
     ipLabel.frame = CGRectMake(0,
                                0,
@@ -1453,7 +1483,7 @@
     UIBarButtonItem *cSwitch = [[UIBarButtonItem alloc] initWithCustomView:self.conectSwitchView];
 
     // put objects in toolbar
-    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:flex, addDirButton, flex, ipButtonItem, flex, switchButtonItem, fixed, cSwitch, flex, nil];
+    NSArray *toolBarItems = [[NSArray alloc] initWithObjects:flex, ipButtonItem, flex, switchButtonItem, fixed, cSwitch, flex, nil];
     self.toolbarItems = toolBarItems;
 
     // set tool bar settings
@@ -1561,7 +1591,7 @@
     for (NSString *b in self.actionSheetButtons) {
         
         //NSLog(@"%@", b);
-        if ([b isEqualToString:@"Open"] && !(extensionTypeFound & UNKNOWN_EXTENSION))
+        if ([b isEqualToString:@"Open"] && !(extensionTypeFound & UNKNOWN_EXTENSION) && ![[dict objectForKey:@"Type"] boolValue])
             [self.detailView addButtonWithTitle:b
                                          target:self
                                        selector:@selector(detailedVeiwButtonPressed:)];
