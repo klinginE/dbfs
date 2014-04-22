@@ -261,6 +261,13 @@ $(function() {
       if (entry.size) {
         size = entry.size + ' bytes';
       }
+  
+      if (entry.type === "Directory") {
+        entry.modified = "";
+      } else {
+        entry.modified = new Date(entry.modified * 1000).format("Y-m-d H:i:s");
+  console.log(entry.modified);
+      }
 
       var row = '<tr class="' + rowClass + '">'
               + '  <td class="file-name"><img src="img/type_' + entry.icon + '.png" /> ' + entry.name + '</td>'
