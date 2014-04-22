@@ -253,20 +253,13 @@ $(function() {
       var entry = cwd[file];
       var rowClass = '';
       var size = '';
-
-      if (entry.type === "Directory") {
-        rowClass = 'directory';
-      }
-
-      if (entry.size) {
-        size = entry.size + ' bytes';
-      }
   
       if (entry.type === "Directory") {
+        rowClass = 'directory';
         entry.modified = "";
       } else {
         entry.modified = new Date(entry.modified * 1000).format("Y-m-d H:i:s");
-  console.log(entry.modified);
+        size = entry.size + ' bytes';
       }
 
       var row = '<tr class="' + rowClass + '">'
