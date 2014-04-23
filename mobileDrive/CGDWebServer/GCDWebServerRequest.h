@@ -74,7 +74,18 @@
 @property(nonatomic, readonly) NSString* temporaryPath;
 @end
 
+@interface GCDWebServerMultiPartFile_SSF : GCDWebServerMultiPart
+@property(nonatomic, readonly) NSString* fileName;  // May be nil
+@property(nonatomic, readonly) NSData* tempBlob;
+@end
+
 @interface GCDWebServerMultiPartFormRequest : GCDWebServerRequest
+@property(nonatomic, readonly) NSDictionary* arguments;  // Only valid after open / write / close sequence
+@property(nonatomic, readonly) NSDictionary* files;  // Only valid after open / write / close sequence
++ (NSString*)mimeType;
+@end
+
+@interface GCDWebServerMultiPartFormRequest_SSF : GCDWebServerRequest
 @property(nonatomic, readonly) NSDictionary* arguments;  // Only valid after open / write / close sequence
 @property(nonatomic, readonly) NSDictionary* files;  // Only valid after open / write / close sequence
 + (NSString*)mimeType;

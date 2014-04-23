@@ -161,14 +161,14 @@
             
         }];
 
-        [webServer addHandlerForMethod:@"POST" path:@"/upload.html" requestClass:[GCDWebServerMultiPartFormRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest * request) {
-            GCDWebServerMultiPartFormRequest *mpReq = (GCDWebServerMultiPartFormRequest *)request;
-            GCDWebServerMultiPartFile *file = [mpReq.files objectForKey:@"upload-file"];
+        [webServer addHandlerForMethod:@"POST" path:@"/upload.html" requestClass:[GCDWebServerMultiPartFormRequest_SSF class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest * request) {
+            GCDWebServerMultiPartFormRequest_SSF *mpReq = (GCDWebServerMultiPartFormRequest_SSF *)request;
+            GCDWebServerMultiPartFile_SSF *file = [mpReq.files objectForKey:@"upload-file"];
             NSString *uploadDir = [[mpReq.arguments objectForKey:@"upload-dir"] string];
             NSString *fileName = [file fileName];
             NSString *filePath = [NSString stringWithFormat:@"%@%@", uploadDir, fileName];
 
-            NSData * tempData = [[NSFileManager defaultManager] contentsAtPath: [file temporaryPath]];
+            NSData * tempData = [file tempBlob];
 
             // If temp file wasn't uploaded, respond with error JSON
             if (tempData == nil) {
