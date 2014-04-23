@@ -124,7 +124,7 @@ enum {
     NSString* _controlName;
     NSString* _fileName;
     NSString* _contentType;
-    NSString* _tmpPath;
+//    NSString* _tmpPath;
     NSMutableData* _tmpFile;
     
     NSMutableDictionary* _arguments;
@@ -734,8 +734,8 @@ static NSStringEncoding _StringEncodingFromCharset(NSString* charset) {
             _fileName = nil;
             ARC_RELEASE(_contentType);
             _contentType = nil;
-            ARC_RELEASE(_tmpPath);
-            _tmpPath = nil;
+//            ARC_RELEASE(_tmpPath);
+//            _tmpPath = nil;
             CFHTTPMessageRef message = CFHTTPMessageCreateEmpty(kCFAllocatorDefault, true);
             const char* temp = "GET / HTTP/1.0\r\n";
             CFHTTPMessageAppendBytes(message, (const UInt8*)temp, strlen(temp));
@@ -756,14 +756,14 @@ static NSStringEncoding _StringEncodingFromCharset(NSString* charset) {
             CFRelease(message);
             if (_controlName) {
                 if (_fileName) {
-                    NSString* path = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
+                    //NSString* path = [NSTemporaryDirectory() stringByAppendingPathComponent:[[NSProcessInfo processInfo] globallyUniqueString]];
                     _tmpFile = [NSMutableData alloc];
-                    if (_tmpFile) {
-                        _tmpPath = [path copy];
-                    } else {
-                        DNOT_REACHED();
-                        success = NO;
-                    }
+//                    if (_tmpFile) {
+//                        _tmpPath = [path copy];
+//                    } else {
+//                        DNOT_REACHED();
+//                        success = NO;
+//                    }
                 }
             } else {
                 DNOT_REACHED();
@@ -786,15 +786,15 @@ static NSStringEncoding _StringEncodingFromCharset(NSString* charset) {
                 if (_parserState == kParserState_Content) {
                     const void* dataBytes = _parserData.bytes;
                     NSUInteger dataLength = range.location - 2;
-                    if (_tmpPath) {
+                    if (_tmpFile) {
                         [_tmpFile appendBytes:_parserData.bytes length:dataLength];
                             GCDWebServerMultiPartFile_SSF* file = [ [GCDWebServerMultiPartFile_SSF alloc] initWithContentType:_contentType fileName:_fileName
                                                                                                                          blob:_tmpFile];
                             [_files setObject:file forKey:_controlName];
 
                                 ARC_RELEASE(file);
-                        ARC_RELEASE(_tmpPath);
-                        _tmpPath = nil;
+//                        ARC_RELEASE(_);
+                        _tmpFile = nil;
                     } else {
                         NSData* data = [[NSData alloc] initWithBytesNoCopy:(void*)dataBytes length:dataLength freeWhenDone:NO];
                         GCDWebServerMultiPartArgument* argument = [[GCDWebServerMultiPartArgument alloc] initWithContentType:_contentType data:data];
@@ -814,7 +814,7 @@ static NSStringEncoding _StringEncodingFromCharset(NSString* charset) {
             }
         } else {
             NSUInteger margin = 2 * _boundary.length;
-            if (_tmpPath && (_parserData.length > margin)) {
+            if (_tmpFile && (_parserData.length > margin)) {
                 NSUInteger length = _parserData.length - margin;
                 [_tmpFile appendBytes:_parserData.bytes length:length];
                     [_parserData replaceBytesInRange:NSMakeRange(0, length) withBytes:NULL length:0];
@@ -839,8 +839,8 @@ static NSStringEncoding _StringEncodingFromCharset(NSString* charset) {
     _fileName = nil;
     ARC_RELEASE(_contentType);
     _contentType = nil;
-    ARC_RELEASE(_tmpPath);
-    _tmpPath = nil;
+//    ARC_RELEASE(_tmpPath);
+//    _tmpPath = nil;
     return (_parserState == kParserState_End ? YES : NO);
 }
 
