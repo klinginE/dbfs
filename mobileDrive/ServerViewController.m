@@ -289,11 +289,13 @@
 }
 
 -(void) turnOnServer{
-    [webServer start];
+    if (![webServer isRunning])
+        [webServer start];
 }
 
 -(void) turnOffServer{
-    [webServer stop];
+    if ([webServer isRunning])
+        [webServer stop];
 }
 
 // Get IP Address
