@@ -538,7 +538,7 @@ DBFS_Error lookup_dir(DBFS *db, int *in_dir, DBFS_DirName *dir)
     while (true)
     {
         const char *slash = strchr(dir->name, '/');
-        if (!slash[1])
+        if (slash && !slash[1])
             return DBFS_OKAY;
         ++slash;
         DBFS_Error err = query_id1(db, in_dir, dir->name, slash - dir->name);
