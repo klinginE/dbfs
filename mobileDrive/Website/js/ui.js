@@ -132,6 +132,10 @@ $(function() {
       contentType: false,
       processData: false
     });
+    
+    $('#upload-form').each(function(){
+      this.reset();
+    });
   });
   
   // Delete button
