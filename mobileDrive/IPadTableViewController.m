@@ -1191,7 +1191,7 @@
     for (UIView *v in [sheet subviews])
         if ([v isKindOfClass:[UIButton class]])
             if ([((UIButton *)v).titleLabel.text isEqualToString:@"Delete All Content"])
-                ((UIButton *)v).titleLabel.textColor = [UIColor redColor];
+                [((UIButton *)v) setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
 
 }
 
