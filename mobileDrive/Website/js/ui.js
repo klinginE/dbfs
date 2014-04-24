@@ -132,6 +132,10 @@ $(function() {
       contentType: false,
       processData: false
     });
+    
+    $('#upload-form').each(function(){
+      this.reset();
+    });
   });
   
   // Delete button
@@ -322,8 +326,8 @@ $(function() {
           cwd[i].type = "Directory";
           cwd[i].icon = "directory";
         } else {
-          cwd[i].type = "Text File";
-          cwd[i].icon = "text";
+          cwd[i].type = "File";
+          cwd[i].icon = "file";
         }
       }
       rebuildFileList();
