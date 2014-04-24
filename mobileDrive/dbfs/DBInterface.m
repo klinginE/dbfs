@@ -88,7 +88,7 @@
     int result = dbfs_get(dbfs, (DBFS_FileName){name}, &blob);
     
     if(result == DBFS_OKAY) {
-        NSData * tempBlob = [[NSData alloc] initWithBytes: blob.data length:blob.size];
+        NSData *tempBlob = [[NSData alloc] initWithBytes:blob.data length:blob.size];
         dbfs_free_blob(blob);
         return tempBlob;
     }

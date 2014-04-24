@@ -179,10 +179,17 @@
             // Overwrite/put file
             MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
             NSDictionary *contents = [model getDirectoryListIn:uploadDir];
+            
+            int errorModel;
+            
             if ([contents objectForKey:fileName]) {
-                [model overwriteFile_NSDATA:filePath BLOB:tempData];
+                errorModel = [model overwriteFile_NSDATA:filePath BLOB:tempData];
             } else {
-                [model putFile_NSDATA: filePath BLOB:tempData];
+                errorModel = [model putFile_NSDATA: filePath BLOB:tempData];
+            }
+            
+            if ( errorModel != DBFS_OKAY){
+                return [GCDWebServerResponse responseWithStatusCode:403];
             }
 
             // Refresh the iPad view
