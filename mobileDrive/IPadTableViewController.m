@@ -1188,6 +1188,11 @@
                                               otherButtonTitles:@"Need Help?", @"Add Directory", @"Import Image", @"Delete All Content", nil];
     [sheet showFromBarButtonItem:button animated:YES];
 
+    for (UIView *v in [sheet subviews])
+        if ([v isKindOfClass:[UIButton class]])
+            if ([((UIButton *)v).titleLabel.text isEqualToString:@"Delete All Content"])
+                ((UIButton *)v).titleLabel.textColor = [UIColor redColor];
+
 }
 
 -(void)displayEmailForAttachmentWithPath:(NSString *)path Name:(NSString *)name {

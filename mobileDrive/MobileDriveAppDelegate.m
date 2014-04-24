@@ -86,7 +86,7 @@
 
     _imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm tga";
     _docExtensions = @"pdf doc docx xlsx xls ppt pptx txt";
-    _audioExtensions = @"mp3 m4p wav";
+    _audioExtensions = @"mp3 m4a wav";
 
 
     self.isConnected = YES;
