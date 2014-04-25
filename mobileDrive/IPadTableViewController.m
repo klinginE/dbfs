@@ -612,14 +612,6 @@
 
 }
 
-//#pragma mark - Converters
-//
-//-(char *)nsStringToCString:(NSString *)s {
-//
-//    return strdup([s cStringUsingEncoding:NSUTF8StringEncoding]);
-//
-//}
-
 #pragma mark - Event Handelers
 
 -(void)viewWillAppear:(BOOL)animated {
@@ -1039,10 +1031,13 @@
             }
 
             NSString *filePath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, imageName];
-            [self.appDelegate.model putFile_NSDATA: filePath BLOB:imageData];
+            DBFS_Error err = [self.appDelegate.model putFile_NSDATA:filePath BLOB:imageData];
             imageData = nil;
 
             [self dismissViewControllerAnimated:YES completion:^{}];
+            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+            [alert setMessage:[self.appDelegate.model dbError:err]];
+            [alert show];
 
         };
         ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
@@ -1071,16 +1066,20 @@
 
 -(char)check_list_ext:(NSArray *)extTuple findFileType:(NSString*)fileExtension {
 
-    NSString* listExtensions = extTuple[0];
-    char codeExtension = [ (NSNumber *) extTuple[1] charValue ];
-    fileExtension = [fileExtension lowercaseString];
+    if (extTuple && [extTuple count] >= 2) {
 
-    NSArray *singleImageExtensions = [listExtensions componentsSeparatedByString: @" "];
+        NSString* listExtensions = extTuple[0];
+        char codeExtension = [ (NSNumber *) extTuple[1] charValue ];
+        fileExtension = [fileExtension lowercaseString];
+
+        NSArray *singleImageExtensions = [listExtensions componentsSeparatedByString: @" "];
     
-    // Looking to see if file is an image
-    for (NSString *ext in singleImageExtensions)
-        if ([fileExtension isEqualToString:ext])
-            return codeExtension;
+        // Looking to see if file is an image
+        for (NSString *ext in singleImageExtensions)
+            if ([fileExtension isEqualToString:ext])
+                return codeExtension;
+
+    }
 
     return UNKNOWN_EXTENSION;
 
@@ -1115,26 +1114,38 @@
 -(void)displayFileWithfilePath:(NSString *)filePath fileName:(NSString *)filename {
 
     NSData *blob = [self.appDelegate.model getFile_NSDATA:filePath];
-    NSString *tempfilename = [NSString stringWithFormat:@"temp.%@", [filename pathExtension]];
-//  NSString *tempfilename = filename;
+    if (blob) {
 
-    NSString *filePath_t = [NSTemporaryDirectory() stringByAppendingString:tempfilename];
-    NSURL *url = [NSURL fileURLWithPath:filePath_t];
-    NSError *writeError = nil;
-    [blob writeToURL:url options:0 error:&writeError];
-    if (writeError) {
+        NSString *tempfilename = [NSString stringWithFormat:@"temp.%@", [filename pathExtension]];
+        NSString *filePath_t = [NSTemporaryDirectory() stringByAppendingString:tempfilename];
+        NSURL *url = [NSURL fileURLWithPath:filePath_t];
+        NSError *writeError = nil;
+        [blob writeToURL:url options:0 error:&writeError];
+        if (writeError) {
 
-        NSLog(@"Error write file to disk to display it");
-        return;
+            NSLog(@"Error write file to disk to display it");
+            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+            [alert setMessage:[NSString stringWithFormat:@"Could not write file: %@", filename]];
+            [alert show];
+            return;
+
+        }
+        blob = nil;
+        self.documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:url];
+        self.documentInteractionController.name = filename;
+        [self.documentInteractionController setDelegate:self];
+
+        // Preview File
+        [self.documentInteractionController presentPreviewAnimated:YES];
 
     }
-    blob = nil;
-    self.documentInteractionController = [UIDocumentInteractionController interactionControllerWithURL:url];
-    self.documentInteractionController.name = filename;
-    [self.documentInteractionController setDelegate:self];
+    else {
 
-    // Preview File
-    [self.documentInteractionController presentPreviewAnimated:YES];
+        UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+        [alert setMessage:[NSString stringWithFormat:@"Could not get file: %@", filename]];
+        [alert show];
+
+    }
 
 }
 
@@ -1187,7 +1198,6 @@
                                          destructiveButtonTitle:nil
                                               otherButtonTitles:@"Need Help?", @"Add Directory", @"Import Image", @"Delete All Content", nil];
     [sheet showFromBarButtonItem:button animated:YES];
-
     for (UIView *v in [sheet subviews])
         if ([v isKindOfClass:[UIButton class]])
             if ([((UIButton *)v).titleLabel.text isEqualToString:@"Delete All Content"])
@@ -1202,11 +1212,22 @@
 
     // Attach an id to the email
     NSData *myData = [self.appDelegate.model getFile_NSDATA:path];
-    [self.mailComposeViewController addAttachmentData:myData mimeType:[path pathExtension] fileName:name];
+    if (myData) {
 
-    // Fill out the email body text
-    [self.mailComposeViewController setMessageBody:@"" isHTML:NO];
-    [self presentViewController:self.mailComposeViewController animated:YES completion:^(void){}];
+        [self.mailComposeViewController addAttachmentData:myData mimeType:[path pathExtension] fileName:name];
+
+        // Fill out the email body text
+        [self.mailComposeViewController setMessageBody:@"" isHTML:NO];
+        [self presentViewController:self.mailComposeViewController animated:YES completion:^(void){}];
+
+    }
+    else {
+
+        UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+        [alert setMessage:@"Could not get data."];
+        [alert show];
+
+    }
 
 }
 
@@ -1380,6 +1401,8 @@
                         [self.detailView.title length] >= [oldName length] &&
                         [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
                         [self.detailView hideAnimated:NO];
+                    if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
+                        [self dismissViewControllerAnimated:YES completion:^(void){}];
 
                     [self reloadTableViewData];
 
@@ -1389,6 +1412,8 @@
 
                     if (self.detailView && !self.detailView.isHidden)
                         [self.detailView hideAnimated:NO];
+                    if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
+                        [self dismissViewControllerAnimated:YES completion:^(void){}];
 
                     for (int d = (self.iPadState.depth - 1); d >= 0; d--)
                         [self.navigationController.viewControllers[d] refreshForTag:tag From:oldPath To:newPath];
@@ -1434,6 +1459,8 @@
                         [self.detailView.title length] >= [oldName length] &&
                         [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
                         [self.detailView hideAnimated:NO];
+                    if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
+                        [self dismissViewControllerAnimated:YES completion:^(void){}];
 
                     [self reloadTableViewData];
                     
