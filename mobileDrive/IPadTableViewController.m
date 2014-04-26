@@ -973,12 +973,8 @@
                 break;
             case DELETE_ALL_ALERT_TAG:
                 [self.appDelegate.model deleteDatabaseRecreate:YES];
-
                 if (self.detailView && !self.detailView.isHidden)
                     [self.detailView hideAnimated:NO];
-                if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
-                    [self dismissViewControllerAnimated:YES completion:^(void){}];
-
                 if ([self.iPadState.currentDir isEqualToString:@"/"])
                     [self reloadTableViewData];
                 else
@@ -1034,10 +1030,15 @@
             DBFS_Error err = [self.appDelegate.model putFile_NSDATA:filePath BLOB:imageData];
             imageData = nil;
 
-            [self dismissViewControllerAnimated:YES completion:^{}];
-            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
-            [alert setMessage:[self.appDelegate.model dbError:err]];
-            [alert show];
+            [self.eImagePickerController dismissViewControllerAnimated:YES completion:^{}];
+            self.eImagePickerController = nil;
+            if (err != DBFS_OKAY) {
+
+                UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+                [alert setMessage:[self.appDelegate.model dbError:err]];
+                [alert show];
+
+            }
 
         };
         ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
@@ -1263,7 +1264,8 @@
             break;
 
     }
-    [self dismissViewControllerAnimated:YES completion:^(void){self.mailComposeViewController = nil;}];
+    [self.mailComposeViewController dismissViewControllerAnimated:YES completion:^(void){}];
+    self.mailComposeViewController = nil;
 
 }
 
@@ -1401,8 +1403,12 @@
                         [self.detailView.title length] >= [oldName length] &&
                         [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
                         [self.detailView hideAnimated:NO];
-                    if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
-                        [self dismissViewControllerAnimated:YES completion:^(void){}];
+                    if ([self.documentInteractionController.name length] >= [oldName length] &&
+                        [oldName isEqualToString:[self.documentInteractionController.name substringFromIndex:([self.documentInteractionController.name length] - [oldName length])]] &&
+                        self.documentInteractionController) {
+                        [self.documentInteractionController dismissPreviewAnimated:YES];
+                        self.documentInteractionController = nil;
+                    }
 
                     [self reloadTableViewData];
 
@@ -1412,8 +1418,18 @@
 
                     if (self.detailView && !self.detailView.isHidden)
                         [self.detailView hideAnimated:NO];
-                    if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
-                        [self dismissViewControllerAnimated:YES completion:^(void){}];
+                    if (self.documentInteractionController) {
+                        [self.documentInteractionController dismissPreviewAnimated:YES];
+                        self.documentInteractionController = nil;
+                    }
+                    if (self.eImagePickerController) {
+                        [self.eImagePickerController dismissViewControllerAnimated:YES completion:^(void){}];
+                        self.eImagePickerController = nil;
+                    }
+                    if (self.mailComposeViewController) {
+                        [self.mailComposeViewController dismissViewControllerAnimated:YES completion:^(void){}];
+                        self.mailComposeViewController = nil;
+                    }
 
                     for (int d = (self.iPadState.depth - 1); d >= 0; d--)
                         [self.navigationController.viewControllers[d] refreshForTag:tag From:oldPath To:newPath];
@@ -1459,20 +1475,34 @@
                         [self.detailView.title length] >= [oldName length] &&
                         [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
                         [self.detailView hideAnimated:NO];
-                    if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
-                        [self dismissViewControllerAnimated:YES completion:^(void){}];
+                    if ([self.documentInteractionController.name length] >= [oldName length] &&
+                        [oldName isEqualToString:[self.documentInteractionController.name substringFromIndex:([self.documentInteractionController.name length] - [oldName length])]] &&
+                        self.documentInteractionController) {
+                        [self.documentInteractionController dismissPreviewAnimated:YES];
+                        self.documentInteractionController = nil;
+                    }
 
                     [self reloadTableViewData];
-                    
+
                 }
                 else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [oldPath characterAtIndex:(oldLen - 1)] == '/') {
 
                     if (self.detailView && !self.detailView.isHidden)
                         [self.detailView hideAnimated:NO];
-                    if (self.documentInteractionController || self.eImagePickerController || self.mailComposeViewController)
-                        [self dismissViewControllerAnimated:YES completion:^(void){}];
-                    
+                    if (self.documentInteractionController) {
+                        [self.documentInteractionController dismissPreviewAnimated:YES];
+                        self.documentInteractionController = nil;
+                    }
+                    if (self.eImagePickerController) {
+                        [self.eImagePickerController dismissViewControllerAnimated:YES completion:^(void){}];
+                        self.eImagePickerController = nil;
+                    }
+                    if (self.mailComposeViewController) {
+                        [self.mailComposeViewController dismissViewControllerAnimated:YES completion:^(void){}];
+                        self.mailComposeViewController = nil;
+                    }
+
                     NSInteger depth = -1;
                     for (int i = 0; i < serverLen; i++)
                         if ([serverPath characterAtIndex:i] == '/')
