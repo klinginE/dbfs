@@ -349,6 +349,9 @@
 
 #pragma mark - Allocs
 
+//======================================================================
+//Convenience method that allocates UIBarButtonItem for use in a toolbar
+//======================================================================
 -(UIBarButtonItem *)makeBarButtonWithTitle:(NSString *)title
                                        Tag:(NSInteger)tag
                                     Target:(id)target
@@ -369,6 +372,9 @@
 
 }
 
+//===========================================================
+//Convenience method that allocates UIBtton for use in a view
+//===========================================================
 -(UIButton *)makeButtonWithTitle:(NSString *)title
                              Tag:(NSInteger)tag
                           Target:(id)target
@@ -388,12 +394,17 @@
 
 }
 
+//==============================================================================
+//This function will resize all the views' frames to the size they need to be on
+//the screen
+//==============================================================================
 -(void)makeFrameForViews {
 
     CGRect mainScreenBounds = [[UIScreen mainScreen] bounds];
     CGFloat mainScreenWidth = mainScreenBounds.size.width;
     CGFloat mainScreenHeight = mainScreenBounds.size.height;
 
+    // if landscape
     if([self interfaceOrientation] == UIInterfaceOrientationLandscapeLeft ||
        [self interfaceOrientation] == UIInterfaceOrientationLandscapeRight) {
 
@@ -403,6 +414,8 @@
 
     }
 
+    //Order of these if statements matter because some frames use a previous
+    //frmaes dimintions as part of their own frames
     if (self.view)
         self.view.frame = CGRectMake(self.view.frame.origin.x,
                                      self.view.frame.origin.y,
@@ -424,13 +437,12 @@
         CGRect statusRect = [[UIApplication sharedApplication] statusBarFrame];
         CGFloat statusBarOffset = 20.0;
         if (statusRect.size.height <= statusRect.size.width)
-            statusBarOffset = statusRect.size.height;
+            statusBarOffset = statusRect.size.height;// landscape
         else
-            statusBarOffset = statusRect.size.width;
-        
+            statusBarOffset = statusRect.size.width;// portrait
+
         self.pathScrollView.frame = CGRectMake(self.view.frame.origin.x,
                                                statusBarOffset + self.navigationController.navigationBar.frame.size.height,
-                                               //statusRect.origin.y + statusRect.size.height + self.navigationController.navigationBar.frame.size.height,
                                                mainScreenWidth,
                                                PATH_VIEW_HEIGHT);
         self.pathScrollView.contentSize = CGSizeMake(self.pathLabelView.frame.size.width + (SMALL_FONT_SIZE * 2),
@@ -466,15 +478,21 @@
 
 }
 
+//==============================================================================
+//Allocates all the global views and inits them it also calls makeFramesForViews
+//and adds the main two views to self.view
+//==============================================================================
 -(void)loadView {
 
-    //NSLog(@"LoadViews");
+    //set up alerts
     _alertViews = [[NSMutableArray alloc] init];
     [self initAlerts:_alertViews];
 
+    //set up detail view buttons
     _actionSheetButtons = [[NSMutableArray alloc] init];
     [self initActionSheetButtons:_actionSheetButtons];
 
+    //set up conectSwitch
     _conectSwitchView = [[UISwitch alloc] init];
     [_conectSwitchView addTarget:self.appDelegate
                           action:self.switchAction
@@ -484,6 +502,7 @@
     else
         _conectSwitchView.on = NO;
 
+    //get help page set up
     _helpLabelView = [[UILabel alloc] initWithFrame:CGRectZero];
     _helpLabelView.backgroundColor = [UIColor clearColor];
     _helpLabelView.textColor = [UIColor blackColor];
@@ -498,12 +517,14 @@
     [_helpScrollView setScrollEnabled:YES];
     [_helpScrollView setBounces:NO];
 
+    //set up main table view
     _mainTableView = [[UITableView alloc] initWithFrame:CGRectZero
                                                   style:UITableViewStylePlain];
     _mainTableView.dataSource = self;
     _mainTableView.delegate = self;
-    self.tableView = _mainTableView;
+    self.tableView = _mainTableView;//very important line never remove
 
+    //set up path navigation view
     self.pathScrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
     [self.pathScrollView setBackgroundColor:self.barColor];
     [self.pathScrollView setBounces:NO];
@@ -516,14 +537,8 @@
     _pathLabelView.numberOfLines = 1;
     [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
 
-    // Set up back button
-    [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:@"Back"
-                                                                       Tag:BACK_BUTTON_TAG
-                                                                    Target:self
-                                                                    Action:@selector(buttonPressed:)]];
-
+    // set up self.view
     self.view = [[UIView alloc] initWithFrame:CGRectZero];
-
     [self makeFrameForViews];
     [self.view addSubview:self.pathScrollView];
     [self.view addSubview:self.mainTableView];
@@ -1569,6 +1584,12 @@
                                              selector:@selector(orientationChanged:)
                                                  name:UIDeviceOrientationDidChangeNotification
                                                object:[UIDevice currentDevice]];
+
+    // Set up back button
+    [self.navigationItem setBackBarButtonItem:[self makeBarButtonWithTitle:@"Back"
+                                                                       Tag:BACK_BUTTON_TAG
+                                                                    Target:self
+                                                                    Action:@selector(buttonPressed:)]];
 
     // Set up directory Contents
     if(_filesArray == nil)
