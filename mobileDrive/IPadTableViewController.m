@@ -523,9 +523,11 @@
     self.helpScrollView = nil;
     self.helpLabelView = nil;
     self.mainTableView = nil;
+    self.pathLabelView = nil;
     self.pathScrollView = nil;
     self.detailView = nil;
     self.extSwitch = nil;
+    self.menuButton = nil;
 
     // Free Colors
     self.barColor = nil;
@@ -1401,8 +1403,10 @@
                     if (self.detailView &&
                         !self.detailView.isHidden &&
                         [self.detailView.title length] >= [oldName length] &&
-                        [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
+                        [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]]) {
                         [self.detailView hideAnimated:NO];
+                        self.detailView = nil;
+                    }
                     if ([self.documentInteractionController.name length] >= [oldName length] &&
                         [oldName isEqualToString:[self.documentInteractionController.name substringFromIndex:([self.documentInteractionController.name length] - [oldName length])]] &&
                         self.documentInteractionController) {
@@ -1416,8 +1420,10 @@
                 else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [newPath characterAtIndex:(newLen - 1)] == '/') {
 
-                    if (self.detailView && !self.detailView.isHidden)
+                    if (self.detailView && !self.detailView.isHidden) {
                         [self.detailView hideAnimated:NO];
+                        self.detailView = nil;
+                    }
                     if (self.documentInteractionController) {
                         [self.documentInteractionController dismissPreviewAnimated:YES];
                         self.documentInteractionController = nil;
@@ -1473,8 +1479,10 @@
                     if (self.detailView &&
                         !self.detailView.isHidden &&
                         [self.detailView.title length] >= [oldName length] &&
-                        [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]])
+                        [oldName isEqualToString:[self.detailView.title substringFromIndex:([self.detailView.title length] - [oldName length])]]) {
                         [self.detailView hideAnimated:NO];
+                        self.detailView = nil;
+                    }
                     if ([self.documentInteractionController.name length] >= [oldName length] &&
                         [oldName isEqualToString:[self.documentInteractionController.name substringFromIndex:([self.documentInteractionController.name length] - [oldName length])]] &&
                         self.documentInteractionController) {
@@ -1488,8 +1496,10 @@
                 else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [oldPath characterAtIndex:(oldLen - 1)] == '/') {
 
-                    if (self.detailView && !self.detailView.isHidden)
+                    if (self.detailView && !self.detailView.isHidden) {
                         [self.detailView hideAnimated:NO];
+                        self.detailView = nil;
+                    }
                     if (self.documentInteractionController) {
                         [self.documentInteractionController dismissPreviewAnimated:YES];
                         self.documentInteractionController = nil;
