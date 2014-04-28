@@ -195,7 +195,6 @@ $(function() {
       e.preventDefault();
       modal.trigger('hide');
     });
-    $('#actions #file-actions .button').addClass('disable');
   });
   
   // Move button
@@ -216,7 +215,6 @@ $(function() {
       e.preventDefault();
       modal.trigger('hide');
     });
-    $('#actions #file-actions .button').addClass('disable');
   });  
   
   // Open/download file button
@@ -281,32 +279,6 @@ $(function() {
     modal.trigger('hide');
   }
   
-  // Rename file button
-  $('#rename-file-form .button').click(renameFileFromForm);
-  $('#rename-file-form input').keyup(renameFileFromForm);
-  
-  function renameFileFromForm(e) {
-    if (e.type === 'keyup' && e.which != 13) return;
-    
-    var fileName = $('#rename-file-form #new-name').val();
-    var old = $('td.selected.file-name').text().trim();
-    var type = $('td.selected.file-type').text().trim();
-    
-    if (old === "") {
-      return;
-    }
-    
-    if (type === 'Directory') {
-      old += '/';
-      fileName += '/';
-    }
-    
-    $('#rename-file-form #new-name').val("");
-
-    renameFile(old, fileName);
-    modal.trigger('hide');
-  }
-  
   // Move file button
   $('#move-file-form .button').click(moveFileFromForm);
   $('#move-file-form input').keyup(moveFileFromForm);
@@ -324,6 +296,22 @@ $(function() {
     $('#actions #file-actions .button').addClass('disable');
     
     moveFile(old, newPath);
+    modal.trigger('hide');
+  }
+  
+  // Create new directory button
+  $('#create-directory-form .button').click(createDirFromForm);
+  $('#create-directory-form input').keyup(createDirFromForm);
+  
+  function createDirFromForm(e) {
+    if (e.type === 'keyup' && e.which != 13) return;
+    
+    var dirName = $('#create-directory-form #dir-name').val();
+    $('#create-directory-form #dir-name').val("");
+    
+    $('#actions #file-actions .button').addClass('disable');
+    
+    createDir(dirName);
     modal.trigger('hide');
   }
 
