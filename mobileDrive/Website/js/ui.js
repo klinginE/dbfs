@@ -1,6 +1,7 @@
 $(function() {
   var path = ["/"];
   var cwd = [];
+  var cwdHash = "";
   var sort = 'sort-type';
   var sortFunc = compareType;
   var sortReverse = false;
@@ -293,8 +294,6 @@ $(function() {
       return;
     }
     
-    $('#actions #file-actions .button').addClass('disable');
-    
     moveFile(old, newPath);
     modal.trigger('hide');
   }
@@ -309,14 +308,13 @@ $(function() {
     var dirName = $('#create-directory-form #dir-name').val();
     $('#create-directory-form #dir-name').val("");
     
-    $('#actions #file-actions .button').addClass('disable');
-    
     createDir(dirName);
     modal.trigger('hide');
   }
 
   function rebuildFileList() {
     $('#file-list tr').not('[id~="header-row"]').remove();
+    $('#actions #file-actions .button').addClass('disable');
 
     if (sortFunc != null) {
       cwd.sort(compareName);
@@ -404,7 +402,13 @@ $(function() {
       dirPath += path[i] + "/";
     }
     $.get("directory.json?path=" + dirPath, function(data) {
+      var newHash = contentsToStr(data.contents);
+      
+      if (newHash === cwdHash) return;
+      
       cwd = data.contents;
+      cwdHash = newHash;
+      
       for (var i = 0; i < cwd.length; i++) {
         var filename = cwd[i].name;
         if (filename.charAt(filename.length - 1) === "/") {
@@ -474,4 +478,31 @@ $(function() {
       $('#upload-progress > div').css('width', e.loaded + '%');
     }
   }
+  
+  function contentsToStr(contents) {
+    var str = "#<DirContents [";
+    for (var i = 0; i < contents.length; i++) {
+      if (i != 0) {
+        str += ","
+      }
+      
+      str += "{";
+      
+      var sep = "";
+      for (key in contents[i]) {
+        var val = contents[i][key];
+        if (val === "") {
+          val = "null";
+        }
+        str += sep + key + ":" + val;
+        sep = ",";
+      }
+      str += "}"
+    }
+    str += "]>";
+    
+    return str;
+  }
+  
+  setInterval(getDir, 3000);
 });
