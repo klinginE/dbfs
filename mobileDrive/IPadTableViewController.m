@@ -547,6 +547,9 @@
 
 #pragma mark - Deallocs
 
+//=====================================
+//sets all the strong properties to nil
+//=====================================
 -(void)dealloc {
 
     //NSLog(@"dealloc");
@@ -585,33 +588,41 @@
 
 #pragma mark - Setters
 
+//============================================================================
+//Iteratively goes through the toolbarItems to find the one containing the ip
+//it then set it's lablel to the new ip and port along with changing the state
+//============================================================================
 -(void)setIPAdress:(NSString *)ip WithPort:(NSString *)port{
 
     NSString *s = self.iPadState.currentPath;
     _iPadState = nil;
     _iPadState = [[IPadState alloc] initWithPath:s Address:ip Port:port];
+   
+    for (UIBarButtonItem *bi in self.toolbarItems)
+        if (bi.tag == IP_TAG) {
 
-    for (UIViewController *vc in [self.navigationController viewControllers])
-        for (UIBarButtonItem *bi in vc.toolbarItems)
-            if (bi.tag == IP_TAG) {
+            UILabel *newLabel = [[UILabel alloc] init];
+            newLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", ip, port];
+            newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
+            newLabel.frame = CGRectMake(0,
+                                        0,
+                                        [self sizeOfString:newLabel.text
+                                                  withFont:newLabel.font].width,
+                                        MEDIAN_FONT_SIZE);
+            bi.customView = newLabel;
+            break;
 
-                UILabel *newLabel = [[UILabel alloc] init];
-                newLabel.text = [NSString stringWithFormat:@"IP: http://%@:%@", ip, port];
-                newLabel.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
-                newLabel.frame = CGRectMake(0,
-                                            0,
-                                            [self sizeOfString:newLabel.text
-                                                      withFont:newLabel.font].width,
-                                            MEDIAN_FONT_SIZE);
-                bi.customView = newLabel;
-                break;
-
-            }
+        }
 
 }
 
 #pragma mark - Getters
 
+//===========================================================================
+//Gets the name of the directory at a certain depth in path. If the path is
+//smaller than the path's depth then @"/" will be returned. A depth of 0 will
+//return @"/" as well
+//===========================================================================
 -(NSString *)dirAtDepth:(NSInteger)depth InPath:(NSString *)path {
 
     NSString *dir = @"/";
@@ -644,6 +655,10 @@
 
 }
 
+//=========================================================================
+//Convenience method for getting the width and hieht of a string as it will
+//apear on the screen with a given font
+//=========================================================================
 -(CGSize)sizeOfString:(NSString *)string withFont:(UIFont *)font {
 
     NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
@@ -651,10 +666,14 @@
 
 }
 
+//=================================================================
+//Returns the alert view found in the array a with a given tag
+//=================================================================
 -(UIAlertView *)objectInArray:(NSArray *)a WithTag:(NSInteger)tag {
 
-    for (UIAlertView *object in a)
-        if(object.tag == tag)
+    for (id object in a)
+        if([object isMemberOfClass:[UIAlertView class]] &&
+           ((UIAlertView *)object).tag == tag)
             return object;
 
     return nil;
@@ -663,6 +682,10 @@
 
 #pragma mark - Event Handelers
 
+//==============================================================================
+//If the view is about to appear then set the switch value, make the frames, and
+//reload table data
+//==============================================================================
 -(void)viewWillAppear:(BOOL)animated {
 
     [super viewWillAppear:animated];
@@ -673,36 +696,51 @@
 
 }
 
+//==============================================================
+//If the orientation has changed then change the frames to match
+//==============================================================
 -(void)orientationChanged:(NSNotification *)note {
 
     [self makeFrameForViews];
 
 }
 
+//===========================================================================
+//Convenience method for checking to see if the str is a valid file/directory
+//string
+//===========================================================================
 -(BOOL)strOkay:(NSString *)str ForTag:(alertTag)tag IsDir:(BOOL)dir {
 
+    //get length
     NSInteger len = 0;
     if (str)
         len = [str length];
+    //if passed is YES then str is a valid file/directory string else str is
+    //invalid
     BOOL passed = NO;
+    //The type of action matters
     switch (tag) {
 
         case DELETE_ALERT_TAG:
         case RENAME_ALERT_TAG:
             if (dir) {
                 if (str && len > 1 && [str characterAtIndex:(len - 1)] == '/') {
-                    passed = YES;
-                    for (int i = 0; i < (len - 1); i++)
-                        if ([str characterAtIndex:i] == '/')
+                    passed = YES;//everyting good at this point
+                    for (int i = 0; i < (len - 1); i++)//unless this test fails
+                        if ([str characterAtIndex:i] == '/') {
                             passed = NO;
+                            break;
+                        }
                 }
             }
             else {
                 if (str && len) {
                     passed = YES;
                     for (int i = 0; i < len; i++)
-                        if ([str characterAtIndex:i] == '/')
+                        if ([str characterAtIndex:i] == '/') {
                             passed = NO;
+                            break;
+                        }
                 }
             }
             break;
@@ -726,18 +764,33 @@
 
 }
 
+//=====================================================================================
+//This is the most complicated method in the entire controller. The person who
+//understands this understands how the main functionality of the program work.
+//All alert views have at most two buttons. It is assumed that if the second
+//button is pushed then the user as desided to perform an action. The action
+//they want to preform depends on the tag of the alert view that was clicked.
+//Every alert, with the exception of delete must be confirmed before preforming
+//the action. In to perform said action we must keep track of what action is
+//being performed and what text went with that action. To accomplish this static
+//variables are used. It must be noted that this use of static variables makes
+//this code not thread safe.
+//=====================================================================================
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex {
 
+    //Only if the button has an index of 1 or greater
     if (buttonIndex != 0) {
 
+        //static variables to contain the previous alerts data and type
         static NSString *text = @"";
         static alertTag previousTag = NONE;
 
         switch (alertView.tag) {
 
             case ADD_ALERT_TAG:
-                previousTag = ADD_ALERT_TAG;
-                text = [alertView textFieldAtIndex:0].text;
+                previousTag = ADD_ALERT_TAG;//set previous type
+                text = [alertView textFieldAtIndex:0].text;//get text
+                //If valid length of text confirm the user choice, else error
                 if (text && [text length])
                     [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
                 else {
@@ -749,13 +802,20 @@
                 }
                 break;
             case DELETE_ALERT_TAG:
+                //This alert is the only one that does not need a confirmation
+                //selectedDict and selectKey must not be nil else abort
                 if (selectedDict && selectedKey) {
 
+                    //get deleted file/dir path, find out if it is a dir or not
                     NSString *path = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
                     BOOL isDir = [[selectedDict objectForKey:@"type"] boolValue];
 
-                    if ([self strOkay:selectedKey ForTag:DELETE_ALERT_TAG IsDir:isDir]) {
+                    //Find out if selected key is valid else error
+                    if ([self strOkay:selectedKey
+                               ForTag:DELETE_ALERT_TAG
+                                IsDir:isDir]) {
 
+                        //perfore delete and show erro if any with DB
                         DBFS_Error err = DBFS_OKAY;
                         if (isDir)
                             err = [self.appDelegate.model deleteDirectory:path];
@@ -765,7 +825,7 @@
                             [self reloadTableViewData];
                         else {
 
-                            NSLog(@"DBFS Not OK with DELETE");
+                            ///NSLog(@"DBFS Not OK with DELETE");
                             UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                             [alert setMessage:[self.appDelegate.model dbError:err]];
                             [alert show];
@@ -781,6 +841,7 @@
 
                     }
 
+                    //set these to nil as they are no longer selected
                     selectedDict = nil;
                     selectedKey = nil;
 
@@ -793,8 +854,9 @@
                 }
                 break;
             case MOVE_ALERT_TAG:
-                previousTag = MOVE_ALERT_TAG;
-                text = [alertView textFieldAtIndex:0].text;
+                previousTag = MOVE_ALERT_TAG;//set previous type
+                text = [alertView textFieldAtIndex:0].text;//get text
+                //if there is text then confirm choice else error
                 if (text && [text length])
                     [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
                 else {
@@ -806,8 +868,9 @@
                 }
                 break;
             case RENAME_ALERT_TAG:
-                previousTag = RENAME_ALERT_TAG;
-                text = [alertView textFieldAtIndex:0].text;
+                previousTag = RENAME_ALERT_TAG;//set previous type
+                text = [alertView textFieldAtIndex:0].text;//get text
+                //if there is text then confirm choice else error
                 if (text && [text length])
                     [[self objectInArray:self.alertViews WithTag:CONFIRM_ALERT_TAG] show];
                 else {
@@ -819,22 +882,29 @@
                 }
                 break;
             case CONFIRM_ALERT_TAG:
+                //Confirm that this is what the user wants
                 switch (previousTag) {
 
                     case ADD_ALERT_TAG:
                     {
 
-                        NSString *path = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, text];
-
+                        //get path to added dir
+                        NSString *path = @"";
+                        //if path is not absolute add current path
                         if ([text characterAtIndex:0] != '/')
                             path = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, text];
                         else
                             path = text;
+                        //add / to end if non exists
                         if ([path characterAtIndex:([path length] - 1)] != '/')
                             path = [NSString stringWithFormat:@"%@/", path];
 
-                        if ([self strOkay:path ForTag:ADD_ALERT_TAG IsDir:YES]) {
+                        //check to make sure path is valid else error
+                        if ([self strOkay:path
+                                   ForTag:ADD_ALERT_TAG
+                                    IsDir:YES]) {
 
+                            //preforme add and check for DB error
                             DBFS_Error err = [self.appDelegate.model createDirectory:path];
                             if (err == DBFS_OKAY)
                                 [self reloadTableViewData];
@@ -858,17 +928,20 @@
                     }
                         break;
                     case MOVE_ALERT_TAG:
+                        //if selectDict or selectedKey are nil then abort
                         if (selectedDict && selectedKey) {
 
+                            //get old path to moving object
                             NSString *oldPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
+                            //set up newPath to moving object see if it is a dir
                             NSString *newPath = text;
                             BOOL isDir = [[selectedDict objectForKey:@"type"] boolValue];
 
-                            // add absoulte path if needed
+                            //add absoulte path if needed
                             if ([newPath characterAtIndex:0] != '/')
                                 newPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, newPath];
 
-                            // add selectedKey to end if left off
+                            //add selectedKey to end if left off
                             NSInteger index = [newPath length] - [selectedKey length];
                             if (index < 0 || ![[newPath substringFromIndex:index] isEqualToString:selectedKey]) {
 
@@ -912,13 +985,16 @@
 
                             }
 
+                            // now that new path has been created cache lengths
                             NSInteger newLen = [newPath length];
                             NSInteger oldLen = [oldPath length];
 
+                            // Both old and new must be valid else error
                             if ([self strOkay:oldPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
                                 [self strOkay:newPath ForTag:MOVE_ALERT_TAG IsDir:isDir] &&
                                 (newLen < oldLen || ![oldPath isEqualToString:[newPath substringToIndex:oldLen]])) {
 
+                                //preforme move and check for DB error
                                 DBFS_Error err = DBFS_OKAY;
                                 if (isDir)
                                     err = [self.appDelegate.model moveDirectory:oldPath to:newPath];
@@ -956,15 +1032,19 @@
                         }
                         break;
                     case RENAME_ALERT_TAG:
+                        //if selectedDict or selectedKey are nil then abort
                         if (selectedDict && selectedKey) {
 
+                            //get object type and append / to end if need be
                             BOOL isDir = [[selectedDict objectForKey:@"type"] boolValue];
                             if (isDir && [text characterAtIndex:([text length] - 1)] != '/')
                                 text = [NSString stringWithFormat:@"%@/", text];
 
+                            //append the current path to front
                             NSString *oldPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, selectedKey];
                             NSString *newPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, text];
 
+                            //if file check for extension and append if needed
                             if (!isDir && self.extSwitch && [self.extSwitch isOn]) {
 
                                 NSString *oldext = [oldPath pathExtension];
@@ -975,9 +1055,11 @@
 
                             }
 
+                            //check if both paths are valid else error
                             if ([self strOkay:selectedKey ForTag:RENAME_ALERT_TAG IsDir:isDir] &&
                                 [self strOkay:text ForTag:RENAME_ALERT_TAG IsDir:isDir]) {
 
+                                // preforme rename and check for DB eror
                                 DBFS_Error err = DBFS_OKAY;
                                 if (isDir)
                                     err = [self.appDelegate.model renameDirectory:oldPath to:newPath];
@@ -1021,6 +1103,7 @@
                 previousTag = CONFIRM_ALERT_TAG;
                 break;
             case DELETE_ALL_ALERT_TAG:
+                //Code to delete the entire database
                 [self.appDelegate.model deleteDatabaseRecreate:YES];
                 if (self.detailView && !self.detailView.isHidden)
                     [self.detailView hideAnimated:NO];
@@ -1037,11 +1120,15 @@
         }
 
     }
+    // once done clear previous text from alert
     if (alertView.alertViewStyle == UIAlertViewStylePlainTextInput)
         [alertView textFieldAtIndex:0].text = @"";
 
 }
 
+//============================================================
+//Modely persent view to import an image from iPad photo album
+//============================================================
 -(void)displayPhotoPicker {
 
     self.eImagePickerController = [[UIImagePickerController alloc] init];
@@ -1054,8 +1141,11 @@
 
 }
 
+//=================================================================================================================
+//Once an image is picked from photo album put the data into the database
+//=================================================================================================================
 -(void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info {
-    
+
     //extracting image from the picker and saving it
     NSString *mediaType = [info objectForKey:UIImagePickerControllerMediaType];
     if ([mediaType isEqualToString:@"public.image"]){
@@ -1090,6 +1180,7 @@
             }
 
         };
+        //Use assetlibrary to get unique name for image
         ALAssetsLibrary* assetslibrary = [[ALAssetsLibrary alloc] init];
         [assetslibrary assetForURL:imagePath
                        resultBlock:resultblock
@@ -1098,6 +1189,10 @@
     }
 
 }
+
+//==============================================
+//Handle all UI buttons being presed
+//==============================================
 -(void)buttonPressed:(UIBarButtonItem *)sender {
 
     //NSLog(@"buttonPressed");
@@ -1114,11 +1209,15 @@
 
 }
 
--(char)check_list_ext:(NSArray *)extTuple findFileType:(NSString*)fileExtension {
+//==============================================
+//Check to see if given extention is valid
+//==============================================
+-(char)check_list_ext:(NSArray *)extTuple
+         findFileType:(NSString*)fileExtension {
 
     if (extTuple && [extTuple count] >= 2) {
 
-        NSString* listExtensions = extTuple[0];
+        NSString *listExtensions = extTuple[0];
         char codeExtension = [ (NSNumber *) extTuple[1] charValue ];
         fileExtension = [fileExtension lowercaseString];
 
@@ -1135,6 +1234,9 @@
 
 }
 
+//===================================================
+//Given a file name get the extension type that it is
+//===================================================
 -(char)findFileType:(NSString *)fileExtension {
     // identifying extension
     char extensionTypeFound_temp = UNKNOWN_EXTENSION;
@@ -1161,7 +1263,11 @@
 
 }
 
--(void)displayFileWithfilePath:(NSString *)filePath fileName:(NSString *)filename {
+//===================================================
+//Display and open files with path and name
+//===================================================
+-(void)displayFileWithfilePath:(NSString *)filePath
+                      fileName:(NSString *)filename {
 
     NSData *blob = [self.appDelegate.model getFile_NSDATA:filePath];
     if (blob) {
@@ -1209,6 +1315,9 @@
 
 }
 
+//===========================================================================================
+//Handle an action sheet button getting pressed
+//===========================================================================================
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
 
     switch (buttonIndex) {
@@ -1240,6 +1349,9 @@
 
 }
 
+//===========================================================
+//Display the action sheet
+//===========================================================
 -(void)displayActionSheetViewFrom:(UIBarButtonItem *)button {
 
     UIActionSheet *sheet = [[UIActionSheet alloc] initWithTitle:@"Menu"
@@ -1255,7 +1367,11 @@
 
 }
 
--(void)displayEmailForAttachmentWithPath:(NSString *)path Name:(NSString *)name {
+//=========================================================
+//Show email page for emailing files
+//=========================================================
+-(void)displayEmailForAttachmentWithPath:(NSString *)path
+                                    Name:(NSString *)name {
 
     self.mailComposeViewController = [[MFMailComposeViewController alloc] init];
     [self.mailComposeViewController setMailComposeDelegate:(id)self];
@@ -1264,11 +1380,15 @@
     NSData *myData = [self.appDelegate.model getFile_NSDATA:path];
     if (myData) {
 
-        [self.mailComposeViewController addAttachmentData:myData mimeType:[path pathExtension] fileName:name];
+        [self.mailComposeViewController addAttachmentData:myData
+                                                 mimeType:[path pathExtension]
+                                                 fileName:name];
 
         // Fill out the email body text
         [self.mailComposeViewController setMessageBody:@"" isHTML:NO];
-        [self presentViewController:self.mailComposeViewController animated:YES completion:^(void){}];
+        [self presentViewController:self.mailComposeViewController
+                           animated:YES
+                         completion:^(void){}];
 
     }
     else {
@@ -1281,43 +1401,54 @@
 
 }
 
--(void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error {
+//=============================================
+//Upon dismissing mail view handel results
+//=============================================
+-(void)mailComposeController:(MFMailComposeViewController *)controller
+         didFinishWithResult:(MFMailComposeResult)result
+                       error:(NSError *)error {
 
     // Notifies users about errors associated with the interface
     switch (result) {
 
         case MFMailComposeResultCancelled:
-            NSLog(@"Result: canceled");
+            //NSLog(@"Result: canceled");
             break;
         case MFMailComposeResultSaved:
-            NSLog(@"Result: saved");
+            //NSLog(@"Result: saved");
             break;
         case MFMailComposeResultSent:
-            NSLog(@"Result: sent");
+            //NSLog(@"Result: sent");
             break;
         case MFMailComposeResultFailed:
         {
-            NSLog(@"Result: failed");
-            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+            //NSLog(@"Result: failed");
+            UIAlertView *alert = [self objectInArray:self.alertViews
+                                             WithTag:ERROR_ALERT_TAG];
             alert.message = @"Email failed";
             [alert show];
         }
             break;
         default:
         {
-            NSLog(@"Result: not sent");
-            UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
+            //NSLog(@"Result: not sent");
+            UIAlertView *alert = [self objectInArray:self.alertViews
+                                             WithTag:ERROR_ALERT_TAG];
             alert.message = @"Email failed to send";
             [alert show];
         }
             break;
 
     }
-    [self.mailComposeViewController dismissViewControllerAnimated:YES completion:^(void){}];
+    [self.mailComposeViewController dismissViewControllerAnimated:YES
+                                                       completion:^(void){}];
     self.mailComposeViewController = nil;
 
 }
 
+//===================================================
+//Handle a detailed view button being pressed
+//===================================================
 -(void)detailedVeiwButtonPressed:(UIButton *)sender {
 
 //    NSLog(@"detailedVeiwButtonPressed");
@@ -1378,6 +1509,9 @@
 
 }
 
+//============================================================
+//handle case when a cell is pressed and held
+//============================================================
 -(void)handleLongPress:(UILongPressGestureRecognizer*)sender {
 
     CGPoint location = [sender locationInView:self.mainTableView];
@@ -1390,6 +1524,17 @@
 
 }
 
+-(void)reloadTableViewData {
+    
+    self.filesArray = [self.appDelegate.model getContentsArrayIn:self.iPadState.currentPath];
+    [self.mainTableView reloadData];
+    
+}
+
+//==========================================================================
+//Wrapper for refreshForTag:From:To: this alows refreshForTag:From:To: to be
+//called on main thread
+//==========================================================================
 -(void)refreshWithArray:(NSArray *)a {
 
     assert(a);
@@ -1403,14 +1548,13 @@
 
 }
 
--(void)reloadTableViewData {
-
-    self.filesArray = [self.appDelegate.model getContentsArrayIn:self.iPadState.currentPath];
-    [self.mainTableView reloadData];
-
-}
-
--(void)refreshForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath {
+//==============================================================================
+//Requeries the model to get the current content and change the current state of
+//the controller
+//==============================================================================
+-(void)refreshForTag:(modelUpdateTag)tag
+                From:(NSString *)oldPath
+                  To:(NSString *)newPath {
 
     assert(oldPath);
     NSInteger oldLen = [oldPath length];
@@ -1419,23 +1563,25 @@
     NSString *currentPath = self.iPadState.currentPath;
     NSInteger currentLen = [currentPath length];
 
+    //Get index of second to last / in path
     NSInteger index = oldLen - 1;
     if ([oldPath characterAtIndex:index] == '/')
         index--;
     for (; index >= 0; index--)
         if ([oldPath characterAtIndex:index] == '/')
             break;
+    //Get path to server location
     NSString *serverPath = [oldPath substringToIndex:(index + 1)];
     NSInteger serverLen = [serverPath length];
 
     NSString *oldName = [oldPath substringFromIndex:(index + 1)];
 
-    NSLog(@"refresh currentPath= %@", currentPath);
-    NSLog(@"refresh oldPath= %@", oldPath);
-    NSLog(@"refresh oldName= %@", oldName);
-    NSLog(@"refresh newPath= %@", newPath);
-    NSLog(@"refresh serverPath= %@", serverPath);
-    NSLog(@"refresh tag= %u", tag);
+//    NSLog(@"refresh currentPath= %@", currentPath);
+//    NSLog(@"refresh oldPath= %@", oldPath);
+//    NSLog(@"refresh oldName= %@", oldName);
+//    NSLog(@"refresh newPath= %@", newPath);
+//    NSLog(@"refresh serverPath= %@", serverPath);
+//    NSLog(@"refresh tag= %u", tag);
 
     if (self.filesArray && self.mainTableView && serverLen <= currentLen)
         switch (tag) {
@@ -1447,6 +1593,7 @@
             case RENAME_MODEL_TAG:
                 if ([serverPath isEqualToString:currentPath]) {
 
+                    //Dismiss open views
                     if (self.detailView &&
                         !self.detailView.isHidden &&
                         [self.detailView.title length] >= [oldName length] &&
@@ -1467,6 +1614,7 @@
                 else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [newPath characterAtIndex:(newLen - 1)] == '/') {
 
+                    //Dismiss open views
                     if (self.detailView && !self.detailView.isHidden) {
                         [self.detailView hideAnimated:NO];
                         self.detailView = nil;
@@ -1484,12 +1632,16 @@
                         self.mailComposeViewController = nil;
                     }
 
+                    //Refresh any sub views
                     for (int d = (self.iPadState.depth - 1); d >= 0; d--)
                         [self.navigationController.viewControllers[d] refreshForTag:tag From:oldPath To:newPath];
 
+                    //Refrsh everything else
                     NSString *newIpadPath = newPath;
                     if (oldLen < currentLen)
-                        newIpadPath = [NSString stringWithFormat:@"%@%@", newIpadPath, [currentPath substringFromIndex:oldLen]];
+                        newIpadPath = [NSString stringWithFormat:@"%@%@",
+                                       newIpadPath,
+                                       [currentPath substringFromIndex:oldLen]];
 
                     NSString *newAddress = self.iPadState.ipAddress;
                     NSString *newPort = self.iPadState.port;
@@ -1523,6 +1675,7 @@
             case DELETE_MODEL_TAG:
                 if ([serverPath isEqualToString:currentPath]) {
 
+                    //Dismiss open views
                     if (self.detailView &&
                         !self.detailView.isHidden &&
                         [self.detailView.title length] >= [oldName length] &&
@@ -1543,6 +1696,7 @@
                 else if (oldLen <= currentLen && [oldPath isEqualToString:[currentPath substringToIndex:oldLen]] &&
                          [oldPath characterAtIndex:(oldLen - 1)] == '/') {
 
+                    //Dismiss open views
                     if (self.detailView && !self.detailView.isHidden) {
                         [self.detailView hideAnimated:NO];
                         self.detailView = nil;
@@ -1560,6 +1714,7 @@
                         self.mailComposeViewController = nil;
                     }
 
+                    // pop to server location in path
                     NSInteger depth = -1;
                     for (int i = 0; i < serverLen; i++)
                         if ([serverPath characterAtIndex:i] == '/')
@@ -1574,6 +1729,10 @@
 
 }
 
+//=========================================================================
+//Load all non global views and alloc/init global arrays puls create global
+//views that requre the view to be loaded before creation can happen
+//=========================================================================
 -(void)viewDidLoad {
 
     [super viewDidLoad];
@@ -1652,16 +1811,15 @@
     [self.navigationController setToolbarHidden:NO animated:YES];
 
     [self.mainTableView reloadData];
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
 
 }
 
 #pragma mark - Dispaly Views
 
+//=====================================================================
+//Loads the helpPage.txt file into a view and pushes that view onto the
+//navigation stack
+//=====================================================================
 -(void)displayHelpPage {
 
     NSString *helpMessagePath = [[NSBundle mainBundle] pathForResource:@"helpPage" ofType:@"txt"];
@@ -1685,6 +1843,9 @@
 
 }
 
+//======================================================================
+//Creates a new detail view everytime. Adds buttons along with meta data
+//======================================================================
 -(void)displayDetailedViwForItem:(NSDictionary *)dict WithKey:(NSString *)key {
 
     UIScrollView *custom = [[UIScrollView alloc] initWithFrame:CGRectZero];
@@ -1787,6 +1948,9 @@
 
 }
 
+//=====================================================================================================
+//Grabs a cell and puts the proper data into it
+//=====================================================================================================
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 
     // fetch cell
@@ -1828,6 +1992,10 @@
 
 #pragma mark - Table View Delegate
 
+//==========================================================================================
+//When a cell is clicked on and it is a dir then this code pushes a new
+//IPadTableViewController on to the nav stack. Otherwise it diplays a detail view.
+//==========================================================================================
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -1861,58 +2029,5 @@
         [self displayDetailedViwForItem:dict WithKey:key];
 
 }
-
-//-(void)tableView:(UITableView *)tableView did {
-
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-*/
-
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    }   
-    else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
-}
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
-
-/*
-#pragma mark - Navigation
-
-// In a story board-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
-{
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-
- */
 
 @end

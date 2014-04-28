@@ -81,6 +81,20 @@
 
 }
 
+-(void)changeAddressIP:(NSString *)ip Port:(NSString *)portNum {
+
+    ipAddress = ip;
+    port = portNum;
+    for (UIViewController *vc in [self.iPadNavController viewControllers])
+        if ([vc isMemberOfClass:[IPadTableViewController class]]) {
+
+            IPadTableViewController *viewContrller = (IPadTableViewController *)vc;
+            [viewContrller setIPAdress:ip WithPort:portNum];
+
+        }
+
+}
+
 -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
     _imageExtensions = @"jpg jpeg gif png bmp tiff tif bmpf ico cur xbm tga";
