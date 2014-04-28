@@ -32,6 +32,15 @@
         <a href="#" class="button icon log">Rename</a>
       </div>
     </div>
+    <div id="move-file-window" class="modal ow-closed modal-window">
+      <h1 class="title">Move File</h1>
+      <a class="close-button" href="#"><img src="img/cross.png" /></a>
+      <div id="move-file-form">
+        <label for="new-path">New Path</label>
+        <input type="text" id="new-path" name="new-path" />
+        <a href="#" class="button icon fork">Move</a>
+      </div>
+    </div>
     <div id="content">
       <div id="breadcrumbs">
       </div>
@@ -49,6 +58,7 @@
         </div>
         <div id="file-actions" class="button-group">
           <a href="#" id="delete-button" class="button danger icon remove disable">Delete</a>
+          <a href="#" id="move-button" class="button icon fork disable">Move</a>
           <a href="#" id="rename-button" class="button icon edit disable">Rename</a>
           <a href="#" id="open-button" class="button icon arrowdown disable">Open</a>
         </div>

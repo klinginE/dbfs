@@ -197,7 +197,27 @@ $(function() {
     });
     $('#actions #file-actions .button').addClass('disable');
   });
+  
+  // Move button
+  $('#move-button').click(function() {
+    if ($('#move-button').hasClass('disable')) return;
     
+    var filePath = "/";
+    for (var i = 1; i < path.length; i++) {
+      filePath += path[i] + "/";
+    }
+    
+    modal = $('#move-file-window').omniWindow();
+    modal.trigger('show');
+                            
+    $('#move-file-form #new-path').val(filePath).focus();
+
+    $('.close-button').click(function(e) {
+      e.preventDefault();
+      modal.trigger('hide');
+    });
+    $('#actions #file-actions .button').addClass('disable');
+  });  
   
   // Open/download file button
   $('#open-button').click(function() {
@@ -261,19 +281,49 @@ $(function() {
     modal.trigger('hide');
   }
   
-  // Create new directory button
-  $('#create-directory-form .button').click(createDirFromForm);
-  $('#create-directory-form input').keyup(createDirFromForm);
+  // Rename file button
+  $('#rename-file-form .button').click(renameFileFromForm);
+  $('#rename-file-form input').keyup(renameFileFromForm);
   
-  function createDirFromForm(e) {
+  function renameFileFromForm(e) {
     if (e.type === 'keyup' && e.which != 13) return;
     
-    var dirName = $('#create-directory-form #dir-name').val();
-    $('#create-directory-form #dir-name').val("");
+    var fileName = $('#rename-file-form #new-name').val();
+    var old = $('td.selected.file-name').text().trim();
+    var type = $('td.selected.file-type').text().trim();
+    
+    if (old === "") {
+      return;
+    }
+    
+    if (type === 'Directory') {
+      old += '/';
+      fileName += '/';
+    }
+    
+    $('#rename-file-form #new-name').val("");
+
+    renameFile(old, fileName);
+    modal.trigger('hide');
+  }
+  
+  // Move file button
+  $('#move-file-form .button').click(moveFileFromForm);
+  $('#move-file-form input').keyup(moveFileFromForm);
+  
+  function moveFileFromForm(e) {
+    if (e.type === 'keyup' && e.which != 13) return;
+
+    var newPath = $('#move-file-form #new-path').val();
+    var old = $('td.selected.file-name').text().trim();
+    
+    if (old === "") {
+      return;
+    }
     
     $('#actions #file-actions .button').addClass('disable');
     
-    createDir(dirName);
+    moveFile(old, newPath);
     modal.trigger('hide');
   }
 
@@ -325,7 +375,23 @@ $(function() {
       rebuildFileList();
     });
   }
+  
+  function moveFile(oldFile, newPath) {
+    if (oldFile === '' || newPath === '') return;
     
+    var filePath = "/";
+    for (var i = 1; i < path.length; i++) {
+      filePath += path[i] + "/";
+    }
+    
+    oldPath = filePath + oldFile;
+    newPath = newPath + oldFile;
+
+    $.get('move.html?old=' + oldPath + '&new=' + newPath, function(data) {
+      getDir();
+      rebuildFileList();
+    });
+  } 
   
   function openDir(dirName) {
     $('#actions #file-actions .button').addClass('disable');
