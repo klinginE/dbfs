@@ -1606,7 +1606,7 @@
     self.helpLabelView.text = helpMessage;
 
     UIViewController *helpController = [[UIViewController alloc] init];
-    helpController.title = @"Help Page.";
+    helpController.title = @"Help Page";
 
     [helpController.view addSubview:self.helpScrollView];
     [self makeFrameForViews];
