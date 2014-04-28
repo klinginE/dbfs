@@ -100,6 +100,10 @@
 
 #pragma mark - Initers
 
+//===========================================================================
+//Inits object to be on the current path with the given ip and port. The next
+//two params set up the ip switch and the last
+//===========================================================================
 -(id)initWithPath:(NSString *)currentPath
         ipAddress:(NSString *)ip
              port:(NSString *)port
@@ -112,7 +116,9 @@
     if (self) {
 
         // init State
-        _iPadState = [[IPadState alloc] initWithPath:currentPath Address:ip Port:port];
+        _iPadState = [[IPadState alloc] initWithPath:currentPath
+                                             Address:ip
+                                                Port:port];
         _appDelegate = (MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate;
         self.title = self.iPadState.currentDir;
         selectedDict = nil;
@@ -146,8 +152,12 @@
 
 }
 
+//=================================================================
+//Creates and stores all global level alerts in the array passed in
+//=================================================================
 -(void)initAlerts:(NSMutableArray *)alerts {
 
+    //start the alerts id at add alert and loop through all the alerts
     for (int i = ADD_ALERT_TAG; i < (NUM_ALERTS + ADD_ALERT_TAG); i++) {
 
         UIAlertView *alert = [[UIAlertView alloc] init];
@@ -188,6 +198,7 @@
                 [alert addButtonWithTitle:@"Cancel"];
                 [alert addButtonWithTitle:@"OK"];
 
+                // Rename needs a switch for users to be able to add extentions
                 UIView *subView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 250, SMALL_FONT_SIZE)];
                 [subView setBackgroundColor:[UIColor clearColor]];
 
@@ -208,7 +219,7 @@
                 [alert setValue:subView forKey:@"accessoryView"];
                 alert.tag = RENAME_ALERT_TAG;
 
-            }
+            }// end of rename block
                 break;
             case CONFIRM_ALERT_TAG:
                 [alert setDelegate:self];
@@ -236,18 +247,21 @@
             default:
                 break;
 
-        }
+        }// end of switch
 
         [alerts addObject:alert];
 
-    }
+    }// end of for
 
 }
 
+//==============================================================================
+//Creates and stores all global level detail view buttons in the array passed in
+//==============================================================================
 -(void)initActionSheetButtons:(NSMutableArray *)buttons {
 
-    [buttons addObject:@"Open"];
-    [buttons addObject:@"Email"];
+    [buttons addObject:@"Open"];//remove this line to get rid of opening files
+    [buttons addObject:@"Email"];//remove this line to get rid of emailing files
     [buttons addObject:@"Move"];
     [buttons addObject:@"Rename"];
     [buttons addObject:@"Delete"];
@@ -255,58 +269,72 @@
 
 }
 
+//===================================================================
+//Gets the path view at the top of the iPad screen created and set up
+//===================================================================
 -(void)initPathViewWithAction:(SEL)action ForEvents:(UIControlEvents)events {
 
-    UIFont *textFont = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
+    //cache values
+    UIFont *textFont = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];//cache font
     CGSize currentPathSize = [self sizeOfString:self.iPadState.currentPath
-                                       withFont:textFont];
+                                       withFont:textFont];//cache size
+    CGFloat pathY = (PATH_VIEW_HEIGHT - MEDIAN_FONT_SIZE)/ 4.0;//cache y value
 
+    //get label set up
     UILabel *pathLabel = [[UILabel alloc] initWithFrame:CGRectZero];
     pathLabel.text = @"Path: ";
-    CGFloat pathY = (PATH_VIEW_HEIGHT - MEDIAN_FONT_SIZE)/ 4.0;
     [pathLabel setFont:self.pathLabelView.font];
     [pathLabel setFrame:CGRectMake(SMALL_FONT_SIZE,
                                    pathY,
-                                   [self sizeOfString:pathLabel.text withFont:textFont].width,
+                                   [self sizeOfString:pathLabel.text
+                                             withFont:textFont].width,
                                    MEDIAN_FONT_SIZE)];
-    [self.pathScrollView addSubview:pathLabel];
+    //cache path lable
     CGSize pathLabelSize = [self sizeOfString:pathLabel.text withFont:textFont];
 
+    //add path lable to pathScrollView
+    [self.pathScrollView addSubview:pathLabel];
     self.pathLabelView.text = pathLabel.text.copy;
     [self.pathLabelView setFont:textFont];
     [self.pathLabelView setFrame:CGRectMake(SMALL_FONT_SIZE,
                                             pathY,
                                             currentPathSize.width + pathLabelSize.width,
                                             currentPathSize.height)];
-    
 
+    //add the rest of the path including the root slash
     NSString *title = @" / ";
     NSInteger len = 0;
     for (int i = 1; i <= (self.iPadState.depth + 1); i++) {
 
+        //get dir for depth i - 1
         title = [self dirAtDepth:(i - 1)
                           InPath:self.iPadState.currentPath];
 
-        if ([title isEqualToString:@"/"] && i == 1)
+        //if depth is root then set title to have spaces surounding root
+        //this makes it easyer for the usr to click on
+        if (i == 1 && [title isEqualToString:@"/"])
             title = @"  /  ";
 
+        // make button for current dir at depth i - 1
         UIButton *pathButton = [self makeButtonWithTitle:title
                                                      Tag:(i - 1)
                                                   Target:self.appDelegate
                                                   Action:action
                                                ForEvents:events];
-        CGSize titleSize = [self sizeOfString:title withFont:pathButton.titleLabel.font];
-
+        CGSize titleSize = [self sizeOfString:title
+                                     withFont:pathButton.titleLabel.font];
         pathButton.frame = CGRectMake(self.view.frame.origin.x + SMALL_FONT_SIZE + pathLabelSize.width + len,
                                       pathY,
                                       titleSize.width,
                                       MEDIAN_FONT_SIZE);
         pathButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentLeft;
 
+        // if dir is final dir then color it gray and disable button
         if (i == (self.iPadState.depth + 1)) {
 
             [pathButton setEnabled:NO];
-            [pathButton setTitleColor:[UIColor darkGrayColor] forState:UIControlStateNormal];
+            [pathButton setTitleColor:[UIColor darkGrayColor]
+                             forState:UIControlStateNormal];
 
         }
         len += titleSize.width;
@@ -315,7 +343,7 @@
                                    self.pathLabelView.text,
                                    pathButton.titleLabel.text];
 
-    }
+    }// end of for
 
 }
 
@@ -533,6 +561,10 @@
     self.barColor = nil;
     self.buttonColor = nil;
     self.toolBarColor = nil;
+
+    // Dicts
+    selectedDict = nil;
+    selectedKey = nil;
 
 }
 
