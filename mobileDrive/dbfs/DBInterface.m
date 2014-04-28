@@ -3,7 +3,7 @@
 //  mobileDrive
 //
 //  Created by Jesse Scott Pitel on 3/10/14.
-//  Copyright (c) 2014 Eric Klinginsmith. All rights reserved.
+//  Copyright (c) 2014. All rights reserved.
 //
 
 #import "DBInterface.h"
@@ -17,12 +17,19 @@
 
 }
 
+// =============================================
+// Converts an NSString* to a C char* string.
+// =============================================
 -(const char *)nsStringToCString:(NSString *)s {
 
     return [s UTF8String];
 
 }
 
+// =============================================
+// Reads in data from a file stream and creates
+// a DBFS_Blob containing the incoming data.
+// =============================================
 -(DBFS_Blob)slurp:(FILE *)in {
     uint8_t *buf = NULL;
     size_t size = 0, cap = 0;
@@ -46,6 +53,10 @@
     return (DBFS_Blob){buf, size};
 }
 
+// =============================================
+// Takes in an error number and acquires the
+// error message corresponding to that number.
+// =============================================
 -(NSString *)dbError:(int)err {
 
     NSString *error;
@@ -55,6 +66,11 @@
 
 }
 
+// =============================================
+// Opens the database by name, creating it if no
+// such database exists.
+// Returns that database.
+// =============================================
 -(DBFS *)openDatabase:(NSString *)name {
     const char *dbName = [self nsStringToCString:name];
     DBFS *dbfs = dbfs_open(dbName);
@@ -62,10 +78,20 @@
     return dbfs;
 }
 
+// =============================================
+// Frees all the memory associated with database
+// operation.
+// =============================================
 -(void)closeDatabase:(DBFS *)dbfs {
     dbfs_close(dbfs);
 }
 
+// =============================================
+// Locates the named file in the database,
+// creates a DBFS_Blob caontaining the file's
+// data and writes the blob's contents to a file
+// stream.
+// =============================================
 -(int)getFile:(NSString *)fname fromDatabase:(DBFS *)dbfs to:(FILE *)out withSize:(int *)size {
     
     DBFS_Blob blob;
@@ -81,6 +107,12 @@
     return result;
 }
 
+// =============================================
+// Locates the named file in the database,
+// creates a DBFS_Blob containing the file's
+// data, and returns an NSData object with that
+// content.
+// =============================================
 -(NSData *) getFile_NSDATA:(NSString *)fname fromDatabase:(DBFS *)dbfs{
     
     DBFS_Blob blob;
@@ -95,6 +127,10 @@
     return nil;
 }
 
+// =============================================
+// Create a new file in the database with a
+// given file name and data from a file stream.
+// =============================================
 -(int)putFile:(NSString *)fname fromDatabase:(DBFS *)dbfs from:(FILE *)in withSize:(int)size {
     DBFS_Blob blob;
     const char *name = [self nsStringToCString:fname];//[fname UTF8String];
@@ -107,16 +143,23 @@
     return r;
 }
 
+// =============================================
+// Create a new file in the database with a
+// given file name and data from an NSData
+// object.
+// =============================================
 -(int)putFile_NSDATA: (NSString *)fname Blob: (NSData*) blob fromDatabase:(DBFS *)dbfs{
     DBFS_Blob blob_temp = (DBFS_Blob){[blob bytes], (int) [blob length]};
     const char *name = [fname UTF8String];
-    
-//    blob_temp = [self slurp:in];
+
     int r = dbfs_put(dbfs, (DBFS_FileName){name}, blob_temp);
     
     return r;
 }
 
+// =============================================
+// 
+// =============================================
 -(int)overwriteFile_NSDATA:(NSString *)fname Blob: (NSData*) blob fromDatabase:(DBFS *)dbfs{
     DBFS_Blob blob_temp = (DBFS_Blob){[blob bytes], (int) [blob length]};
     const char *name = [self nsStringToCString:fname];//[fname UTF8String];
