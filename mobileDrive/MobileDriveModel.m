@@ -496,9 +496,6 @@
     NSData *contents = [NSJSONSerialization dataWithJSONObject:dict
                                                        options:0
                                                          error:nil];
-    NSString *s = [[NSString alloc] initWithBytes:[contents bytes]
-                                           length:[contents length]
-                                         encoding:NSUTF8StringEncoding];
     return contents;
 
 }
