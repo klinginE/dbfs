@@ -22,9 +22,9 @@ $(function() {
         
         // Changing open button label to "Download" or "Open" depending on its type.
         var fileType = $('td.selected.file-type').text().trim();
-        if ( fileType == "File"){
+        if (fileType === "File") {
             $('#open-button').text("Download");
-        }else{
+        } else {
             $('#open-button').text("Open");
         }
       }
@@ -151,11 +151,14 @@ $(function() {
     if ($('#delete-button').hasClass('disable')) return;
     
     var fileName = $('td.selected.file-name').text().trim();
-    if ( fileName == "") return;
     var fileType = $('td.selected.file-type').text().trim();
+    
+    if (fileName === "") {
+      return;
+    }
                             
     var checkstr =  confirm("Are you sure you want to delete "+ fileName +"?");
-    if(checkstr == true){
+    if (checkstr == true) {
         var filePath = "/";
         for (var i = 1; i < path.length; i++) {
           filePath += path[i] + "/";
@@ -168,7 +171,8 @@ $(function() {
         
         $.get('delete.html?path=' + filePath, function(data) {
           getDir();
-              });
+        });
+        
         $('#actions #file-actions .button').addClass('disable');
     }
   });
@@ -176,18 +180,22 @@ $(function() {
   // Rename button
   $('#rename-button').click(function() {
     if ($('#rename-button').hasClass('disable')) return;
+    
     var val = $('td.selected.file-name').text().trim();
-    if ( val == "") {return;}
+    if (val === "") {
+      return;
+    }
+    
     modal = $('#rename-file-window').omniWindow();
     modal.trigger('show');
                             
     $('#rename-file-form #new-name').val(val).focus();
 
-    $('.close-button').click(function(e){
+    $('.close-button').click(function(e) {
       e.preventDefault();
       modal.trigger('hide');
     });
-     $('#actions #file-actions .button').addClass('disable');
+    $('#actions #file-actions .button').addClass('disable');
   });
     
   
@@ -197,7 +205,10 @@ $(function() {
     
     var fileName = $('td.selected.file-name').text().trim();
     var fileType = $('td.selected.file-type').text().trim();
-    if ( fileName == "") return;
+    
+    if (fileName === "") {
+      return;
+    }
                           
     if (fileType === 'Directory') {
       openDir(fileName);
@@ -218,7 +229,7 @@ $(function() {
     
     $('#create-directory-form #dir-name').focus();
 
-    $('.close-button').click(function(e){
+    $('.close-button').click(function(e) {
       e.preventDefault();
       modal.trigger('hide');
     });
@@ -233,8 +244,11 @@ $(function() {
     
     var fileName = $('#rename-file-form #new-name').val();
     var old = $('td.selected.file-name').text().trim();
-    if ( old == "" ){ return; }
     var type = $('td.selected.file-type').text().trim();
+    
+    if (old === "") {
+      return;
+    }
     
     if (type === 'Directory') {
       old += '/';
