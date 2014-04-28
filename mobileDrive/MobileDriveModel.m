@@ -21,17 +21,11 @@
     if (self) {
 
         _interfaceQueue = dispatch_queue_create("interfaceThread", DISPATCH_QUEUE_SERIAL);
-        //_interfaceLock = [[NSLock alloc] init];
 
         dispatch_block_t block = ^{
             self.dbInterface = [[DBInterface alloc] init];
         };
-        //[self.interfaceLock lock];
         dispatch_sync(self.interfaceQueue, block);
-        //[self.interfaceLock unlock];
-
-//        [block1 performSelector:@selector(invoke) onThread:self.interfaceThread withObject:nil waitUntilDone:YES];
-        //[self.interfaceThread ]
         
         NSArray *dirPaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
         NSString *docsDir = [dirPaths objectAtIndex:0];
@@ -40,9 +34,7 @@
         block = ^{
             dbfs = [self.dbInterface openDatabase:dbPath];
         };
-        //[self.interfaceLock lock];
         dispatch_sync(self.interfaceQueue, block);
-        //[self.interfaceLock unlock];
 
     }
 
@@ -56,9 +48,7 @@
     dispatch_block_t block = ^{
         r = [self.dbInterface dbError:err_t];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
 
     return r;
 
@@ -69,9 +59,7 @@
     dispatch_block_t block = ^{
         [self.dbInterface closeDatabase:dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
 
 }
 
@@ -86,10 +74,8 @@
     [fileMgr removeItemAtPath:dbPath error:&error];
 
     if (error) {
-
         NSLog(@"Fatal error in removing database: %@ because: %@", dbPath, [error description]);
         abort();
-
     }
 
     if (flag) {
@@ -98,18 +84,9 @@
         dispatch_block_t block = ^{
             dbfs = [self.dbInterface openDatabase:dbPath];
         };
-        //[self.interfaceLock lock];
         dispatch_sync(self.interfaceQueue, block);
-        //[self.interfaceLock unlock];
 
     }
-
-}
-
--(DBFS_Blob)slurp:(FILE *)in {
-
-    DBFS_Blob blob;
-    return blob;
 
 }
 
@@ -125,11 +102,12 @@
     __block FILE *out_t = out;
     __block int *size_t = size;
     dispatch_block_t block = ^{
-        result = [self.dbInterface getFile:fname_t fromDatabase:self->dbfs to:out_t withSize:size_t];
+        result = [self.dbInterface getFile:fname_t
+                              fromDatabase:self->dbfs
+                                        to:out_t
+                                  withSize:size_t];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
 
     return result;
 
@@ -137,22 +115,18 @@
 
 -(NSData *)getFile_NSDATA:(NSString *)fname{
     if (fname == nil) {
-//        return DBFS_NOT_FILENAME;
         return nil;
     }
     else if ([fname isEqualToString:@""]) {
-//        return DBFS_NOT_FILENAME;
         return nil;
     }
-//    int result = [self.dbInterface getFile:fname fromDatabase:self->dbfs to:out withSize:size];
     __block NSData *result = nil;
     __block NSString *fname_t = fname.copy;
     dispatch_block_t block = ^{
-        result = [self.dbInterface getFile_NSDATA:fname_t fromDatabase:self->dbfs];
+        result = [self.dbInterface getFile_NSDATA:fname_t
+                                     fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 }
 
@@ -168,11 +142,12 @@
     __block FILE *in_t = in;
     __block int size_t = size;
     dispatch_block_t block = ^{
-        result =  [self.dbInterface putFile:fname_t fromDatabase:self->dbfs from:in_t withSize:size_t];
+        result =  [self.dbInterface putFile:fname_t
+                               fromDatabase:self->dbfs
+                                       from:in_t
+                                   withSize:size_t];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 
 }
@@ -185,14 +160,12 @@
     }
     __block int result = DBFS_LIGHTS_ON;
     __block NSString *fname_t = fname.copy;
-//    __block FILE *in_t = in;
     dispatch_block_t block = ^{
-        result = [self.dbInterface overwriteFile_NSDATA:fname_t Blob:blob fromDatabase:self->dbfs];
-//        result = [self.dbInterface overwriteFile_NSDATA:fname_t inDatabase:self->dbfs from:in_t];
+        result = [self.dbInterface overwriteFile_NSDATA:fname_t
+                                                   Blob:blob
+                                           fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 }
 
@@ -207,11 +180,11 @@
     __block NSData * myData = blob;
     __block NSString *fname_t = fname.copy;
     dispatch_block_t block = ^{
-        result = [self.dbInterface putFile_NSDATA:fname_t Blob:myData fromDatabase:self->dbfs];
+        result = [self.dbInterface putFile_NSDATA:fname_t
+                                             Blob:myData
+                                     fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 }
 
@@ -226,11 +199,11 @@
     __block NSString *oldName_t = oldName.copy;
     __block NSString *newName_t = newName.copy;
     dispatch_block_t block = ^{
-        result = [self.dbInterface renameFile:oldName_t to:newName_t fromDatabase:self->dbfs];
+        result = [self.dbInterface renameFile:oldName_t
+                                           to:newName_t
+                                 fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
 
     return result;
 
@@ -247,11 +220,11 @@
     __block NSString *oldName_t = oldName.copy;
     __block NSString *newName_t = newName.copy;
     dispatch_block_t block = ^{
-        result = [self.dbInterface renameFile:oldName_t to:newName_t fromDatabase:self->dbfs];
+        result = [self.dbInterface renameFile:oldName_t
+                                           to:newName_t
+                                 fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 }
 
@@ -266,11 +239,11 @@
     __block NSString *fname_t = fname.copy;
     __block FILE *in_t = in;
     dispatch_block_t block = ^{
-        result = [self.dbInterface overwriteFile:fname_t inDatabase:self->dbfs from:in_t];
+        result = [self.dbInterface overwriteFile:fname_t
+                                      inDatabase:self->dbfs
+                                            from:in_t];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 
 }
@@ -286,11 +259,10 @@
     __block int result = DBFS_LIGHTS_ON;
     __block NSString *fname_t = fname.copy;
     dispatch_block_t block = ^{
-        result = [self.dbInterface deleteFile:fname_t fromDatabase:self->dbfs];
+        result = [self.dbInterface deleteFile:fname_t
+                                 fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 
 }
@@ -306,11 +278,10 @@
     __block int result = DBFS_LIGHTS_ON;
     __block NSString *dirName_t = dirName.copy;
     dispatch_block_t block = ^{
-        result = [self.dbInterface createDirectory:dirName_t fromDatabase:self->dbfs];
+        result = [self.dbInterface createDirectory:dirName_t
+                                      fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 
 }
@@ -325,11 +296,10 @@
     __block int result = DBFS_LIGHTS_ON;
     __block NSString *dirName_t = dirName.copy;
     dispatch_block_t block = ^{
-        result = [self.dbInterface deleteDirectory:dirName_t fromDatabase:self->dbfs];
+        result = [self.dbInterface deleteDirectory:dirName_t
+                                      fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 }
 
@@ -344,11 +314,11 @@
     __block NSString *dirName_t = dirName.copy;
     __block NSString *destName_t = destName.copy;
     dispatch_block_t block = ^{
-        result = [self.dbInterface moveDirectory:dirName_t to:destName_t fromDatabase:self->dbfs];
+        result = [self.dbInterface moveDirectory:dirName_t
+                                              to:destName_t
+                                    fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 
 }
@@ -364,11 +334,11 @@
     __block NSString *dirName_t = dirName.copy;
     __block NSString *newName_t = newName.copy;
     dispatch_block_t block = ^{
-        result = [self.dbInterface moveDirectory:dirName_t to:newName_t fromDatabase:self->dbfs];
+        result = [self.dbInterface moveDirectory:dirName_t
+                                              to:newName_t
+                                    fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
     return result;
 }
 
@@ -376,18 +346,21 @@
     __block DBFS_FileList fileList;
     __block NSString *dirName_t = dirName.copy;
     dispatch_block_t block = ^{
-        fileList = [self.dbInterface getFileListIn:dirName_t fromDatabase:self->dbfs];
+        fileList = [self.dbInterface getFileListIn:dirName_t
+                                      fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
 
     NSMutableDictionary *fileDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
     
     for (int i = 0; i < fileList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((fileList.files)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name", [[NSNumber alloc] initWithBool:NO], @"type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name",
+                           [[NSNumber alloc] initWithBool:NO], @"type",
+                           [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"size",
+                           [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"modified",
+                           nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((fileList.files)+i)->name]];
         [fileDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -395,9 +368,8 @@
     
     /* Alphabetize the file list */
     NSArray *alphabeticalKeys = [[fileDict allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    NSArray *objects = [fileDict objectsForKeys:alphabeticalKeys notFoundMarker:[NSNull null]];
-    
-    //    NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects forKeys:alphabeticalKeys];
+    NSArray *objects = [fileDict objectsForKeys:alphabeticalKeys
+                                 notFoundMarker:[NSNull null]];
     
     return objects;
 }
@@ -406,42 +378,37 @@
     __block DBFS_DirList dirList;
     NSString *dirName_t = dirName.copy;
     dispatch_block_t block = ^{
-        dirList = [self.dbInterface getDirectoryListIn:dirName_t inDatabase:dbfs];
+        dirList = [self.dbInterface getDirectoryListIn:dirName_t
+                                            inDatabase:dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
 
     NSMutableDictionary *dirDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
     
     for (int i = 0; i < dirList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name", [[NSNumber alloc] initWithBool:YES], @"type", [[NSNumber alloc] initWithInt:0], @"size", @"", @"modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name",
+                           [[NSNumber alloc] initWithBool:YES], @"type",
+                           [[NSNumber alloc] initWithInt:0], @"size",
+                           @"", @"modified", nil];
         NSString *s = [NSString stringWithUTF8String:((dirList.dirs)+i)->name];
         [keys addObject:[[NSString alloc] initWithString:s]];
         [dirDict setObject:d forKey:[keys objectAtIndex:i]];
     }
     
     /* Alphabetize the directory list */
-    
     NSArray *alphabeticalKeys = [[dirDict allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    NSArray *objects = [dirDict objectsForKeys:alphabeticalKeys notFoundMarker:[NSNull null]];
-    
-    //    NSLog(@"keys: %@", alphabeticalKeys);
-    
-    //    NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects forKeys:alphabeticalKeys];
-    //    NSLog(@"final: %@", finalDict);
+    NSArray *objects = [dirDict objectsForKeys:alphabeticalKeys
+                                notFoundMarker:[NSNull null]];
+
     return objects;
 }
 
 -(NSArray *)getContentsArrayIn:(NSString *)dirName {
     NSMutableArray *contentArray = [[NSMutableArray alloc] initWithArray:[self getDirectoryArrayIn:dirName]];
-    //    NSMutableDictionary *contentDict = [[NSMutableDictionary alloc] initWithDictionary:[self getDirectoryListIn:dirName]];
     NSArray *tempArray = [self getFileArrayIn:dirName];
-    //    NSDictionary *tempDict = [self getFileListIn:dirName];
     [contentArray addObjectsFromArray:tempArray];
-    //    [contentDict addEntriesFromDictionary:tempDict];
     return contentArray;
 }
 
@@ -450,18 +417,20 @@
     __block DBFS_FileList fileList;
     __block NSString *dirName_t = dirName.copy;
     dispatch_block_t block = ^{
-        fileList = [self.dbInterface getFileListIn:dirName_t fromDatabase:self->dbfs];
+        fileList = [self.dbInterface getFileListIn:dirName_t
+                                      fromDatabase:self->dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
 
     NSMutableDictionary *fileDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
 
     for (int i = 0; i < fileList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((fileList.files)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name", [[NSNumber alloc] initWithBool:NO], @"type", [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"size", [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name",
+                           [[NSNumber alloc] initWithBool:NO], @"type",
+                           [[NSNumber alloc] initWithInt:((fileList.files)+i)->size], @"size",
+                           [[NSNumber alloc] initWithInt:((fileList.files)+i)->timestamp ], @"modified", nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((fileList.files)+i)->name]];
         [fileDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -469,9 +438,11 @@
     
     /* Alphabetize the file list */
     NSArray *alphabeticalKeys = [[fileDict allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    NSArray *objects = [fileDict objectsForKeys:alphabeticalKeys notFoundMarker:[NSNull null]];
+    NSArray *objects = [fileDict objectsForKeys:alphabeticalKeys
+                                 notFoundMarker:[NSNull null]];
     
-    NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects forKeys:alphabeticalKeys];
+    NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects
+                                                            forKeys:alphabeticalKeys];
     
     return finalDict;
 }
@@ -480,18 +451,21 @@
     __block DBFS_DirList dirList;
     __block NSString *dirName_t = dirName.copy;
     dispatch_block_t block = ^{
-        dirList = [self.dbInterface getDirectoryListIn:dirName_t inDatabase:dbfs];
+        dirList = [self.dbInterface getDirectoryListIn:dirName_t
+                                            inDatabase:dbfs];
     };
-    //[self.interfaceLock lock];
     dispatch_sync(self.interfaceQueue, block);
-    //[self.interfaceLock unlock];
 
     NSMutableDictionary *dirDict = [[NSMutableDictionary alloc] init];
     NSMutableArray *keys = [[NSMutableArray alloc] init];
  
     for (int i = 0; i < dirList.count; i++) {
         NSString *name = [[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name];
-        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name", [[NSNumber alloc] initWithBool:YES], @"type", [[NSNumber alloc] initWithInt:0], @"size", @"", @"modified", nil];
+        NSDictionary *d = [[NSDictionary alloc] initWithObjectsAndKeys:name, @"name",
+                           [[NSNumber alloc] initWithBool:YES], @"type",
+                           [[NSNumber alloc] initWithInt:0], @"size",
+                           @"", @"modified",
+                           nil];
         
         [keys addObject:[[NSString alloc] initWithUTF8String:((dirList.dirs)+i)->name]];
         [dirDict setObject:d forKey:[keys objectAtIndex:i]];
@@ -500,24 +474,18 @@
     /* Alphabetize the directory list */
     
     NSArray *alphabeticalKeys = [[dirDict allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    NSArray *objects = [dirDict objectsForKeys:alphabeticalKeys notFoundMarker:[NSNull null]];
-    
-//    NSLog(@"keys: %@", alphabeticalKeys);
-    
-    NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects forKeys:alphabeticalKeys];
-//    NSLog(@"final: %@", finalDict);
+    NSArray *objects = [dirDict objectsForKeys:alphabeticalKeys
+                                notFoundMarker:[NSNull null]];
+
+    NSDictionary *finalDict = [[NSDictionary alloc] initWithObjects:objects
+                                                            forKeys:alphabeticalKeys];
     return finalDict;
 }
 
 -(NSDictionary *)getContentsIn:(NSString *)dirName {
-//    NSMutableArray *contentArray = [[NSMutableArray alloc] initWithArray:[self getDirectoryListIn:dirName]];
     NSMutableDictionary *contentDict = [[NSMutableDictionary alloc] initWithDictionary:[self getDirectoryListIn:dirName]];
-//    NSLog(@"init: %@", contentArray);
-//    NSArray *tempArray = [self getFileListIn:dirName];
     NSDictionary *tempDict = [self getFileListIn:dirName];
-//    [contentArray addObjectsFromArray:tempArray];
     [contentDict addEntriesFromDictionary:tempDict];
-//    NSLog(@"last: %@", contentArray);
     return contentDict;
 }
 
@@ -525,37 +493,14 @@
     
     NSArray *contentArray = [self getContentsArrayIn:dirName];
     NSDictionary *dict = [[NSDictionary alloc] initWithObjectsAndKeys:contentArray, @"contents", nil];
-    NSData *contents = [NSJSONSerialization dataWithJSONObject:dict options:0 error:nil];
-    NSString *s = [[NSString alloc] initWithBytes:[contents bytes] length:[contents length] encoding:NSUTF8StringEncoding];
-    NSLog(@"JSON contents: %@", s);
+    NSData *contents = [NSJSONSerialization dataWithJSONObject:dict
+                                                       options:0
+                                                         error:nil];
+    NSString *s = [[NSString alloc] initWithBytes:[contents bytes]
+                                           length:[contents length]
+                                         encoding:NSUTF8StringEncoding];
     return contents;
-    
-    /*
-    
-    NSString *temp = @"{\n\t\"contents\": [";
-    NSString *json = [[NSString alloc] initWithString:temp];
-    NSArray *dict = [self getContentsArrayIn:dirName];
-//    NSArray *keys = [dict allKeys];
-    for (NSUInteger i = 0; i < [dict count]; ++i) {
-//        NSString *name = [keys objectAtIndex:i];
-        NSString *name = [[dict objectAtIndex:i] objectForKey:@"Name"];
-        json = [json stringByAppendingString:@"\n\t\t{\n\t\t\t\"name\": \""];
-        json = [json stringByAppendingString:name];
-        json = [json stringByAppendingString:@"\",\n\t\t\t\"size\": \""];
-        json = [json stringByAppendingString:[NSString stringWithFormat:@"%@", [[dict objectAtIndex:i] objectForKey:@"Size"]]];
-//        json = [json stringByAppendingString:[NSString stringWithFormat:@"%@", [[dict objectForKey:name] objectForKey:@"Size"]]];
-        json = [json stringByAppendingString:@"\",\n\t\t\t\"modified\": \""];
-        json = [json stringByAppendingString:[NSString stringWithFormat:@"%@", [[dict objectAtIndex:i] objectForKey:@"Modified"]]];
-        
-        json = [json stringByAppendingString:@"\"\n\t\t}"];
-        if (i < [dict count] - 1) {
-            json = [json stringByAppendingString:@","];
-        }
-    }
-    
-    json = [json stringByAppendingString:@"\n\t]\n}"];
-    return json;
-     */
+
 }
 
 @end
