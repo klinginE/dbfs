@@ -58,7 +58,17 @@
 
     NSNumber *n = [[NSNumber alloc] initWithInt:tag];
     NSArray *a = [[NSArray alloc] initWithObjects:n, oldPath, newPath, nil];
-    [((IPadTableViewController *)self.iPadNavController.topViewController) performSelectorOnMainThread:@selector(refreshWithArray:) withObject:a waitUntilDone:YES];
+    IPadTableViewController *topController = ((IPadTableViewController *)self.iPadNavController.topViewController);
+    
+    if (tag != RENAME_MODEL_TAG)
+        [topController performSelectorOnMainThread:@selector(refreshWithArray:) withObject:a waitUntilDone:YES];
+    else {
+
+        NSInteger d = topController.iPadState.depth;
+        for (; d >= 0; d--)
+            [self.iPadNavController.viewControllers[d] performSelectorOnMainThread:@selector(refreshWithArray:) withObject:a waitUntilDone:YES];
+
+    }
 
 }
 
@@ -92,6 +102,21 @@
             [viewContrller setIPAdress:ip WithPort:portNum];
 
         }
+
+}
+
+-(void)rebuildStackWithPath:(NSString *)path {
+
+    [self.iPadNavController popToRootViewControllerAnimated:NO];
+    NSString *currentPath = @"/";
+    NSInteger len = [[path pathComponents] count] - 1;
+    for (int i = 1; i < len; i++) {
+
+        currentPath = [NSString stringWithFormat:@"%@%@/", currentPath, [path pathComponents][i]];
+        IPadTableViewController *temp = [self.iPadTableViewController makeSubControllerForPath:currentPath];
+        [self.iPadNavController pushViewController:temp animated:NO];
+
+    }
 
 }
 

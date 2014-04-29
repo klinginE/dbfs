@@ -48,6 +48,7 @@ enum{
 -(void)pathButtonPressed:(UIButton *)sender;
 -(void)refreshIpadForTag:(modelUpdateTag)tag From:(NSString *)oldPath To:(NSString *)newPath;
 -(void)popToViewWithDepth:(NSInteger)depth Anamated:(BOOL)animate WithMessage:(NSString *)message;
+-(void)rebuildStackWithPath:(NSString *)path;
 
 @end
 
@@ -76,6 +77,7 @@ enum{
                           Target:(id)target
                           Action:(SEL)action
                        ForEvents:(UIControlEvents)events;
+-(IPadTableViewController *)makeSubControllerForPath:(NSString *)path;
 
 // Public dealloc
 -(void)dealloc;

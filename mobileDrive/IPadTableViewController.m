@@ -478,6 +478,20 @@
 
 }
 
+-(IPadTableViewController *)makeSubControllerForPath:(NSString *)path {
+    
+    // Make subTableviewcontroller to push onto nav stack
+    IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithPath:path
+                                                                                          ipAddress:self.iPadState.ipAddress
+                                                                                               port:self.iPadState.port
+                                                                                       switchAction:self.switchAction
+                                                                                          forEvents:self.switchEvents
+                                                                                         pathAction:self.pathAction
+                                                                                         pathEvents:self.pathEvents];
+    return subTableViewController;
+    
+}
+
 //==============================================================================
 //Allocates all the global views and inits them it also calls makeFramesForViews
 //and adds the main two views to self.view
@@ -1632,43 +1646,54 @@
                         self.mailComposeViewController = nil;
                     }
 
-                    //Refresh any sub views
-                    for (int d = (self.iPadState.depth - 1); d >= 0; d--)
-                        [self.navigationController.viewControllers[d] refreshForTag:tag From:oldPath To:newPath];
+                    if (tag == MOVE_MODEL_TAG) {
 
-                    //Refrsh everything else
-                    NSString *newIpadPath = newPath;
-                    if (oldLen < currentLen)
-                        newIpadPath = [NSString stringWithFormat:@"%@%@",
-                                       newIpadPath,
-                                       [currentPath substringFromIndex:oldLen]];
+                        NSString *newIpadPath = newPath;
+                        if (oldLen < currentLen)
+                            newIpadPath = [NSString stringWithFormat:@"%@%@",
+                                           newIpadPath,
+                                           [currentPath substringFromIndex:oldLen]];
+                        [self.appDelegate rebuildStackWithPath:newIpadPath];
 
-                    NSString *newAddress = self.iPadState.ipAddress;
-                    NSString *newPort = self.iPadState.port;
-                    self.iPadState = nil;
-                    _iPadState = [[IPadState alloc] initWithPath:newIpadPath Address:newAddress Port:newPort];
-                    if ([oldPath isEqualToString:currentPath])
-                        self.title = self.iPadState.currentDir;
+                    }
 
-                    [self.pathScrollView removeFromSuperview];
-                    [self.pathLabelView removeFromSuperview];
-                    self.pathScrollView = nil;
-                    self.pathLabelView = nil;
-                    _pathScrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
-                    [self.pathScrollView setBackgroundColor:self.barColor];
-                    [self.pathScrollView setBounces:NO];
-                    [self.pathScrollView setScrollEnabled:YES];
-                    self.automaticallyAdjustsScrollViewInsets = NO;
-                    
-                    _pathLabelView = [[UILabel alloc] initWithFrame:CGRectZero];
-                    _pathLabelView.text = @"";
-                    _pathLabelView.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
-                    _pathLabelView.numberOfLines = 1;
-                    [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
-                    [self makeFrameForViews];
-                    [self.view addSubview:self.pathScrollView];
+                    else {
 
-                    [self reloadTableViewData];
+                        //Refrsh everything else
+                        NSString *newIpadPath = newPath;
+                        if (oldLen < currentLen)
+                            newIpadPath = [NSString stringWithFormat:@"%@%@",
+                                           newIpadPath,
+                                           [currentPath substringFromIndex:oldLen]];
+
+                        NSString *newAddress = self.iPadState.ipAddress;
+                        NSString *newPort = self.iPadState.port;
+                        self.iPadState = nil;
+                        _iPadState = [[IPadState alloc] initWithPath:newIpadPath Address:newAddress Port:newPort];
+                        if ([oldPath isEqualToString:currentPath])
+                            self.title = self.iPadState.currentDir;
+
+                        [self.pathScrollView removeFromSuperview];
+                        [self.pathLabelView removeFromSuperview];
+                        self.pathScrollView = nil;
+                        self.pathLabelView = nil;
+                        _pathScrollView = [[UIScrollView alloc] initWithFrame:CGRectZero];
+                        [self.pathScrollView setBackgroundColor:self.barColor];
+                        [self.pathScrollView setBounces:NO];
+                        [self.pathScrollView setScrollEnabled:YES];
+                        self.automaticallyAdjustsScrollViewInsets = NO;
+
+                        _pathLabelView = [[UILabel alloc] initWithFrame:CGRectZero];
+                        _pathLabelView.text = @"";
+                        _pathLabelView.font = [UIFont systemFontOfSize:MEDIAN_FONT_SIZE];
+                        _pathLabelView.numberOfLines = 1;
+                        [self initPathViewWithAction:self.pathAction ForEvents:self.pathEvents];
+                        [self makeFrameForViews];
+                        [self.view addSubview:self.pathScrollView];
+
+                        [self reloadTableViewData];
+
+                    }
 
                 }
                 break;
@@ -2011,13 +2036,7 @@
         NSString *subPath = [NSString stringWithFormat:@"%@%@", self.iPadState.currentPath, key];
 
         // Make subTableviewcontroller to push onto nav stack
-        IPadTableViewController *subTableViewController = [[IPadTableViewController alloc] initWithPath:subPath
-                                                                                               ipAddress:self.iPadState.ipAddress
-                                                                                                   port:self.iPadState.port
-                                                                                            switchAction:self.switchAction
-                                                                                              forEvents:self.switchEvents
-                                                                                             pathAction:self.pathAction
-                                                                                             pathEvents:self.pathEvents];
+        IPadTableViewController *subTableViewController = [self makeSubControllerForPath:subPath];
 
         // push new controller onto nav stack
         [self.navigationController pushViewController:subTableViewController animated:YES];
