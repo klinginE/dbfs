@@ -478,6 +478,9 @@
 
 }
 
+//=====================================================================
+//Allocates a controller for sub directories
+//=====================================================================
 -(IPadTableViewController *)makeSubControllerForPath:(NSString *)path {
     
     // Make subTableviewcontroller to push onto nav stack
@@ -924,7 +927,7 @@
                                 [self reloadTableViewData];
                             else {
 
-                                NSLog(@"DBFS Not OK with ADD");
+                                //NSLog(@"DBFS Not OK with ADD");
                                 UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                                 [alert setMessage:[self.appDelegate.model dbError:err]];
                                 [alert show];
@@ -1018,7 +1021,7 @@
                                     [self reloadTableViewData];
                                 else {
 
-                                    NSLog(@"DBFS Not OK with MOVE");
+                                    //NSLog(@"DBFS Not OK with MOVE");
                                     UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                                     [alert setMessage:[self.appDelegate.model dbError:err]];
                                     [alert show];
@@ -1083,7 +1086,7 @@
                                     [self reloadTableViewData];
                                 else {
 
-                                    NSLog(@"DBFS Not OK With RENAME");
+                                    //NSLog(@"DBFS Not OK With RENAME");
                                     UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
                                     [alert setMessage:[self.appDelegate.model dbError:err]];
                                     [alert show];
@@ -1293,7 +1296,7 @@
         [blob writeToURL:url options:0 error:&writeError];
         if (writeError) {
 
-            NSLog(@"Error write file to disk to display it");
+            //NSLog(@"Error write file to disk to display it");
             UIAlertView *alert = [self objectInArray:self.alertViews WithTag:ERROR_ALERT_TAG];
             [alert setMessage:[NSString stringWithFormat:@"Could not write file: %@", filename]];
             [alert show];
