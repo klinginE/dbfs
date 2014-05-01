@@ -128,7 +128,7 @@
         }];
         
         [webServer addHandlerForMethod:@"GET" path:@"/move.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
-            
+            NSLog(@"move got called");
             MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
             
             // Called from GCD thread
@@ -136,6 +136,7 @@
             NSString * newPath = [request.query objectForKey:@"new"];
             
             if ( oldPath == NULL || newPath == NULL ){
+                NSLog(@"Move 403");
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }
             NSMutableString* content = [[NSMutableString alloc] init];

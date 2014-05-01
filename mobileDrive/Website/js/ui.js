@@ -293,7 +293,26 @@ $(function() {
     if (old === "") {
       return;
     }
-    
+  
+
+  // Changing open button label to "Download" or "Open" depending on its type.
+  var fileType = $('td.selected.file-type').text().trim();
+  var filePath = "/";
+  for (var i = 1; i < path.length; i++) {
+    filePath += path[i] + "/";
+  }
+  
+  if (fileType === "Directory") {
+    newPath += old;
+    newPath += "/";
+    old = filePath + old+"/";
+  }else if (fileType === "File") {
+
+    newPath += old;
+    old = filePath + old;
+  }else{
+    return;
+  }
     moveFile(old, newPath);
     modal.trigger('hide');
   }
@@ -364,7 +383,7 @@ $(function() {
   
   function moveFile(oldFile, newPath) {
     if (oldFile === '' || newPath === '') return;
-    
+    /*
     var filePath = "/";
     for (var i = 1; i < path.length; i++) {
       filePath += path[i] + "/";
@@ -372,8 +391,8 @@ $(function() {
     
     oldPath = filePath + oldFile;
     newPath = newPath + oldFile;
-
-    $.get('move.html?old=' + oldPath + '&new=' + newPath, function(data) {
+     */
+    $.get('move.html?old=' + oldFile + '&new=' + newPath, function(data) {
       getDir();
       rebuildFileList();
     });
