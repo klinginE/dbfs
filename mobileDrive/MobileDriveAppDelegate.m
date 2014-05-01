@@ -114,6 +114,7 @@
 
         currentPath = [NSString stringWithFormat:@"%@%@/", currentPath, [path pathComponents][i]];
         IPadTableViewController *temp = [self.iPadTableViewController makeSubControllerForPath:currentPath];
+        [temp.view setNeedsDisplay];
         [self.iPadNavController pushViewController:temp animated:NO];
 
     }
