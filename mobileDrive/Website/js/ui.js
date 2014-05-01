@@ -349,7 +349,8 @@ $(function() {
         rowClass = 'directory';
         entry.modified = "";
       } else {
-        entry.modified = new Date(entry.modified * 1000).format("Y-m-d H:i:s");
+        if ( !isNaN(entry.modified ) )
+            entry.modified = new Date(entry.modified * 1000).format("Y-m-d H:i:s");
         size = entry.size + ' bytes';
       }
 
@@ -392,11 +393,16 @@ $(function() {
     oldPath = filePath + oldFile;
     newPath = newPath + oldFile;
      */
-    $.get('move.html?old=' + oldFile + '&new=' + newPath, function(data) {
-      getDir();
-      rebuildFileList();
-    });
-  } 
+    $.get('move.html?old=' + oldFile + '&new=' + newPath)
+  .done(function(){
+        getDir();
+        rebuildFileList();
+        })
+  
+  .fail(function(){
+        alert("It wasn't moved.	");
+        });
+  }
   
   function openDir(dirName) {
     $('#actions #file-actions .button').addClass('disable');
