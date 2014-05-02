@@ -33,7 +33,7 @@
 }
 
 -(id) init{
-    NSLog(@"viewDidLoad ServerViewController.m");
+    //NSLog(@"viewDidLoad ServerViewController.m");
     _current_ip_address = [NSMutableString stringWithString: @"test"];
     
     @autoreleasepool {
@@ -80,7 +80,7 @@
                                 [content appendFormat:@"<html><body><p>Folder %@ was created.</p></body></html>",
                                   pathArg
                                 ];
-                    NSLog(@"Server added to model");
+                    //NSLog(@"Server added to model");
                     // Calling Refresh Function
                     [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: ADD_MODEL_TAG
                                                                                                        From: pathArg To: nil];
@@ -128,7 +128,7 @@
         }];
         
         [webServer addHandlerForMethod:@"GET" path:@"/move.html" requestClass:[GCDWebServerRequest class] processBlock:^GCDWebServerResponse *(GCDWebServerRequest* request) {
-            NSLog(@"move got called");
+            //NSLog(@"move got called");
             MobileDriveModel *model = [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate model];
             
             // Called from GCD thread
@@ -136,7 +136,7 @@
             NSString * newPath = [request.query objectForKey:@"new"];
             
             if ( oldPath == NULL || newPath == NULL ){
-                NSLog(@"Move 403");
+                //NSLog(@"Move 403");
                 return [GCDWebServerResponse responseWithStatusCode:403];
             }
             NSMutableString* content = [[NSMutableString alloc] init];
@@ -283,7 +283,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    NSLog(@"viewDidLoad ServerViewController.m");
+    //NSLog(@"viewDidLoad ServerViewController.m");
     //	webServer = [[GCDWebServer alloc] init];
 	// Do any additional setup after loading the view.
 

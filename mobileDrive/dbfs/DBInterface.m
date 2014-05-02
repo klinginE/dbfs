@@ -272,7 +272,7 @@
     dlist.dirs = NULL;
     
     if (!dirName) {
-        NSLog(@"Error: No name");
+        //NSLog(@"Error: No name");
         return dlist;
     }
     const char *dName = [self nsStringToCString:dirName];

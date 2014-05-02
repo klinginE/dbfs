@@ -34,11 +34,11 @@
 
     }
 
-    NSLog(@"path= %@", self.currentPath);
-    NSLog(@"dir= %@", self.currentDir);
-    NSLog(@"ip= %@", self.ipAddress);
-    NSLog(@"port= %@", self.port);
-    NSLog(@"depth= %d", self.depth);
+    //NSLog(@"path= %@", self.currentPath);
+    //NSLog(@"dir= %@", self.currentDir);
+    //NSLog(@"ip= %@", self.ipAddress);
+    //NSLog(@"port= %@", self.port);
+    //NSLog(@"depth= %d", self.depth);
 
     return self;
 
