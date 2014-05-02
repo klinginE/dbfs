@@ -271,9 +271,22 @@ $(function() {
     
     if (type === 'Directory') {
       old += '/';
-      fileName += '/';
+      if (fileName[path.length - 1] !== '/') {
+        fileName += '/';
+      }
+      if((fileName.split("/").length - 1) > 1) {
+        alert("Error invalid name");
+        return;
+      }
+
     }
-    
+    else {
+      if((fileName.split("/").length - 1) >= 1) {
+        alert("Error invalid name");
+        return;
+      }
+    }
+  
     $('#rename-file-form #new-name').val("");
 
     renameFile(old, fileName);
