@@ -173,8 +173,12 @@ $(function() {
           filePath += '/';
         }
         
-        $.get('delete.html?path=' + filePath, function(data) {
+        $.get('delete.html?path=' + filePath)
+        .done(function() {
           getDir();
+        })
+        .fail(function() {
+          alert("Failed to delete file.");
         });
         
         $('#actions #file-actions .button').addClass('disable');
@@ -391,9 +395,13 @@ $(function() {
     oldPath = filePath + oldFile;
     newPath = filePath + newFile;
 
-    $.get('rename.html?old=' + oldPath + '&new=' + newPath, function(data) {
+    $.get('rename.html?old=' + oldPath + '&new=' + newPath)
+    .done(function() {
       getDir();
       rebuildFileList();
+    })
+    .fail(function() {
+      alert("Failed to rename file.");
     });
   }
   
@@ -408,9 +416,13 @@ $(function() {
     oldPath = filePath + oldFile;
     newPath = newPath + oldFile;
      */
-    $.get('move.html?old=' + oldFile + '&new=' + newPath, function(data) {
+    $.get('move.html?old=' + oldFile + '&new=' + newPath)
+    .done(function() {
       getDir();
       rebuildFileList();
+    })
+    .fail(function() {
+      alert("Failed to move file.");
     });
   } 
   
@@ -426,8 +438,12 @@ $(function() {
       dirPath += path[i] + "/";
     }
     dirPath += dirName + "/";
-    $.get("createDir.html?path=" + dirPath, function(data) {
+    $.get("createDir.html?path=" + dirPath)
+    .done(function() {
       getDir();
+    })
+    .fail(function() {
+      alert("Failed to create directory.");
     });
   }
   
