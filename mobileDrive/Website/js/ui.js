@@ -112,6 +112,8 @@ $(function() {
   // Upload file button
   $('#upload-button').click(function() {
     if ($('#upload-button').hasClass('disable')) return;
+    $('#upload-progress > div').css('width', '0');
+    $('#upload-progress > div').text('');
     
     var dirPath = "/";
     for (var i = 1; i < path.length; i++) {
@@ -126,7 +128,7 @@ $(function() {
       xhr: function() {
         var myXhr = $.ajaxSettings.xhr();
         if (myXhr.upload) {
-          myXhr.upload.addEventListener('#upload-progress', uploadProgress, false);
+          myXhr.upload.addEventListener('progress', uploadProgress, false);
         }
         return myXhr; 
       },
@@ -134,7 +136,8 @@ $(function() {
         getDir();
         $('#select-file-button').text("Select file...");
         $('#upload-button').addClass('disable');
-        $('#upload-progress > div').css('width', '0%');
+        $('#upload-progress > div').text('Done!');
+        setTimeout(clearProgressBar, 3000);
       },
       data: formData,
       cache: false,
@@ -170,8 +173,12 @@ $(function() {
           filePath += '/';
         }
         
-        $.get('delete.html?path=' + filePath, function(data) {
+        $.get('delete.html?path=' + filePath)
+        .done(function() {
           getDir();
+        })
+        .fail(function() {
+          alert("Failed to delete file.");
         });
         
         $('#actions #file-actions .button').addClass('disable');
@@ -399,9 +406,13 @@ $(function() {
     oldPath = filePath + oldFile;
     newPath = filePath + newFile;
 
-    $.get('rename.html?old=' + oldPath + '&new=' + newPath, function(data) {
+    $.get('rename.html?old=' + oldPath + '&new=' + newPath)
+    .done(function() {
       getDir();
       rebuildFileList();
+    })
+    .fail(function() {
+      alert("Failed to rename file.");
     });
   }
   
@@ -417,15 +428,14 @@ $(function() {
     newPath = newPath + oldFile;
      */
     $.get('move.html?old=' + oldFile + '&new=' + newPath)
-  .done(function(){
-        getDir();
-        rebuildFileList();
-        })
-  
-  .fail(function(){
-        alert("It wasn't moved.	");
-        });
-  }
+    .done(function() {
+      getDir();
+      rebuildFileList();
+    })
+    .fail(function() {
+      alert("Failed to move file.");
+    });
+  } 
   
   function openDir(dirName) {
     $('#actions #file-actions .button').addClass('disable');
@@ -439,8 +449,12 @@ $(function() {
       dirPath += path[i] + "/";
     }
     dirPath += dirName + "/";
-    $.get("createDir.html?path=" + dirPath, function(data) {
+    $.get("createDir.html?path=" + dirPath)
+    .done(function() {
       getDir();
+    })
+    .fail(function() {
+      alert("Failed to create directory.");
     });
   }
   
@@ -523,8 +537,14 @@ $(function() {
   
   function uploadProgress(e) {
     if (e.lengthComputable) {
-      $('#upload-progress > div').css('width', e.loaded + '%');
+      var percent = e.loaded / e.total * 100;
+      $('#upload-progress > div').css('width', percent + '%');
     }
+  }
+  
+  function clearProgressBar() {
+    $('#upload-progress > div').css('width', '0');
+    $('#upload-progress > div').text('');
   }
   
   function contentsToStr(contents) {
