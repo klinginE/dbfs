@@ -86,8 +86,9 @@
                                                                                                        From: pathArg To: nil];
                     
                 }else{
-                    [content appendFormat:@"<html><body><p>Folder %@ was not created.</p></body></html>",
-                     pathArg];
+                     return [GCDWebServerResponse responseWithStatusCode:403];
+//                    [content appendFormat:@"<html><body><p>Folder %@ was not created.</p></body></html>",
+//                   pathArg];
                 }
                 return [GCDWebServerDataResponse responseWithHTML:content];
             }
@@ -120,7 +121,8 @@
                 [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: RENAME_MODEL_TAG
                                                                                                        From: oldPath To: newPath];
             } else {
-                [content appendFormat:@"<html><body><p>Path %@ was NOT renamed to %@.</p></body></html>", oldPath, newPath];
+                return [GCDWebServerResponse responseWithStatusCode:403];
+//                [content appendFormat:@"<html><body><p>Path %@ was NOT renamed to %@.</p></body></html>", oldPath, newPath];
             }
 
             return [GCDWebServerDataResponse responseWithHTML:content];
@@ -155,7 +157,9 @@
                 [(MobileDriveAppDelegate *)[UIApplication sharedApplication].delegate refreshIpadForTag: MOVE_MODEL_TAG
                                                                                                    From: oldPath To: newPath];
             } else {
-                [content appendFormat:@"<html><body><p>Path %@ was NOT moved to %@.</p></body></html>", oldPath, newPath];
+                NSLog(@"It didn't move the file");
+                return [GCDWebServerResponse responseWithStatusCode:403];
+                //[content appendFormat:@"<html><body><p>Path %@ was NOT moved to %@.</p></body></html>", oldPath, newPath];
             }
             
             return [GCDWebServerDataResponse responseWithHTML:content];
@@ -222,7 +226,8 @@
             
             tempData = [model getFile_NSDATA:path];
             if ( tempData == nil) {
-                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>Failed to get file from DB.</body></html>"];
+                  return [GCDWebServerResponse responseWithStatusCode:403];
+//                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>Failed to get file from DB.</body></html>"];
             }
             
             NSString * contentTypeString = [NSString stringWithFormat:@"image/%@", fileExtension];
@@ -237,7 +242,8 @@
             NSData * tempData;
             tempData = [model getFile_NSDATA:path];
             if ( tempData == nil) {
-                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>Failed to get file from DB.</body></html>"];
+                return [GCDWebServerResponse responseWithStatusCode:403];
+//                return [GCDWebServerDataResponse responseWithHTML:@"<html><body>Failed to get file from DB.</body></html>"];
             }
             
             NSString *fnHeader = [NSString stringWithFormat:@"attachment; filename=%@", [path lastPathComponent]];
