@@ -169,6 +169,7 @@ label {
 
 
 #upload-progress {
+  text-align: center;
   float: right;
   background-color: #d4d4d4;
   border-radius: 13px;
@@ -178,6 +179,9 @@ label {
 
 
 #upload-progress > div {
+  text-align: center;
+  font-size: 10px;
+  color: #ffffff;
   background-color: #007aff;
   width: 0%;
   height:12px;

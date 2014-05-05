@@ -112,6 +112,8 @@ $(function() {
   // Upload file button
   $('#upload-button').click(function() {
     if ($('#upload-button').hasClass('disable')) return;
+    $('#upload-progress > div').css('width', '0');
+    $('#upload-progress > div').text('');
     
     var dirPath = "/";
     for (var i = 1; i < path.length; i++) {
@@ -126,7 +128,7 @@ $(function() {
       xhr: function() {
         var myXhr = $.ajaxSettings.xhr();
         if (myXhr.upload) {
-          myXhr.upload.addEventListener('#upload-progress', uploadProgress, false);
+          myXhr.upload.addEventListener('progress', uploadProgress, false);
         }
         return myXhr; 
       },
@@ -134,7 +136,8 @@ $(function() {
         getDir();
         $('#select-file-button').text("Select file...");
         $('#upload-button').addClass('disable');
-        $('#upload-progress > div').css('width', '0%');
+        $('#upload-progress > div').text('Done!');
+        setTimeout(clearProgressBar, 3000);
       },
       data: formData,
       cache: false,
@@ -507,8 +510,14 @@ $(function() {
   
   function uploadProgress(e) {
     if (e.lengthComputable) {
-      $('#upload-progress > div').css('width', e.loaded + '%');
+      var percent = e.loaded / e.total * 100;
+      $('#upload-progress > div').css('width', percent + '%');
     }
+  }
+  
+  function clearProgressBar() {
+    $('#upload-progress > div').css('width', '0');
+    $('#upload-progress > div').text('');
   }
   
   function contentsToStr(contents) {
