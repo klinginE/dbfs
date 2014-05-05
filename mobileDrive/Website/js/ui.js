@@ -302,7 +302,16 @@ $(function() {
 
     var newPath = $('#move-file-form #new-path').val();
     var old = $('td.selected.file-name').text().trim();
-    
+  
+    var lastComponent = newPath.substr(newPath.lastIndexOf('/') + 1)
+  
+    if ( (newPath[newPath.length - 1] !== "/") ){
+        if ( (newPath.split("/").length - 1) <= 1 ){
+            alert("Error: You're trying to move a file using Rename.");
+            return;
+        }
+    }
+  
     if (old === "") {
       return;
     }
@@ -320,7 +329,8 @@ $(function() {
     newPath += "/";
     old = filePath + old+"/";
   }else if (fileType === "File") {
-
+  
+  if (newPath[newPath.length -1] == "/")
     newPath += old;
     old = filePath + old;
   }else{
@@ -362,7 +372,8 @@ $(function() {
         rowClass = 'directory';
         entry.modified = "";
       } else {
-        entry.modified = new Date(entry.modified * 1000).format("Y-m-d H:i:s");
+        if ( !isNaN(entry.modified ) )
+            entry.modified = new Date(entry.modified * 1000).format("Y-m-d H:i:s");
         size = entry.size + ' bytes';
       }
 
@@ -405,11 +416,16 @@ $(function() {
     oldPath = filePath + oldFile;
     newPath = newPath + oldFile;
      */
-    $.get('move.html?old=' + oldFile + '&new=' + newPath, function(data) {
-      getDir();
-      rebuildFileList();
-    });
-  } 
+    $.get('move.html?old=' + oldFile + '&new=' + newPath)
+  .done(function(){
+        getDir();
+        rebuildFileList();
+        })
+  
+  .fail(function(){
+        alert("It wasn't moved.	");
+        });
+  }
   
   function openDir(dirName) {
     $('#actions #file-actions .button').addClass('disable');
